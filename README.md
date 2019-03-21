@@ -1,2 +1,2 @@
-# kraken_ws
+# Kraken WS
 Go library for Kraken Websocket
