@@ -53,3 +53,26 @@ type SystemStatus struct {
 	Status       string  `json:"status"`
 	Version      string  `json:"version"`
 }
+
+type TickerUpdate struct {
+	Ask                Level
+	Bid                Level
+	Close              Level
+	Volume             Values
+	VolumeAveragePrice Values
+	TradeVolume        Values
+	Low                Values
+	High               Values
+	Open               Values
+}
+
+type Level struct {
+	Price          float64
+	Volume         float64
+	WholeLotVolume float64
+}
+
+type Values struct {
+	Today  float64
+	Last24 float64
+}
