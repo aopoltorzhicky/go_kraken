@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 	"sync"
 	"time"
 	"unicode"
@@ -448,31 +447,13 @@ func (c *Client) handleChannel(msg []byte) error {
 	case ChanCandles:
 	case ChanSpread:
 	case ChanTicker:
-
 		ticker, ok := raw[1].(map[string]interface{})
 		if !ok {
 			return fmt.Errorf("Can't parse ticker data %#v", raw[1])
 		}
-
-		result := TickerUpdate{}
-		for k, v := range ticker {
-			data := v.([]interface{})
-			switch k {
-			case "a":
-				price, err := strconv.ParseFloat(data[0].(string), 64)
-				if err != nil {
-					return fmt.Errorf("Can't parse ticker data %#v", ticker)
-				}
-				volume, err := strconv.ParseFloat(data[2].(string), 64)
-				if err != nil {
-					return fmt.Errorf("Can't parse ticker data %#v", ticker)
-				}
-				result.Ask = Level{
-					Price:          price,
-					Volume:         volume,
-					WholeLotVolume: data[1].(float64),
-				}
-			}
+		result, err := parseTicker(ticker)
+		if err != nil {
+			return err
 		}
 		c.listener <- result
 	case ChanTrades:
