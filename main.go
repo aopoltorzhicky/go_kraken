@@ -18,7 +18,7 @@ func main() {
 	// subscribe to BTCUSD book
 	ctx, cxl2 := context.WithTimeout(context.Background(), time.Second*5)
 	defer cxl2()
-	err = c.SubscribeTicker(ctx, []string{"ADA/CAD", "STR/USD", "BTC/USD"})
+	err = c.SubscribeBook(ctx, []string{"ADA/CAD", "STR/USD", "BTC/USD"}, ws.Depth100)
 	if err != nil {
 		log.Fatal(err)
 	}

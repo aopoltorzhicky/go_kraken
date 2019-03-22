@@ -1,6 +1,9 @@
 package websocket
 
-import "math/big"
+import (
+	"math/big"
+	"time"
+)
 
 type EventType struct {
 	Event string `json:"event"`
@@ -57,13 +60,14 @@ type SystemStatus struct {
 type TickerUpdate struct {
 	Ask                Level
 	Bid                Level
-	Close              Level
+	Close              Values
 	Volume             Values
 	VolumeAveragePrice Values
 	TradeVolume        Values
 	Low                Values
 	High               Values
 	Open               Values
+	Pair               string
 }
 
 type Level struct {
@@ -75,4 +79,47 @@ type Level struct {
 type Values struct {
 	Today  float64
 	Last24 float64
+}
+
+type CandleUpdate struct {
+	Time      time.Time
+	EndTime   float64
+	Open      float64
+	High      float64
+	Low       float64
+	Close     float64
+	VolumeWAP float64
+	Volume    float64
+	Count     int64
+	Pair      string
+}
+
+type TradeUpdate struct {
+	Price     float64
+	Volume    float64
+	Time      time.Time
+	Side      string
+	OrderType string
+	Misc      string
+	Pair      string
+}
+
+type SpreadUpdate struct {
+	Ask  float64
+	Bid  float64
+	Time time.Time
+	Pair string
+}
+
+type OrderBookItem struct {
+	Price  float64
+	Volume float64
+	Time   time.Time
+}
+
+type OrderBookUpdate struct {
+	Asks       []OrderBookItem
+	Bids       []OrderBookItem
+	IsSnapshot bool
+	Pair       string
 }

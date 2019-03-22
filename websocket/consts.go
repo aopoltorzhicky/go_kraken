@@ -55,3 +55,15 @@ const (
 	SubscriptionStatusSubscribed   = "subscribed"
 	SubscriptionStatusUnsubscribed = "unsubscribed"
 )
+
+// Trade sides
+const (
+	Buy  = "buy"
+	Sell = "sell"
+)
+
+// Order types
+const (
+	Market = "market"
+	Limit  = "limit"
+)

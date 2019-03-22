@@ -69,6 +69,7 @@ type Client struct {
 	waitGroup sync.WaitGroup
 
 	subscriptions map[int64]*SubscriptionStatus
+	factories     map[string]ParseFactory
 }
 
 // New creates a default client.
@@ -86,6 +87,7 @@ func New() *Client {
 		asynchronous:  nil,
 		heartbeat:     time.Now().Add(params.HeartbeatTimeout),
 		subscriptions: make(map[int64]*SubscriptionStatus),
+		factories:     make(map[string]ParseFactory),
 	}
 	c.registerPublicFactories()
 	return c
@@ -106,6 +108,7 @@ func NewSandbox() *Client {
 		asynchronous:  nil,
 		heartbeat:     time.Now().Add(params.HeartbeatTimeout),
 		subscriptions: make(map[int64]*SubscriptionStatus),
+		factories:     make(map[string]ParseFactory),
 	}
 	c.registerPublicFactories()
 	return c
@@ -186,6 +189,8 @@ func (c *Client) reset() {
 	c.init = true
 	c.asynchronous = c.asyncFactory.Create()
 	c.shutdown = make(chan bool)
+
+	c.createFactories()
 
 	// wait for shutdown signals from child & caller
 	go c.listenDisconnect()
@@ -343,6 +348,18 @@ func (c *Client) handleMessage(msg []byte) error {
 	return err
 }
 
+func (c *Client) createFactories() {
+	c.createFactory(ChanTicker, newTickerFactory())
+	c.createFactory(ChanCandles, newCandlesFactory())
+	c.createFactory(ChanTrades, newTradesFactory())
+	c.createFactory(ChanSpread, newSpreadFactory())
+	c.createFactory(ChanBook, newBookFactory())
+}
+
+func (c *Client) createFactory(name string, factory ParseFactory) {
+	c.factories[name] = factory
+}
+
 func (c *Client) handleEvent(msg []byte) error {
 	event := &EventType{}
 	err := json.Unmarshal(msg, event)
@@ -414,6 +431,52 @@ func (c *Client) SubscribeTicker(ctx context.Context, pairs []string) error {
 	return c.newSubscription(ctx, s)
 }
 
+func (c *Client) SubscribeCandles(ctx context.Context, pairs []string, interval int64) error {
+	s := SubscriptionRequest{
+		Event: EventSubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name:     ChanCandles,
+			Interval: interval,
+		},
+	}
+	return c.newSubscription(ctx, s)
+}
+
+func (c *Client) SubscribeTrades(ctx context.Context, pairs []string) error {
+	s := SubscriptionRequest{
+		Event: EventSubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name: ChanTrades,
+		},
+	}
+	return c.newSubscription(ctx, s)
+}
+
+func (c *Client) SubscribeSpread(ctx context.Context, pairs []string) error {
+	s := SubscriptionRequest{
+		Event: EventSubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name: ChanSpread,
+		},
+	}
+	return c.newSubscription(ctx, s)
+}
+
+func (c *Client) SubscribeBook(ctx context.Context, pairs []string, depth int64) error {
+	s := SubscriptionRequest{
+		Event: EventSubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name:  ChanBook,
+			Depth: depth,
+		},
+	}
+	return c.newSubscription(ctx, s)
+}
+
 func (c *Client) lookupByChannelID(chanID int64) (*SubscriptionStatus, error) {
 	sub, ok := c.subscriptions[chanID]
 	if ok {
@@ -438,27 +501,18 @@ func (c *Client) handleChannel(msg []byte) error {
 	chanID := int64(chID)
 	sub, err := c.lookupByChannelID(chanID)
 	if err != nil {
-		// no subscribed channel for message
 		return err
 	}
 
-	switch sub.Subscription.Name {
-	case ChanBook:
-	case ChanCandles:
-	case ChanSpread:
-	case ChanTicker:
-		ticker, ok := raw[1].(map[string]interface{})
-		if !ok {
-			return fmt.Errorf("Can't parse ticker data %#v", raw[1])
-		}
-		result, err := parseTicker(ticker)
-		if err != nil {
-			return err
-		}
-		c.listener <- result
-	case ChanTrades:
-	default:
+	factory, ok := c.factories[sub.Subscription.Name]
+	if !ok {
 		return fmt.Errorf("Unknown message type: %s", sub.Subscription.Name)
 	}
+
+	result, err := factory.Parse(raw[1], sub.Pair)
+	if err != nil {
+		return err
+	}
+	c.listener <- result
 	return nil
 }
