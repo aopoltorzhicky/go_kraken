@@ -9,16 +9,16 @@ import (
 )
 
 func main() {
-	c := ws.NewSandbox()
+	c := ws.New()
 	err := c.Connect()
 	if err != nil {
 		log.Fatal("Error connecting to web socket : ", err)
 	}
 
-	// subscribe to BTCUSD book
+	// subscribe to BTCUSD, XLMUSD, ADACAD candles
 	ctx, cxl2 := context.WithTimeout(context.Background(), time.Second*5)
 	defer cxl2()
-	err = c.SubscribeBook(ctx, []string{"ADA/CAD", "STR/USD", "BTC/USD"}, ws.Depth100)
+	err = c.SubscribeCandles(ctx, []string{"ADA/CAD", "STR/USD", "BTC/USD"}, ws.Interal10080)
 	if err != nil {
 		log.Fatal(err)
 	}
