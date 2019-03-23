@@ -4,13 +4,13 @@ import (
 	"fmt"
 )
 
-type TickerFactory struct{}
+type tickerFactory struct{}
 
-func newTickerFactory() *TickerFactory {
-	return &TickerFactory{}
+func newTickerFactory() *tickerFactory {
+	return &tickerFactory{}
 }
 
-func (f *TickerFactory) Parse(data interface{}, pair string) (interface{}, error) {
+func (f *tickerFactory) Parse(data interface{}, pair string) (interface{}, error) {
 	result := TickerUpdate{
 		Pair: pair,
 	}
@@ -45,13 +45,13 @@ func (f *TickerFactory) Parse(data interface{}, pair string) (interface{}, error
 	return result, nil
 }
 
-type CandlesFactory struct{}
+type candlesFactory struct{}
 
-func newCandlesFactory() *CandlesFactory {
-	return &CandlesFactory{}
+func newCandlesFactory() *candlesFactory {
+	return &candlesFactory{}
 }
 
-func (f *CandlesFactory) Parse(data interface{}, pair string) (interface{}, error) {
+func (f *candlesFactory) Parse(data interface{}, pair string) (interface{}, error) {
 	body, ok := data.([]interface{})
 	if !ok {
 		return CandleUpdate{}, fmt.Errorf("Can't parse data %#v", data)
@@ -70,13 +70,13 @@ func (f *CandlesFactory) Parse(data interface{}, pair string) (interface{}, erro
 	}, nil
 }
 
-type TradesFactory struct{}
+type tradesFactory struct{}
 
-func newTradesFactory() *TradesFactory {
-	return &TradesFactory{}
+func newTradesFactory() *tradesFactory {
+	return &tradesFactory{}
 }
 
-func (f *TradesFactory) Parse(data interface{}, pair string) (interface{}, error) {
+func (f *tradesFactory) Parse(data interface{}, pair string) (interface{}, error) {
 	result := []TradeUpdate{}
 	body, ok := data.([]interface{})
 	if !ok {
@@ -98,13 +98,13 @@ func (f *TradesFactory) Parse(data interface{}, pair string) (interface{}, error
 	return result, nil
 }
 
-type SpreadFactory struct{}
+type spreadFactory struct{}
 
-func newSpreadFactory() *SpreadFactory {
-	return &SpreadFactory{}
+func newSpreadFactory() *spreadFactory {
+	return &spreadFactory{}
 }
 
-func (f *SpreadFactory) Parse(data interface{}, pair string) (interface{}, error) {
+func (f *spreadFactory) Parse(data interface{}, pair string) (interface{}, error) {
 	body, ok := data.([]interface{})
 	if !ok {
 		return SpreadUpdate{}, fmt.Errorf("Can't parse data %#v", data)
@@ -117,13 +117,13 @@ func (f *SpreadFactory) Parse(data interface{}, pair string) (interface{}, error
 	}, nil
 }
 
-type BookFactory struct{}
+type bookFactory struct{}
 
-func newBookFactory() *BookFactory {
-	return &BookFactory{}
+func newBookFactory() *bookFactory {
+	return &bookFactory{}
 }
 
-func (f *BookFactory) Parse(data interface{}, pair string) (interface{}, error) {
+func (f *bookFactory) Parse(data interface{}, pair string) (interface{}, error) {
 	result := OrderBookUpdate{
 		Pair: pair,
 	}

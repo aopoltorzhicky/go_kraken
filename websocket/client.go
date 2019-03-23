@@ -11,8 +11,7 @@ import (
 	"unicode"
 )
 
-// Asynchronous interface decouples the underlying transport from API logic.
-type Asynchronous interface {
+type asynchronous interface {
 	Connect() error
 	Send(ctx context.Context, msg interface{}) error
 	Listen() <-chan []byte
@@ -20,40 +19,26 @@ type Asynchronous interface {
 	Done() <-chan error
 }
 
-// AsynchronousFactory provides an interface to re-create asynchronous transports during reconnect events.
-type AsynchronousFactory interface {
-	Create() Asynchronous
+type asynchronousFactory interface {
+	Create() asynchronous
 }
 
-// WebsocketAsynchronousFactory creates a websocket-based asynchronous transport.
-type WebsocketAsynchronousFactory struct {
+type websocketAsynchronousFactory struct {
 	parameters *Parameters
-}
-
-// NewWebsocketAsynchronousFactory creates a new websocket factory with a given URL.
-func NewWebsocketAsynchronousFactory(parameters *Parameters) AsynchronousFactory {
-	return &WebsocketAsynchronousFactory{
-		parameters: parameters,
-	}
-}
-
-// Create returns a new websocket transport.
-func (w *WebsocketAsynchronousFactory) Create() Asynchronous {
-	return newWs(w.parameters.URL, w.parameters.LogTransport)
 }
 
 // Client provides a unified interface for users to interact with the Kraken Websocket API.
 // nolint:megacheck,structcheck
 type Client struct {
-	asyncFactory AsynchronousFactory // for re-creating transport during reconnects
+	asyncFactory asynchronousFactory // for re-creating transport during reconnects
 
-	timeout            int64 // read timeout
-	cancelOnDisconnect bool
-	asynchronous       Asynchronous
-	isConnected        bool
-	terminal           bool
-	init               bool
-	heartbeat          time.Time
+	timeout      int64 // read timeout
+	asynchronous asynchronous
+	isConnected  bool
+	terminal     bool
+	init         bool
+	heartbeat    time.Time
+	hbChannel    chan error
 
 	// connection & operational behavior
 	parameters *Parameters
@@ -65,18 +50,27 @@ type Client struct {
 	listener chan interface{}
 
 	// race management
-	lock      sync.Mutex
 	waitGroup sync.WaitGroup
 
 	subscriptions map[int64]*SubscriptionStatus
 	factories     map[string]ParseFactory
 }
 
+// Create returns a new websocket transport.
+func (w *websocketAsynchronousFactory) Create() asynchronous {
+	return newWs(w.parameters.URL, w.parameters.LogTransport)
+}
+
 // New creates a default client.
-func New() *Client {
-	params := NewDefaultParameters()
+func New(sandbox bool) *Client {
+	var params *Parameters
+	if sandbox {
+		params = NewDefaultSandboxParameters()
+	} else {
+		params = NewDefaultParameters()
+	}
 	c := &Client{
-		asyncFactory: &WebsocketAsynchronousFactory{
+		asyncFactory: &websocketAsynchronousFactory{
 			parameters: params,
 		},
 		isConnected:   false,
@@ -86,52 +80,40 @@ func New() *Client {
 		shutdown:      nil,
 		asynchronous:  nil,
 		heartbeat:     time.Now().Add(params.HeartbeatTimeout),
+		hbChannel:     make(chan error),
 		subscriptions: make(map[int64]*SubscriptionStatus),
 		factories:     make(map[string]ParseFactory),
 	}
-	c.registerPublicFactories()
+	c.createFactories()
 	return c
 }
 
-// NewSandbox creates a default sandbox client.
-func NewSandbox() *Client {
-	params := NewDefaultSandboxParameters()
-	c := &Client{
-		asyncFactory: &WebsocketAsynchronousFactory{
-			parameters: params,
-		},
-		isConnected:   false,
-		parameters:    params,
-		listener:      make(chan interface{}),
-		terminal:      false,
-		shutdown:      nil,
-		asynchronous:  nil,
-		heartbeat:     time.Now().Add(params.HeartbeatTimeout),
-		subscriptions: make(map[int64]*SubscriptionStatus),
-		factories:     make(map[string]ParseFactory),
+func (c *Client) controlHeartbeat() {
+	for {
+		select {
+		case <-c.shutdown:
+			return
+		default:
+		}
+		if time.Now().After(c.heartbeat) {
+			c.hbChannel <- fmt.Errorf("Heartbeat disconnect on client")
+			return
+		}
 	}
-	c.registerPublicFactories()
-	return c
 }
 
-// CancelOnDisconnect ensures all orders will be canceled if this API session is disconnected.
-func (c *Client) CancelOnDisconnect(cxl bool) *Client {
-	c.cancelOnDisconnect = cxl
-	return c
+func (c *Client) listenHeartbeat() <-chan error {
+	return c.hbChannel
 }
 
-func (c *Client) registerPublicFactories() {
-
-}
-
-// IsConnected returns true if the underlying asynchronous transport is connected to an endpoint.
-func (c *Client) IsConnected() bool {
-	return c.isConnected
+func (c *Client) updateHeartbeat() {
+	c.heartbeat = time.Now().Add(c.parameters.HeartbeatTimeout)
 }
 
 func (c *Client) listenDisconnect() {
 	select {
-	case e := <-c.asynchronous.Done(): // transport shutdown
+	case e := <-c.asynchronous.Done():
+		log.Printf("socket disconnect")
 		if e != nil {
 			log.Printf("socket disconnect: %s", e.Error())
 		}
@@ -140,19 +122,22 @@ func (c *Client) listenDisconnect() {
 		if err != nil {
 			log.Printf("socket disconnect: %s", err.Error())
 		}
-	case <-c.shutdown: // normal shutdown
+	case <-c.shutdown:
+		log.Printf("Shutdown")
 		c.isConnected = false
-		return // exit routine
-	default:
-		if time.Now().After(c.heartbeat) { // subscription heartbeat timeout
-			log.Printf("heartbeat disconnect")
-			c.isConnected = false
+		return
+
+	case e := <-c.listenHeartbeat():
+		log.Printf("Heartbeat")
+		if e != nil {
+			log.Println(e.Error())
 			c.closeAsyncAndWait(c.parameters.ShutdownTimeout)
 			err := c.reconnect(nil)
 			if err != nil {
 				log.Printf("socket disconnect: %s", err.Error())
 			}
 		}
+		c.isConnected = false
 	}
 }
 
@@ -165,37 +150,23 @@ func (c *Client) dumpParams() {
 	log.Printf("ResubscribeOnReconnect=%t", c.parameters.ResubscribeOnReconnect)
 	log.Printf("HeartbeatTimeout=%s", c.parameters.HeartbeatTimeout)
 	log.Printf("URL=%s", c.parameters.URL)
-	log.Printf("ManageOrderbook=%t", c.parameters.ManageOrderbook)
 }
 
-// Connect to the Bitfinex API, this should only be called once.
-func (c *Client) Connect() error {
-	c.dumpParams()
-	c.reset()
-	return c.connect()
-}
-
-// reset assumes transport has already died or been closed
 func (c *Client) reset() {
-	// subs := c.subscriptions.Reset()
-	// shutown if existing websocket connected
 	if c.shutdown != nil {
 		close(c.shutdown)
 	}
 
-	// if subs != nil {
-	// 	c.resetSubscriptions = subs
-	// }
 	c.init = true
 	c.asynchronous = c.asyncFactory.Create()
 	c.shutdown = make(chan bool)
+	c.updateHeartbeat()
 
-	c.createFactories()
-
-	// wait for shutdown signals from child & caller
 	go c.listenDisconnect()
-	// listen to data from async
+
 	go c.listenUpstream()
+
+	go c.controlHeartbeat()
 }
 
 func (c *Client) connect() error {
@@ -203,26 +174,40 @@ func (c *Client) connect() error {
 	if err == nil {
 		c.isConnected = true
 	}
-	if c.parameters.ManageOrderbook {
-		_, cancel := context.WithTimeout(context.Background(), time.Second*5)
-		defer cancel()
-	}
 	return err
+}
+
+func (c *Client) resubscribe() error {
+	ctx := context.Background()
+	for _, sub := range c.subscriptions {
+		s := SubscriptionRequest{
+			Event:        EventSubscribe,
+			Pairs:        []string{sub.Pair},
+			Subscription: sub.Subscription,
+		}
+
+		err := c.asynchronous.Send(ctx, s)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+	}
+	return nil
 }
 
 func (c *Client) reconnect(err error) error {
 	if c.terminal {
-		err_exit := c.exit(err)
-		if err_exit != nil {
-			return err_exit
+		errExit := c.exit(err)
+		if errExit != nil {
+			return errExit
 		}
 		return err
 	}
 	if !c.parameters.AutoReconnect {
 		err := fmt.Errorf("AutoReconnect setting is disabled, do not reconnect: %s", err.Error())
-		err_exit := c.exit(err)
-		if err_exit != nil {
-			return err_exit
+		errExit := c.exit(err)
+		if errExit != nil {
+			return errExit
 		}
 		return err
 	}
@@ -234,9 +219,14 @@ func (c *Client) reconnect(err error) error {
 		c.reset()
 		err = c.connect()
 		if err == nil {
-			log.Print("reconnect OK")
-			reconnectTry = 0
-			return nil
+			err := c.resubscribe()
+			if err == nil {
+				log.Print("reconnect OK")
+				reconnectTry = 0
+				return nil
+			}
+			log.Printf("reconnect failed: %s", err.Error())
+			return c.exit(err)
 		}
 		log.Printf("reconnect failed: %s", err.Error())
 	}
@@ -252,16 +242,14 @@ func (c *Client) exit(err error) error {
 	return err
 }
 
-// start this goroutine before connecting, but this should die during a connection failure
 func (c *Client) listenUpstream() {
 	for {
 		select {
 		case <-c.shutdown:
-			return // only exit point
+			return
 		case msg := <-c.asynchronous.Listen():
 			if msg != nil {
-				// Errors here should be non critical so we just log them.
-				log.Printf("[DEBUG]: %s\n", msg)
+				// log.Printf("[DEBUG]: %s\n", msg)
 				err := c.handleMessage(msg)
 				if err != nil {
 					log.Printf("[WARN]: %s\n", err)
@@ -271,7 +259,6 @@ func (c *Client) listenUpstream() {
 	}
 }
 
-// terminal, unrecoverable state. called after async is closed.
 func (c *Client) close(e error) {
 	if c.listener != nil {
 		if e != nil {
@@ -279,7 +266,6 @@ func (c *Client) close(e error) {
 		}
 		close(c.listener)
 	}
-	// shutdowns goroutines
 	close(c.shutdown)
 }
 
@@ -305,39 +291,11 @@ func (c *Client) closeAsyncAndWait(t time.Duration) {
 	c.waitGroup.Wait()
 }
 
-// Listen provides an atomic interface for receiving API messages.
-// When a websocket connection is terminated, the publisher channel will close.
-func (c *Client) Listen() <-chan interface{} {
-	return c.listener
-}
-
-// Close provides an interface for a user initiated shutdown.
-// Close will close the Done() channel.
-func (c *Client) Close() {
-	c.terminal = true
-	c.closeAsyncAndWait(c.parameters.ShutdownTimeout)
-	// c.subscriptions.Close()
-
-	// clean shutdown waits on shutdown channel, which is triggered by cascading resource
-	// cleanups after a closed asynchronous transport
-	timeout := make(chan bool)
-	go func() {
-		time.Sleep(c.parameters.ShutdownTimeout)
-		close(timeout)
-	}()
-	select {
-	case <-c.shutdown:
-		return // successful cleanup
-	case <-timeout:
-		log.Print("shutdown timed out")
-		return
-	}
-}
-
 func (c *Client) handleMessage(msg []byte) error {
 	t := bytes.TrimLeftFunc(msg, unicode.IsSpace)
 	err := error(nil)
-	// either a channel data array or an event object, raw json encoding
+
+	c.updateHeartbeat()
 	if bytes.HasPrefix(t, []byte("[")) {
 		err = c.handleChannel(msg)
 	} else if bytes.HasPrefix(t, []byte("{")) {
@@ -409,72 +367,10 @@ func (c *Client) handleEvent(msg []byte) error {
 			}
 		}
 	case EventHeartbeat:
-
 	default:
 		fmt.Printf("unknown event: %s", msg)
 	}
 	return nil
-}
-
-func (c *Client) newSubscription(ctx context.Context, s SubscriptionRequest) error {
-	return c.asynchronous.Send(ctx, s)
-}
-
-func (c *Client) SubscribeTicker(ctx context.Context, pairs []string) error {
-	s := SubscriptionRequest{
-		Event: EventSubscribe,
-		Pairs: pairs,
-		Subscription: Subscription{
-			Name: ChanTicker,
-		},
-	}
-	return c.newSubscription(ctx, s)
-}
-
-func (c *Client) SubscribeCandles(ctx context.Context, pairs []string, interval int64) error {
-	s := SubscriptionRequest{
-		Event: EventSubscribe,
-		Pairs: pairs,
-		Subscription: Subscription{
-			Name:     ChanCandles,
-			Interval: interval,
-		},
-	}
-	return c.newSubscription(ctx, s)
-}
-
-func (c *Client) SubscribeTrades(ctx context.Context, pairs []string) error {
-	s := SubscriptionRequest{
-		Event: EventSubscribe,
-		Pairs: pairs,
-		Subscription: Subscription{
-			Name: ChanTrades,
-		},
-	}
-	return c.newSubscription(ctx, s)
-}
-
-func (c *Client) SubscribeSpread(ctx context.Context, pairs []string) error {
-	s := SubscriptionRequest{
-		Event: EventSubscribe,
-		Pairs: pairs,
-		Subscription: Subscription{
-			Name: ChanSpread,
-		},
-	}
-	return c.newSubscription(ctx, s)
-}
-
-func (c *Client) SubscribeBook(ctx context.Context, pairs []string, depth int64) error {
-	s := SubscriptionRequest{
-		Event: EventSubscribe,
-		Pairs: pairs,
-		Subscription: Subscription{
-			Name:  ChanBook,
-			Depth: depth,
-		},
-	}
-	return c.newSubscription(ctx, s)
 }
 
 func (c *Client) lookupByChannelID(chanID int64) (*SubscriptionStatus, error) {
@@ -482,7 +378,7 @@ func (c *Client) lookupByChannelID(chanID int64) (*SubscriptionStatus, error) {
 	if ok {
 		return sub, nil
 	}
-	return nil, fmt.Errorf("Unknown channel ID: %s", chanID)
+	return nil, fmt.Errorf("Unknown channel ID: %d", chanID)
 }
 
 func (c *Client) handleChannel(msg []byte) error {
@@ -515,4 +411,118 @@ func (c *Client) handleChannel(msg []byte) error {
 	}
 	c.listener <- result
 	return nil
+}
+
+// IsConnected returns true if the underlying asynchronous transport is connected to an endpoint.
+func (c *Client) IsConnected() bool {
+	return c.isConnected
+}
+
+// Connect to the Kraken API, this should only be called once.
+func (c *Client) Connect() error {
+	c.dumpParams()
+	c.reset()
+	return c.connect()
+}
+
+// Listen provides an atomic interface for receiving API messages.
+// When a websocket connection is terminated, the publisher channel will close.
+func (c *Client) Listen() <-chan interface{} {
+	return c.listener
+}
+
+// Close provides an interface for a user initiated shutdown.
+// Close will close the Done() channel.
+func (c *Client) Close() {
+	c.terminal = true
+	c.closeAsyncAndWait(c.parameters.ShutdownTimeout)
+
+	// clean shutdown waits on shutdown channel, which is triggered by cascading resource
+	// cleanups after a closed asynchronous transport
+	timeout := make(chan bool)
+	go func() {
+		time.Sleep(c.parameters.ShutdownTimeout)
+		close(timeout)
+	}()
+	select {
+	case <-c.shutdown:
+		return // successful cleanup
+	case <-timeout:
+		log.Print("shutdown timed out")
+		return
+	}
+}
+
+// SubscribeTicker - subscribe on `pairs` ticker
+func (c *Client) SubscribeTicker(ctx context.Context, pairs []string) error {
+	s := SubscriptionRequest{
+		Event: EventSubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name: ChanTicker,
+		},
+	}
+	return c.asynchronous.Send(ctx, s)
+}
+
+// SubscribeCandles - subscribe on `pairs` candles with interval
+func (c *Client) SubscribeCandles(ctx context.Context, pairs []string, interval int64) error {
+	s := SubscriptionRequest{
+		Event: EventSubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name:     ChanCandles,
+			Interval: interval,
+		},
+	}
+	return c.asynchronous.Send(ctx, s)
+}
+
+// SubscribeTrades - subscribe on `pairs` trades
+func (c *Client) SubscribeTrades(ctx context.Context, pairs []string) error {
+	s := SubscriptionRequest{
+		Event: EventSubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name: ChanTrades,
+		},
+	}
+	return c.asynchronous.Send(ctx, s)
+}
+
+// SubscribeSpread - subscribe on `pairs` spread
+func (c *Client) SubscribeSpread(ctx context.Context, pairs []string) error {
+	s := SubscriptionRequest{
+		Event: EventSubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name: ChanSpread,
+		},
+	}
+	return c.asynchronous.Send(ctx, s)
+}
+
+// SubscribeBook - subscribe on `pairs` book
+func (c *Client) SubscribeBook(ctx context.Context, pairs []string, depth int64) error {
+	s := SubscriptionRequest{
+		Event: EventSubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name:  ChanBook,
+			Depth: depth,
+		},
+	}
+	return c.asynchronous.Send(ctx, s)
+}
+
+// Unsubscribe - to unsubsribe from `channelType` (ticker, book, etc) on `pairs`
+func (c *Client) Unsubscribe(ctx context.Context, channelType string, pairs []string) error {
+	u := UnsubscribeRequest{
+		Event: EventUnsubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name: channelType,
+		},
+	}
+	return c.asynchronous.Send(ctx, u)
 }

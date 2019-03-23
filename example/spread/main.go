@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	c := ws.New()
+	c := ws.New(false)
 	err := c.Connect()
 	if err != nil {
 		log.Fatal("Error connecting to web socket : ", err)
@@ -18,7 +18,7 @@ func main() {
 	// subscribe to BTCUSD, XLMUSD, ADACAD spread
 	ctx, cxl2 := context.WithTimeout(context.Background(), time.Second*5)
 	defer cxl2()
-	err = c.SubscribeSpread(ctx, []string{"ADA/CAD", "STR/USD", "BTC/USD"})
+	err = c.SubscribeSpread(ctx, []string{ws.ADABTC, ws.XTZBTC, ws.XLMBTC})
 	if err != nil {
 		log.Fatal(err)
 	}

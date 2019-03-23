@@ -25,7 +25,6 @@ type SubscriptionRequest struct {
 
 type UnsubscribeRequest struct {
 	Event        string       `json:"event"`
-	ChannelID    int64        `json:"chanId"`
 	Pairs        []string     `json:"pair"`
 	Subscription Subscription `json:"subscription"`
 }

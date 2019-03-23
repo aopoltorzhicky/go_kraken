@@ -17,8 +17,7 @@ type Parameters struct {
 	HeartbeatTimeout time.Duration
 	LogTransport     bool
 
-	URL             string
-	ManageOrderbook bool
+	URL string
 }
 
 func NewDefaultParameters() *Parameters {
@@ -28,11 +27,10 @@ func NewDefaultParameters() *Parameters {
 		reconnectTry:           0,
 		ReconnectAttempts:      5,
 		URL:                    prodBaseURL,
-		ManageOrderbook:        false,
 		ShutdownTimeout:        time.Second * 5,
 		ResubscribeOnReconnect: true,
-		HeartbeatTimeout:       time.Second * 3, // HB = 3s
-		LogTransport:           false,           // log transport send/recv
+		HeartbeatTimeout:       time.Second * 15, // HB = 3s
+		LogTransport:           false,            // log transport send/recv
 	}
 }
 
@@ -43,10 +41,9 @@ func NewDefaultSandboxParameters() *Parameters {
 		reconnectTry:           0,
 		ReconnectAttempts:      5,
 		URL:                    sandboxBaseURL,
-		ManageOrderbook:        false,
 		ShutdownTimeout:        time.Second * 5,
 		ResubscribeOnReconnect: true,
-		HeartbeatTimeout:       time.Second * 3, // HB = 3s
-		LogTransport:           false,           // log transport send/recv
+		HeartbeatTimeout:       time.Second * 15, // HB = 3s
+		LogTransport:           false,            // log transport send/recv
 	}
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	c := ws.New()
+	c := ws.New(false)
 	err := c.Connect()
 	if err != nil {
 		log.Fatal("Error connecting to web socket : ", err)
@@ -18,7 +18,7 @@ func main() {
 	// subscribe to BTCUSD ticker
 	ctx, cxl2 := context.WithTimeout(context.Background(), time.Second*5)
 	defer cxl2()
-	err = c.SubscribeTicker(ctx, []string{"BTC/USD"})
+	err = c.SubscribeTicker(ctx, []string{ws.BTCCAD})
 	if err != nil {
 		log.Fatal(err)
 	}

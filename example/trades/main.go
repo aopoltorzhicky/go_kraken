@@ -9,19 +9,33 @@ import (
 )
 
 func main() {
-	c := ws.New()
+	c := ws.New(false)
 	err := c.Connect()
 	if err != nil {
 		log.Fatal("Error connecting to web socket : ", err)
 	}
 
+	pairs := []string{ws.BTCUSD}
 	// subscribe to BTCUSD trades
-	ctx, cxl2 := context.WithTimeout(context.Background(), time.Second*5)
-	defer cxl2()
-	err = c.SubscribeTrades(ctx, []string{"BTC/USD"})
+	ctx, cxl := context.WithTimeout(context.Background(), time.Second*5)
+	defer cxl()
+	err = c.SubscribeTrades(ctx, pairs)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	go func() {
+		time.Sleep(time.Second * 2)
+		log.Print("Unsubsribing...")
+		ctx2, cxl2 := context.WithTimeout(context.Background(), time.Second*5)
+		defer cxl2()
+		err = c.Unsubscribe(ctx2, ws.ChanTrades, pairs)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Print("Success!")
+		c.Close()
+	}()
 
 	for obj := range c.Listen() {
 		switch obj.(type) {

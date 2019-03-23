@@ -81,7 +81,7 @@ func (w *ws) Send(ctx context.Context, msg interface{}) error {
 
 	bs, err := json.Marshal(msg)
 
-	log.Printf("[DEBUG]: %s\n", bs)
+	// log.Printf("[DEBUG]: %s\n", bs)
 	if err != nil {
 		return err
 	}
