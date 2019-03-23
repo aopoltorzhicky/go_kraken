@@ -11,6 +11,7 @@ type Parameters struct {
 	ReconnectAttempts int
 	reconnectTry      int
 	ShutdownTimeout   time.Duration
+	ContextTimeout    time.Duration
 
 	ResubscribeOnReconnect bool
 
@@ -29,8 +30,9 @@ func NewDefaultParameters() *Parameters {
 		URL:                    prodBaseURL,
 		ShutdownTimeout:        time.Second * 5,
 		ResubscribeOnReconnect: true,
-		HeartbeatTimeout:       time.Second * 15, // HB = 3s
-		LogTransport:           false,            // log transport send/recv
+		HeartbeatTimeout:       time.Second * 3, // HB = 3s
+		LogTransport:           false,           // log transport send/recv,
+		ContextTimeout:         time.Second * 5,
 	}
 }
 
@@ -43,7 +45,8 @@ func NewDefaultSandboxParameters() *Parameters {
 		URL:                    sandboxBaseURL,
 		ShutdownTimeout:        time.Second * 5,
 		ResubscribeOnReconnect: true,
-		HeartbeatTimeout:       time.Second * 15, // HB = 3s
-		LogTransport:           false,            // log transport send/recv
+		HeartbeatTimeout:       time.Second * 3, // HB = 3s
+		LogTransport:           false,           // log transport send/recv
+		ContextTimeout:         time.Second * 5,
 	}
 }

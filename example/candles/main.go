@@ -1,9 +1,7 @@
 package main
 
 import (
-	"context"
 	"log"
-	"time"
 
 	ws "scripts/kraken_ws/websocket"
 )
@@ -16,9 +14,7 @@ func main() {
 	}
 
 	// subscribe to BTCUSD, XLMUSD, ADACAD candles
-	ctx, cxl2 := context.WithTimeout(context.Background(), time.Second*5)
-	defer cxl2()
-	err = c.SubscribeCandles(ctx, []string{ws.XLMBTC, ws.BTCEUR, ws.QTUMCAD}, ws.Interal10080)
+	err = c.SubscribeCandles([]string{ws.XLMBTC, ws.BTCEUR, ws.QTUMCAD}, ws.Interal10080)
 	if err != nil {
 		log.Fatal(err)
 	}

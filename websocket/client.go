@@ -327,12 +327,12 @@ func (c *Client) handleEvent(msg []byte) error {
 	switch event.Event {
 
 	case EventPong:
-		pong := Pong{}
+		pong := PongResponse{}
 		err = json.Unmarshal(msg, &pong)
 		if err != nil {
 			return err
 		}
-		log.Printf("Pong received. Req ID: %s", pong.ReqID)
+		log.Print("Pong received")
 
 	case EventSystemStatus:
 		systemStatus := SystemStatus{}
@@ -432,13 +432,10 @@ func (c *Client) Listen() <-chan interface{} {
 }
 
 // Close provides an interface for a user initiated shutdown.
-// Close will close the Done() channel.
 func (c *Client) Close() {
 	c.terminal = true
 	c.closeAsyncAndWait(c.parameters.ShutdownTimeout)
 
-	// clean shutdown waits on shutdown channel, which is triggered by cascading resource
-	// cleanups after a closed asynchronous transport
 	timeout := make(chan bool)
 	go func() {
 		time.Sleep(c.parameters.ShutdownTimeout)
@@ -453,8 +450,10 @@ func (c *Client) Close() {
 	}
 }
 
-// SubscribeTicker - subscribe on `pairs` ticker
-func (c *Client) SubscribeTicker(ctx context.Context, pairs []string) error {
+// SubscribeTicker - Ticker information includes best ask and best bid prices, 24hr volume, last trade price, volume weighted average price, etc for a given currency pair. A ticker message is published every time a trade or a group of trade happens.
+func (c *Client) SubscribeTicker(pairs []string) error {
+	ctx, cxl := context.WithTimeout(context.Background(), c.parameters.ContextTimeout)
+	defer cxl()
 	s := SubscriptionRequest{
 		Event: EventSubscribe,
 		Pairs: pairs,
@@ -465,8 +464,10 @@ func (c *Client) SubscribeTicker(ctx context.Context, pairs []string) error {
 	return c.asynchronous.Send(ctx, s)
 }
 
-// SubscribeCandles - subscribe on `pairs` candles with interval
-func (c *Client) SubscribeCandles(ctx context.Context, pairs []string, interval int64) error {
+// SubscribeCandles - Open High Low Close (Candle) feed for a currency pair and interval period.
+func (c *Client) SubscribeCandles(pairs []string, interval int64) error {
+	ctx, cxl := context.WithTimeout(context.Background(), c.parameters.ContextTimeout)
+	defer cxl()
 	s := SubscriptionRequest{
 		Event: EventSubscribe,
 		Pairs: pairs,
@@ -478,8 +479,10 @@ func (c *Client) SubscribeCandles(ctx context.Context, pairs []string, interval 
 	return c.asynchronous.Send(ctx, s)
 }
 
-// SubscribeTrades - subscribe on `pairs` trades
-func (c *Client) SubscribeTrades(ctx context.Context, pairs []string) error {
+// SubscribeTrades - Trade feed for a currency pair.
+func (c *Client) SubscribeTrades(pairs []string) error {
+	ctx, cxl := context.WithTimeout(context.Background(), c.parameters.ContextTimeout)
+	defer cxl()
 	s := SubscriptionRequest{
 		Event: EventSubscribe,
 		Pairs: pairs,
@@ -490,8 +493,10 @@ func (c *Client) SubscribeTrades(ctx context.Context, pairs []string) error {
 	return c.asynchronous.Send(ctx, s)
 }
 
-// SubscribeSpread - subscribe on `pairs` spread
-func (c *Client) SubscribeSpread(ctx context.Context, pairs []string) error {
+// SubscribeSpread - Spread feed to show best bid and ask price for a currency pair
+func (c *Client) SubscribeSpread(pairs []string) error {
+	ctx, cxl := context.WithTimeout(context.Background(), c.parameters.ContextTimeout)
+	defer cxl()
 	s := SubscriptionRequest{
 		Event: EventSubscribe,
 		Pairs: pairs,
@@ -502,8 +507,10 @@ func (c *Client) SubscribeSpread(ctx context.Context, pairs []string) error {
 	return c.asynchronous.Send(ctx, s)
 }
 
-// SubscribeBook - subscribe on `pairs` book
-func (c *Client) SubscribeBook(ctx context.Context, pairs []string, depth int64) error {
+// SubscribeBook - Order book levels. On subscription, a snapshot will be published at the specified depth, following the snapshot, level updates will be published.
+func (c *Client) SubscribeBook(pairs []string, depth int64) error {
+	ctx, cxl := context.WithTimeout(context.Background(), c.parameters.ContextTimeout)
+	defer cxl()
 	s := SubscriptionRequest{
 		Event: EventSubscribe,
 		Pairs: pairs,
@@ -515,8 +522,10 @@ func (c *Client) SubscribeBook(ctx context.Context, pairs []string, depth int64)
 	return c.asynchronous.Send(ctx, s)
 }
 
-// Unsubscribe - to unsubsribe from `channelType` (ticker, book, etc) on `pairs`
-func (c *Client) Unsubscribe(ctx context.Context, channelType string, pairs []string) error {
+// Unsubscribe - Unsubscribe from single subscription, can specify multiple currency pairs.
+func (c *Client) Unsubscribe(channelType string, pairs []string) error {
+	ctx, cxl := context.WithTimeout(context.Background(), c.parameters.ContextTimeout)
+	defer cxl()
 	u := UnsubscribeRequest{
 		Event: EventUnsubscribe,
 		Pairs: pairs,
@@ -525,4 +534,14 @@ func (c *Client) Unsubscribe(ctx context.Context, channelType string, pairs []st
 		},
 	}
 	return c.asynchronous.Send(ctx, u)
+}
+
+// Ping - Client can ping server to determine whether connection is alive, server responds with pong. This is an application level ping as opposed to default ping in WebSockets standard which is server initiated
+func (c *Client) Ping() error {
+	ctx, cxl := context.WithTimeout(context.Background(), c.parameters.ContextTimeout)
+	defer cxl()
+	ping := PingRequest{
+		Event: EventPing,
+	}
+	return c.asynchronous.Send(ctx, ping)
 }

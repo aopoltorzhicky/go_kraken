@@ -39,12 +39,12 @@ type SubscriptionStatus struct {
 	Subscription Subscription `json:"subscription"`
 }
 
-type Ping struct {
+type PingRequest struct {
 	Event string `json:"event"`
 	ReqID string `json:"reqid,omitempty"`
 }
 
-type Pong struct {
+type PongResponse struct {
 	Event string `json:"event"`
 	ReqID string `json:"reqid,omitempty"`
 }

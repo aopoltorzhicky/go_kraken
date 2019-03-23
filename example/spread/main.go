@@ -1,9 +1,7 @@
 package main
 
 import (
-	"context"
 	"log"
-	"time"
 
 	ws "scripts/kraken_ws/websocket"
 )
@@ -15,10 +13,13 @@ func main() {
 		log.Fatal("Error connecting to web socket : ", err)
 	}
 
+	err = c.Ping()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// subscribe to BTCUSD, XLMUSD, ADACAD spread
-	ctx, cxl2 := context.WithTimeout(context.Background(), time.Second*5)
-	defer cxl2()
-	err = c.SubscribeSpread(ctx, []string{ws.ADABTC, ws.XTZBTC, ws.XLMBTC})
+	err = c.SubscribeSpread([]string{ws.ADABTC, ws.XTZBTC, ws.XLMBTC})
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"time"
 
@@ -16,10 +15,9 @@ func main() {
 	}
 
 	pairs := []string{ws.BTCUSD}
+
 	// subscribe to BTCUSD trades
-	ctx, cxl := context.WithTimeout(context.Background(), time.Second*5)
-	defer cxl()
-	err = c.SubscribeTrades(ctx, pairs)
+	err = c.SubscribeTrades(pairs)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,9 +25,7 @@ func main() {
 	go func() {
 		time.Sleep(time.Second * 2)
 		log.Print("Unsubsribing...")
-		ctx2, cxl2 := context.WithTimeout(context.Background(), time.Second*5)
-		defer cxl2()
-		err = c.Unsubscribe(ctx2, ws.ChanTrades, pairs)
+		err = c.Unsubscribe(ws.ChanTrades, pairs)
 		if err != nil {
 			log.Fatal(err)
 		}

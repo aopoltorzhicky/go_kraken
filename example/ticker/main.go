@@ -1,9 +1,7 @@
 package main
 
 import (
-	"context"
 	"log"
-	"time"
 
 	ws "scripts/kraken_ws/websocket"
 )
@@ -16,9 +14,7 @@ func main() {
 	}
 
 	// subscribe to BTCUSD ticker
-	ctx, cxl2 := context.WithTimeout(context.Background(), time.Second*5)
-	defer cxl2()
-	err = c.SubscribeTicker(ctx, []string{ws.BTCCAD})
+	err = c.SubscribeTicker([]string{ws.BTCCAD})
 	if err != nil {
 		log.Fatal(err)
 	}
