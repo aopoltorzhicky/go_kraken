@@ -962,3 +962,71 @@ func TestClient_exit(t *testing.T) {
 		})
 	}
 }
+
+func TestClient_Listen(t *testing.T) {
+	l := make(chan interface{})
+	defer close(l)
+	tests := []struct {
+		name string
+		want <-chan interface{}
+	}{
+		{
+			name: "Test Listen method",
+			want: l,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Client{
+				listener: l,
+			}
+			if got := c.Listen(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Client.Listen() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestClient_resubscribe(t *testing.T) {
+	type fields struct {
+		isError bool
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		{
+			name: "Test without error",
+			fields: fields{
+				isError: false,
+			},
+			wantErr: false,
+		},
+		{
+			name: "Test with error",
+			fields: fields{
+				isError: true,
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Client{
+				asynchronous: &mockAsynchronous{
+					isError: tt.fields.isError,
+				},
+				subscriptions: map[int64]*SubscriptionStatus{
+					1: &SubscriptionStatus{
+						Pair:         BTCCAD,
+						Subscription: Subscription{},
+					},
+				},
+			}
+			if err := c.resubscribe(); (err != nil) != tt.wantErr {
+				t.Errorf("Client.resubscribe() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
