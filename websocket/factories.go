@@ -54,18 +54,18 @@ func newCandlesFactory() *candlesFactory {
 func (f *candlesFactory) Parse(data interface{}, pair string) (interface{}, error) {
 	body, ok := data.([]interface{})
 	if !ok {
-		return CandleUpdate{}, fmt.Errorf("Can't parse data %#v", data)
+		return CandleUpdate{Pair: pair}, fmt.Errorf("Can't parse data %#v", data)
 	}
 	return CandleUpdate{
 		Time:      valToTime(body[0]),
-		EndTime:   valToFloat64(body[1]),
+		EndTime:   valToTime(body[1]),
 		Open:      valToFloat64(body[2]),
 		High:      valToFloat64(body[3]),
 		Low:       valToFloat64(body[4]),
 		Close:     valToFloat64(body[5]),
 		VolumeWAP: valToFloat64(body[6]),
 		Volume:    valToFloat64(body[7]),
-		Count:     int64(body[8].(float64)),
+		Count:     body[8].(int),
 		Pair:      pair,
 	}, nil
 }
@@ -107,7 +107,7 @@ func newSpreadFactory() *spreadFactory {
 func (f *spreadFactory) Parse(data interface{}, pair string) (interface{}, error) {
 	body, ok := data.([]interface{})
 	if !ok {
-		return SpreadUpdate{}, fmt.Errorf("Can't parse data %#v", data)
+		return SpreadUpdate{Pair: pair}, fmt.Errorf("Can't parse data %#v", data)
 	}
 	return SpreadUpdate{
 		Ask:  valToFloat64(body[0]),

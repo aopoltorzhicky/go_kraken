@@ -41,12 +41,12 @@ type SubscriptionStatus struct {
 
 type PingRequest struct {
 	Event string `json:"event"`
-	ReqID string `json:"reqid,omitempty"`
+	ReqID int    `json:"reqid,omitempty"`
 }
 
 type PongResponse struct {
 	Event string `json:"event"`
-	ReqID string `json:"reqid,omitempty"`
+	ReqID int    `json:"reqid,omitempty"`
 }
 
 type SystemStatus struct {
@@ -72,24 +72,24 @@ type TickerUpdate struct {
 type Level struct {
 	Price          float64
 	Volume         float64
-	WholeLotVolume float64
+	WholeLotVolume int
 }
 
 type Values struct {
-	Today  float64
-	Last24 float64
+	Today  interface{}
+	Last24 interface{}
 }
 
 type CandleUpdate struct {
 	Time      time.Time
-	EndTime   float64
+	EndTime   time.Time
 	Open      float64
 	High      float64
 	Low       float64
 	Close     float64
 	VolumeWAP float64
 	Volume    float64
-	Count     int64
+	Count     int
 	Pair      string
 }
 

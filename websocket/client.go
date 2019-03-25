@@ -387,7 +387,7 @@ func (c *Client) handleChannel(msg []byte) error {
 	if err != nil {
 		return err
 	} else if len(raw) < 2 {
-		return nil
+		return fmt.Errorf("Inalid message length: %#v", msg)
 	}
 
 	chID, ok := raw[0].(float64)

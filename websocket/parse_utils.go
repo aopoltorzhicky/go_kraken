@@ -28,28 +28,50 @@ func valToTime(data interface{}) time.Time {
 }
 
 func parseLevel(data []interface{}) Level {
+	wholeLot := 0
+	if v, ok := data[1].(int); ok {
+		wholeLot = v
+	}
 	return Level{
-		Price:          valToFloat64(data[0].(string)),
-		Volume:         valToFloat64(data[2].(string)),
-		WholeLotVolume: data[1].(float64),
+		Price:          valToFloat64(data[0]),
+		Volume:         valToFloat64(data[2]),
+		WholeLotVolume: wholeLot,
 	}
 }
 
 func parseValues(data []interface{}) Values {
-	var today, last24h float64
 	switch data[0].(type) {
 	case string:
-		today = valToFloat64(data[0].(string))
-		last24h = valToFloat64(data[1].(string))
+		return Values{
+			Today:  valToFloat64(data[0]),
+			Last24: valToFloat64(data[1]),
+		}
+	case int:
+		last24h := 0
+		if v, ok := data[1].(int); ok {
+			last24h = v
+		}
+		return Values{
+			Today:  data[0].(int),
+			Last24: last24h,
+		}
+
 	case float64:
-		today = data[0].(float64)
-		last24h = data[1].(float64)
+		last24h := 0.0
+		if v, ok := data[1].(float64); ok {
+			last24h = v
+		}
+		return Values{
+			Today:  data[0].(float64),
+			Last24: last24h,
+		}
+	default:
+		return Values{
+			Today:  0,
+			Last24: 0,
+		}
 	}
 
-	return Values{
-		Today:  today,
-		Last24: last24h,
-	}
 }
 
 func parseSide(data string) string {
