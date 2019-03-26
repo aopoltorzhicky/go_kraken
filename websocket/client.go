@@ -197,19 +197,14 @@ func (c *Client) resubscribe() error {
 
 func (c *Client) reconnect(err error) error {
 	if c.terminal {
-		errExit := c.exit(err)
-		if errExit != nil {
-			return errExit
-		}
-		return err
+		return c.exit(err)
 	}
 	if !c.parameters.AutoReconnect {
-		err := fmt.Errorf("AutoReconnect setting is disabled, do not reconnect: %s", err.Error())
-		errExit := c.exit(err)
-		if errExit != nil {
-			return errExit
+		s := "Empty error"
+		if err != nil {
+			s = err.Error()
 		}
-		return err
+		return c.exit(fmt.Errorf("AutoReconnect setting is disabled, do not reconnect: %s", s))
 	}
 	reconnectTry := 0
 	for ; reconnectTry < c.parameters.ReconnectAttempts; reconnectTry++ {

@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+var SomethingError = fmt.Errorf("Something went wrong")
+
 func TestClient_createFactory(t *testing.T) {
 	type args struct {
 		name    string
@@ -437,27 +439,53 @@ func TestClient_handleMessage(t *testing.T) {
 }
 
 type mockAsynchronous struct {
-	isError bool
+	isConnectionError bool
+	isSendError       bool
+	isDone            bool
 
-	finished chan error
-	data     chan []byte
+	Finished chan error
+	Data     chan []byte
 }
 
 func (m *mockAsynchronous) Connect() error {
-	if m.isError {
-		return fmt.Errorf("")
+	if m.isConnectionError {
+		return SomethingError
 	}
 	return nil
 }
 func (m *mockAsynchronous) Send(ctx context.Context, msg interface{}) error {
-	if m.isError {
-		return fmt.Errorf("")
+	if m.isSendError {
+		return SomethingError
 	}
 	return nil
 }
-func (m *mockAsynchronous) Close()                {}
-func (m *mockAsynchronous) Listen() <-chan []byte { return m.data }
-func (m *mockAsynchronous) Done() <-chan error    { return m.finished }
+func (m *mockAsynchronous) Close() {}
+
+func (m *mockAsynchronous) Listen() <-chan []byte {
+	return m.Data
+}
+func (m *mockAsynchronous) Done() <-chan error {
+	if m.isDone {
+		close(m.Finished)
+	}
+	return m.Finished
+}
+
+type mockAsyncFactory struct {
+	isConnectionError bool
+	isSendError       bool
+}
+
+func (m *mockAsyncFactory) Create() asynchronous {
+	return &mockAsynchronous{
+		Finished: make(chan error),
+		Data:     make(chan []byte),
+
+		isConnectionError: m.isConnectionError,
+		isSendError:       m.isSendError,
+		isDone:            false,
+	}
+}
 
 func TestClient_connect(t *testing.T) {
 	type fields struct {
@@ -487,7 +515,7 @@ func TestClient_connect(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isError: tt.fields.isError,
+					isConnectionError: tt.fields.isError,
 				},
 				isConnected: false,
 			}
@@ -553,7 +581,7 @@ func TestClient_Ping(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isError: tt.fields.isError,
+					isSendError: tt.fields.isError,
 				},
 				parameters: NewDefaultSandboxParameters(),
 			}
@@ -605,7 +633,7 @@ func TestClient_Unsubscribe(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isError: tt.fields.isError,
+					isSendError: tt.fields.isError,
 				},
 				parameters: NewDefaultSandboxParameters(),
 			}
@@ -657,7 +685,7 @@ func TestClient_SubscribeBook(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isError: tt.fields.isError,
+					isSendError: tt.fields.isError,
 				},
 				parameters: NewDefaultSandboxParameters(),
 			}
@@ -706,7 +734,7 @@ func TestClient_SubscribeSpread(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isError: tt.fields.isError,
+					isSendError: tt.fields.isError,
 				},
 				parameters: NewDefaultSandboxParameters(),
 			}
@@ -755,7 +783,7 @@ func TestClient_SubscribeTrades(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isError: tt.fields.isError,
+					isSendError: tt.fields.isError,
 				},
 				parameters: NewDefaultSandboxParameters(),
 			}
@@ -807,7 +835,7 @@ func TestClient_SubscribeCandles(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isError: tt.fields.isError,
+					isSendError: tt.fields.isError,
 				},
 				parameters: NewDefaultSandboxParameters(),
 			}
@@ -856,7 +884,7 @@ func TestClient_SubscribeTicker(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isError: tt.fields.isError,
+					isSendError: tt.fields.isError,
 				},
 				parameters: NewDefaultSandboxParameters(),
 			}
@@ -882,7 +910,7 @@ func TestClient_close(t *testing.T) {
 		{
 			name: "Close with error",
 			args: args{
-				e: fmt.Errorf(""),
+				e: SomethingError,
 			},
 			fields: fields{
 				listenerIsNil: false,
@@ -934,7 +962,7 @@ func TestClient_exit(t *testing.T) {
 		{
 			name: "Test exit method with error",
 			args: args{
-				err: fmt.Errorf("Test error"),
+				err: SomethingError,
 			},
 			wantErr: true,
 		},
@@ -1015,7 +1043,7 @@ func TestClient_resubscribe(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isError: tt.fields.isError,
+					isSendError: tt.fields.isError,
 				},
 				subscriptions: map[int64]*SubscriptionStatus{
 					1: &SubscriptionStatus{
@@ -1026,6 +1054,514 @@ func TestClient_resubscribe(t *testing.T) {
 			}
 			if err := c.resubscribe(); (err != nil) != tt.wantErr {
 				t.Errorf("Client.resubscribe() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestClient_closeAsyncAndWait(t *testing.T) {
+	type fields struct {
+		init   bool
+		isDone bool
+	}
+	type args struct {
+		t time.Duration
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+	}{
+		{
+			name: "Test init is false",
+			fields: fields{
+				init:   false,
+				isDone: false,
+			},
+			args: args{
+				t: time.Second,
+			},
+		},
+		{
+			name: "Test init: true, asynchronous Done",
+			fields: fields{
+				init:   true,
+				isDone: true,
+			},
+			args: args{
+				t: time.Second * 10,
+			},
+		},
+		{
+			name: "Test init: true, timeout Done",
+			fields: fields{
+				init:   true,
+				isDone: false,
+			},
+			args: args{
+				t: time.Microsecond,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Client{
+				asynchronous: &mockAsynchronous{
+					isDone:   tt.fields.isDone,
+					Finished: make(chan error),
+				},
+				init: tt.fields.init,
+			}
+			if !tt.fields.isDone {
+				defer close(c.asynchronous.(*mockAsynchronous).Finished)
+			}
+
+			c.closeAsyncAndWait(tt.args.t)
+		})
+	}
+}
+func TestClient_controlHeartbeat(t *testing.T) {
+	type fields struct {
+		isShutdown bool
+		heartbeat  time.Time
+	}
+	tests := []struct {
+		name   string
+		fields fields
+	}{
+		{
+			name: "Test control heartbeat: by heartbeat",
+			fields: fields{
+				isShutdown: false,
+				heartbeat:  time.Unix(0, 0),
+			},
+		},
+		{
+			name: "Test control heartbeat: by shutdown",
+			fields: fields{
+				isShutdown: true,
+				heartbeat:  time.Now().Add(time.Hour),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Client{
+				shutdown:  make(chan bool),
+				heartbeat: time.Unix(0, 0),
+				hbChannel: make(chan error),
+			}
+			defer close(c.hbChannel)
+			defer close(c.shutdown)
+
+			go func() {
+				if tt.fields.isShutdown {
+					c.shutdown <- true
+				} else {
+					<-c.hbChannel
+				}
+			}()
+			time.Sleep(time.Microsecond * 500)
+
+			c.controlHeartbeat()
+		})
+	}
+}
+
+func TestClient_listenUpstream(t *testing.T) {
+	type fields struct {
+		data []byte
+	}
+	tests := []struct {
+		name   string
+		fields fields
+	}{
+		{
+			name: "test with data",
+			fields: fields{
+				data: []byte("Test data"),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Client{
+				asynchronous: &mockAsynchronous{
+					Data: make(chan []byte),
+				},
+				shutdown:   make(chan bool),
+				hbChannel:  make(chan error),
+				heartbeat:  time.Now().Add(time.Hour),
+				parameters: NewDefaultSandboxParameters(),
+			}
+			defer close(c.shutdown)
+			defer close(c.asynchronous.(*mockAsynchronous).Data)
+			defer close(c.hbChannel)
+
+			go func() {
+				c.asynchronous.(*mockAsynchronous).Data <- tt.fields.data
+				c.shutdown <- true
+			}()
+
+			time.Sleep(time.Microsecond)
+
+			c.listenUpstream()
+		})
+	}
+}
+
+func TestClient_reconnect(t *testing.T) {
+	type fields struct {
+		terminal          bool
+		autoReconnect     bool
+		isConnectError    bool
+		isSendError       bool
+		reconnectInterval time.Duration
+		subscriptions     map[int64]*SubscriptionStatus
+	}
+	type args struct {
+		err error
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "Test terminal is true",
+			fields: fields{
+				terminal:          true,
+				reconnectInterval: time.Millisecond,
+				subscriptions:     make(map[int64]*SubscriptionStatus),
+			},
+			args: args{
+				err: nil,
+			},
+			wantErr: false,
+		},
+		{
+			name: "Test terminal is true with error",
+			fields: fields{
+				terminal:          true,
+				reconnectInterval: time.Millisecond,
+				subscriptions:     make(map[int64]*SubscriptionStatus),
+			},
+			args: args{
+				err: SomethingError,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test autoReconnect false",
+			fields: fields{
+				terminal:          false,
+				autoReconnect:     false,
+				reconnectInterval: time.Millisecond,
+				subscriptions:     make(map[int64]*SubscriptionStatus),
+			},
+			args: args{
+				err: nil,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test autoReconnect false with error",
+			fields: fields{
+				terminal:          false,
+				autoReconnect:     false,
+				reconnectInterval: time.Millisecond,
+				subscriptions:     make(map[int64]*SubscriptionStatus),
+			},
+			args: args{
+				err: SomethingError,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test autoReconnect true",
+			fields: fields{
+				terminal:          false,
+				autoReconnect:     true,
+				isConnectError:    false,
+				reconnectInterval: time.Millisecond,
+				subscriptions:     make(map[int64]*SubscriptionStatus),
+			},
+			args: args{
+				err: nil,
+			},
+			wantErr: false,
+		},
+		{
+			name: "Test isConnectError true",
+			fields: fields{
+				terminal:          false,
+				autoReconnect:     true,
+				isConnectError:    true,
+				reconnectInterval: time.Millisecond,
+				subscriptions:     make(map[int64]*SubscriptionStatus),
+			},
+			args: args{
+				err: nil,
+			},
+			wantErr: true,
+		},
+		{
+			name: "Test isSendError true",
+			fields: fields{
+				terminal:       false,
+				autoReconnect:  true,
+				isConnectError: false,
+				isSendError:    true,
+				subscriptions: map[int64]*SubscriptionStatus{
+					1: &SubscriptionStatus{
+						Pair: BTCCAD,
+						Subscription: Subscription{
+							Name: ChanTicker,
+						},
+					},
+				},
+			},
+			args: args{
+				err: nil,
+			},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Client{
+				asyncFactory: &mockAsyncFactory{
+					isConnectionError: tt.fields.isConnectError,
+					isSendError:       tt.fields.isSendError,
+				},
+				asynchronous:  nil,
+				isConnected:   false,
+				terminal:      tt.fields.terminal,
+				init:          false,
+				heartbeat:     time.Now().Add(time.Hour),
+				hbChannel:     make(chan error),
+				parameters:    NewDefaultSandboxParameters(),
+				shutdown:      make(chan bool),
+				listener:      make(chan interface{}),
+				subscriptions: tt.fields.subscriptions,
+				factories:     make(map[string]ParseFactory),
+			}
+			c.parameters.AutoReconnect = tt.fields.autoReconnect
+			c.parameters.ReconnectInterval = tt.fields.reconnectInterval
+
+			go func() {
+				<-c.listener
+			}()
+
+			if err := c.reconnect(tt.args.err); (err != nil) != tt.wantErr {
+				t.Errorf("Client.reconnect() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestClient_Close(t *testing.T) {
+	type fields struct {
+		isShutdown bool
+	}
+	tests := []struct {
+		name   string
+		fields fields
+	}{
+		{
+			name: "Test shutdown",
+			fields: fields{
+				isShutdown: true,
+			},
+		},
+		{
+			name: "Test is not shutdown",
+			fields: fields{
+				isShutdown: false,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Client{
+				asynchronous: &mockAsynchronous{},
+				terminal:     false,
+				init:         true,
+				parameters:   NewDefaultSandboxParameters(),
+				shutdown:     make(chan bool),
+			}
+			c.parameters.ShutdownTimeout = time.Second * 1
+
+			go func() {
+				if tt.fields.isShutdown {
+					c.shutdown <- true
+				}
+			}()
+
+			c.Close()
+		})
+	}
+}
+
+func TestClient_Connect(t *testing.T) {
+	tests := []struct {
+		name           string
+		isConnectError bool
+		wantErr        bool
+	}{
+		{
+			name:           "Test without error",
+			isConnectError: false,
+		},
+		{
+			name:           "Test with error",
+			isConnectError: true,
+			wantErr:        true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Client{
+				asyncFactory: &mockAsyncFactory{
+					isConnectionError: tt.isConnectError,
+				},
+				heartbeat:  time.Now().Add(time.Hour),
+				hbChannel:  make(chan error),
+				parameters: NewDefaultSandboxParameters(),
+				listener:   make(chan interface{}),
+			}
+			if err := c.Connect(); (err != nil) != tt.wantErr {
+				t.Errorf("Client.Connect() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestClient_listenDisconnect(t *testing.T) {
+	type fields struct {
+		isAsynchronousDone bool
+		isListenHeartbeat  bool
+
+		err error
+	}
+	tests := []struct {
+		name   string
+		fields fields
+	}{
+		{
+			name: "test asynchronous branch",
+			fields: fields{
+				isAsynchronousDone: true,
+				isListenHeartbeat:  false,
+			},
+		},
+		{
+			name: "test asynchronous branch with error",
+			fields: fields{
+				isAsynchronousDone: true,
+				isListenHeartbeat:  false,
+				err:                SomethingError,
+			},
+		},
+		{
+			name: "test heartbeat branch",
+			fields: fields{
+				isAsynchronousDone: true,
+				isListenHeartbeat:  true,
+			},
+		},
+		{
+			name: "test heartbeat branch with error",
+			fields: fields{
+				isAsynchronousDone: true,
+				isListenHeartbeat:  true,
+				err:                SomethingError,
+			},
+		},
+		{
+			name: "test heartbeat branch with connect error",
+			fields: fields{
+				isAsynchronousDone: true,
+				isListenHeartbeat:  true,
+				err:                SomethingError,
+			},
+		},
+		{
+			name: "test both branches",
+			fields: fields{
+				isAsynchronousDone: true,
+				isListenHeartbeat:  true,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Client{
+				asynchronous: &mockAsynchronous{
+					isDone:            tt.fields.isAsynchronousDone && tt.fields.err == nil,
+					Finished:          make(chan error),
+					isConnectionError: true,
+				},
+				isConnected: false,
+				terminal:    true,
+				heartbeat:   time.Now().Add(time.Hour),
+				hbChannel:   make(chan error),
+				parameters:  NewDefaultSandboxParameters(),
+				shutdown:    make(chan bool),
+			}
+
+			go func() {
+				if tt.fields.isListenHeartbeat {
+					c.hbChannel <- tt.fields.err
+				}
+				if tt.fields.isAsynchronousDone && tt.fields.err != nil {
+					c.asynchronous.(*mockAsynchronous).Finished <- tt.fields.err
+				}
+			}()
+
+			c.listenDisconnect()
+		})
+	}
+}
+
+func TestNew(t *testing.T) {
+	type args struct {
+		sandbox bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want *Client
+	}{
+		{
+			name: "Test sandbox",
+			args: args{
+				sandbox: true,
+			},
+		},
+		{
+			name: "Test prod",
+			args: args{
+				sandbox: false,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := New(tt.args.sandbox)
+			if tt.args.sandbox {
+				if got.parameters.URL != sandboxBaseURL {
+					t.Errorf("URL = %s, want %s", got.parameters.URL, sandboxBaseURL)
+				}
+			} else {
+				if got.parameters.URL != prodBaseURL {
+					t.Errorf("URL = %s, want %s", got.parameters.URL, prodBaseURL)
+				}
+			}
+			if len(got.factories) != 5 {
+				t.Errorf("Factories count = %d, want %d", len(got.factories), 5)
 			}
 		})
 	}
