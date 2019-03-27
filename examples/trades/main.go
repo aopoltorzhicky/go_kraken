@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	ws "scripts/kraken_ws/websocket"
+	ws "github.com/aopoltorzhicky/go_kraken/websocket"
 )
 
 func main() {
