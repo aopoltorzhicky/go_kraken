@@ -441,7 +441,6 @@ func TestClient_handleMessage(t *testing.T) {
 type mockAsynchronous struct {
 	isConnectionError bool
 	isSendError       bool
-	isDone            bool
 
 	Finished chan error
 	Data     chan []byte
@@ -465,10 +464,15 @@ func (m *mockAsynchronous) Listen() <-chan []byte {
 	return m.Data
 }
 func (m *mockAsynchronous) Done() <-chan error {
-	if m.isDone {
-		close(m.Finished)
-	}
 	return m.Finished
+}
+
+func (m *mockAsynchronous) cleanup(err error) {
+	close(m.Data)
+	if err != nil {
+		m.Finished <- err
+	}
+	close(m.Finished)
 }
 
 type mockAsyncFactory struct {
@@ -483,7 +487,6 @@ func (m *mockAsyncFactory) Create() asynchronous {
 
 		isConnectionError: m.isConnectionError,
 		isSendError:       m.isSendError,
-		isDone:            false,
 	}
 }
 
@@ -1107,13 +1110,15 @@ func TestClient_closeAsyncAndWait(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isDone:   tt.fields.isDone,
 					Finished: make(chan error),
+					Data:     make(chan []byte),
 				},
 				init: tt.fields.init,
 			}
 			if !tt.fields.isDone {
-				defer close(c.asynchronous.(*mockAsynchronous).Finished)
+				defer c.asynchronous.(*mockAsynchronous).cleanup(nil)
+			} else {
+				c.asynchronous.(*mockAsynchronous).cleanup(nil)
 			}
 
 			c.closeAsyncAndWait(tt.args.t)
@@ -1350,9 +1355,10 @@ func TestClient_reconnect(t *testing.T) {
 			}
 			c.parameters.AutoReconnect = tt.fields.autoReconnect
 			c.parameters.ReconnectInterval = tt.fields.reconnectInterval
+			c.parameters.ReconnectAttempts = 2
 
 			go func() {
-				<-c.listener
+				<-c.Listen()
 			}()
 
 			if err := c.reconnect(tt.args.err); (err != nil) != tt.wantErr {
@@ -1468,14 +1474,14 @@ func TestClient_listenDisconnect(t *testing.T) {
 		{
 			name: "test heartbeat branch",
 			fields: fields{
-				isAsynchronousDone: true,
+				isAsynchronousDone: false,
 				isListenHeartbeat:  true,
 			},
 		},
 		{
 			name: "test heartbeat branch with error",
 			fields: fields{
-				isAsynchronousDone: true,
+				isAsynchronousDone: false,
 				isListenHeartbeat:  true,
 				err:                SomethingError,
 			},
@@ -1483,7 +1489,7 @@ func TestClient_listenDisconnect(t *testing.T) {
 		{
 			name: "test heartbeat branch with connect error",
 			fields: fields{
-				isAsynchronousDone: true,
+				isAsynchronousDone: false,
 				isListenHeartbeat:  true,
 				err:                SomethingError,
 			},
@@ -1500,8 +1506,8 @@ func TestClient_listenDisconnect(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isDone:            tt.fields.isAsynchronousDone && tt.fields.err == nil,
 					Finished:          make(chan error),
+					Data:              make(chan []byte),
 					isConnectionError: true,
 				},
 				isConnected: false,
@@ -1516,8 +1522,8 @@ func TestClient_listenDisconnect(t *testing.T) {
 				if tt.fields.isListenHeartbeat {
 					c.hbChannel <- tt.fields.err
 				}
-				if tt.fields.isAsynchronousDone && tt.fields.err != nil {
-					c.asynchronous.(*mockAsynchronous).Finished <- tt.fields.err
+				if tt.fields.isAsynchronousDone {
+					c.asynchronous.(*mockAsynchronous).cleanup(SomethingError)
 				}
 			}()
 
