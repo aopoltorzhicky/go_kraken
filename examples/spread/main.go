@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	ws "scripts/kraken_ws"
+	ws "scripts/kraken_ws/websocket"
 )
 
 func main() {

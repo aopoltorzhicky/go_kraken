@@ -1,4 +1,4 @@
-package kraken_ws
+package websocket
 
 import (
 	"bytes"
