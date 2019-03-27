@@ -4,12 +4,12 @@ Go library for Kraken Websocket
 ## Installation
 
 ```bash
-go get github.com/aopoltorzhicky/kraken_ws
+go get github.com/aopoltorzhicky/go_kraken/websocket
 ```
 
 ## Usage
 
-To learn how you can use the package read [examples](kraken_ws/blob/master/examples/).
+To learn how you can use the package read [examples](examples/).
 
 For quick start read the one below:
 
