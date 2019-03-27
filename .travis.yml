@@ -6,9 +6,6 @@ env:
 go:
 - "1.12"
 
-before_install: 
-  - go get github.com/gorilla/websocket@v1.4.0
-
 script:
   - go test -v -covermode=atomic
 
