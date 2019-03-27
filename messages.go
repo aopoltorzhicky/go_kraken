@@ -1,4 +1,4 @@
-package websocket
+package kraken_ws
 
 import (
 	"math/big"

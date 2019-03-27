@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	ws "scripts/kraken_ws/websocket"
+	ws "scripts/kraken_ws"
 )
 
 func main() {
