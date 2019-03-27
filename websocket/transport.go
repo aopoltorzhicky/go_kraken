@@ -19,6 +19,12 @@ var (
 	ErrWSAlreadyConnected = fmt.Errorf("websocket connection already established")
 )
 
+type connInterface interface {
+	WriteMessage(messageType int, msg []byte) error
+	ReadMessage() (int, []byte, error)
+	Close() error
+}
+
 func newWs(baseURL string, logTransport bool) *ws {
 	return &ws{
 		BaseURL:      baseURL,
@@ -30,7 +36,7 @@ func newWs(baseURL string, logTransport bool) *ws {
 }
 
 type ws struct {
-	ws            *websocket.Conn
+	ws            connInterface
 	wsLock        sync.Mutex
 	BaseURL       string
 	TLSSkipVerify bool

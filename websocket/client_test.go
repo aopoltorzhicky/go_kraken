@@ -1505,13 +1505,13 @@ func TestClient_listenDisconnect(t *testing.T) {
 					isConnectionError: true,
 				},
 				isConnected: false,
-				terminal:    true,
+				terminal:    false,
 				heartbeat:   time.Now().Add(time.Hour),
 				hbChannel:   make(chan error),
 				parameters:  NewDefaultSandboxParameters(),
 				shutdown:    make(chan bool),
 			}
-
+			c.parameters.AutoReconnect = false
 			go func() {
 				if tt.fields.isListenHeartbeat {
 					c.hbChannel <- tt.fields.err
@@ -1562,6 +1562,36 @@ func TestNew(t *testing.T) {
 			}
 			if len(got.factories) != 5 {
 				t.Errorf("Factories count = %d, want %d", len(got.factories), 5)
+			}
+		})
+	}
+}
+
+func Test_websocketAsynchronousFactory_Create(t *testing.T) {
+	params := NewDefaultSandboxParameters()
+	tests := []struct {
+		name string
+		want asynchronous
+	}{
+		{
+			name: "test creation",
+			want: &ws{
+				BaseURL:      params.URL,
+				downstream:   make(chan []byte),
+				shutdown:     make(chan struct{}),
+				finished:     make(chan error),
+				logTransport: params.LogTransport,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w := &websocketAsynchronousFactory{
+				parameters: params,
+			}
+			got := w.Create()
+			if got.(*ws).BaseURL != params.URL {
+				t.Errorf("websocketAsynchronousFactory.Create() = %v, want %v", got, tt.want)
 			}
 		})
 	}
