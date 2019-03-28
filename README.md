@@ -21,7 +21,7 @@ package main
 import (
 	"log"
 
-	ws "scripts/kraken_ws/websocket"
+	ws "github.com/aopoltorzhicky/go_kraken/websocket"
 )
 
 func main() {
