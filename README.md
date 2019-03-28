@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/aopoltorzhicky/go_kraken.svg?branch=master)](https://travis-ci.org/aopoltorzhicky/go_kraken)
 
-# Kraken WS
+# Kraken WebSocket
 Go library for Kraken Websocket
 
 ## Installation

@@ -125,11 +125,11 @@ func Test_tickerFactory_Parse(t *testing.T) {
 }
 
 func Test_candlesFactory_Parse(t *testing.T) {
-	t1, err := time.Parse(time.RFC3339, "2018-11-13T00:15:14+03:00")
+	t1, err := time.Parse(time.RFC3339, "2018-11-12T21:15:14+00:00")
 	if err != nil {
 		log.Println(err)
 	}
-	t2, err := time.Parse(time.RFC3339, "2018-11-13T00:16:00+03:00")
+	t2, err := time.Parse(time.RFC3339, "2018-11-12T21:16:00+00:00")
 	if err != nil {
 		log.Println(err)
 	}
@@ -162,8 +162,8 @@ func Test_candlesFactory_Parse(t *testing.T) {
 				},
 			},
 			want: CandleUpdate{
-				Time:      t1,
-				EndTime:   t2,
+				Time:      t1.UTC(),
+				EndTime:   t2.UTC(),
 				Open:      3586.7,
 				High:      3586.7,
 				Low:       3586.6,
@@ -202,11 +202,11 @@ func Test_candlesFactory_Parse(t *testing.T) {
 }
 
 func Test_tradesFactory_Parse(t *testing.T) {
-	t1, err := time.Parse(time.RFC3339, "2018-08-18T20:40:57+03:00")
+	t1, err := time.Parse(time.RFC3339, "2018-08-18T17:40:57+00:00")
 	if err != nil {
 		log.Println(err)
 	}
-	t2, err := time.Parse(time.RFC3339, "2018-08-18T20:40:57+03:00")
+	t2, err := time.Parse(time.RFC3339, "2018-08-18T17:40:57+00:00")
 	if err != nil {
 		log.Println(err)
 	}
@@ -248,7 +248,7 @@ func Test_tradesFactory_Parse(t *testing.T) {
 			want: []TradeUpdate{
 				TradeUpdate{
 					Pair:      BTCCAD,
-					Time:      t1,
+					Time:      t1.UTC(),
 					Price:     5541.2,
 					Volume:    0.15850568,
 					Side:      Sell,
@@ -257,7 +257,7 @@ func Test_tradesFactory_Parse(t *testing.T) {
 				},
 				TradeUpdate{
 					Pair:      BTCCAD,
-					Time:      t2,
+					Time:      t2.UTC(),
 					Price:     6060.,
 					Volume:    0.02455000,
 					Side:      Buy,
@@ -294,7 +294,7 @@ func Test_tradesFactory_Parse(t *testing.T) {
 }
 
 func Test_spreadFactory_Parse(t *testing.T) {
-	t1, err := time.Parse(time.RFC3339, "2018-11-13T00:14:59+03:00")
+	t1, err := time.Parse(time.RFC3339, "2018-11-12T21:14:59+00:00")
 	if err != nil {
 		log.Println(err)
 	}
@@ -324,7 +324,7 @@ func Test_spreadFactory_Parse(t *testing.T) {
 				Pair: BTCCAD,
 				Bid:  5698.4,
 				Ask:  5700,
-				Time: t1,
+				Time: t1.UTC(),
 			},
 			wantErr: false,
 		},
@@ -355,11 +355,11 @@ func Test_spreadFactory_Parse(t *testing.T) {
 }
 
 func Test_bookFactory_Parse(t *testing.T) {
-	t1, err := time.Parse(time.RFC3339, "2018-08-18T20:44:08+03:00")
+	t1, err := time.Parse(time.RFC3339, "2018-08-18T17:44:08+00:00")
 	if err != nil {
 		log.Println(err)
 	}
-	t2, err := time.Parse(time.RFC3339, "2018-08-18T20:41:38+03:00")
+	t2, err := time.Parse(time.RFC3339, "2018-08-18T17:41:38+00:00")
 	if err != nil {
 		log.Println(err)
 	}
@@ -414,24 +414,24 @@ func Test_bookFactory_Parse(t *testing.T) {
 					OrderBookItem{
 						Price:  5541.3,
 						Volume: 2.50700000,
-						Time:   t1,
+						Time:   t1.UTC(),
 					},
 					OrderBookItem{
 						Price:  5541.8,
 						Volume: 0.33000000,
-						Time:   t2,
+						Time:   t2.UTC(),
 					},
 				},
 				Bids: []OrderBookItem{
 					OrderBookItem{
 						Price:  5541.2,
 						Volume: 1.52900000,
-						Time:   t1,
+						Time:   t1.UTC(),
 					},
 					OrderBookItem{
 						Price:  5539.9,
 						Volume: 0.30000000,
-						Time:   t2,
+						Time:   t2.UTC(),
 					},
 				},
 			},
@@ -466,14 +466,14 @@ func Test_bookFactory_Parse(t *testing.T) {
 					OrderBookItem{
 						Price:  5541.3,
 						Volume: 2.50700000,
-						Time:   t1,
+						Time:   t1.UTC(),
 					},
 				},
 				Bids: []OrderBookItem{
 					OrderBookItem{
 						Price:  5541.2,
 						Volume: 1.52900000,
-						Time:   t1,
+						Time:   t1.UTC(),
 					},
 				},
 			},

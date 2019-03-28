@@ -60,21 +60,21 @@ func Test_valToTime(t *testing.T) {
 			args: args{
 				"1553516579",
 			},
-			want: time.Unix(0, 1553516579*1e9),
+			want: time.Unix(0, 1553516579*1e9).UTC(),
 		},
 		{
 			name: "Not string",
 			args: args{
 				1553516579,
 			},
-			want: time.Unix(0, 0),
+			want: time.Unix(0, 0).UTC(),
 		},
 		{
 			name: "Invalid string",
 			args: args{
 				"FAILED STRING",
 			},
-			want: time.Unix(0, 0),
+			want: time.Unix(0, 0).UTC(),
 		},
 	}
 	for _, tt := range tests {

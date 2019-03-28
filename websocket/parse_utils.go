@@ -24,7 +24,7 @@ func valToFloat64(value interface{}) float64 {
 
 func valToTime(data interface{}) time.Time {
 	ret := valToFloat64(data) * 1e9
-	return time.Unix(0, int64(ret))
+	return time.Unix(0, int64(ret)).UTC()
 }
 
 func parseLevel(data []interface{}) Level {
