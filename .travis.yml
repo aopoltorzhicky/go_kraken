@@ -10,6 +10,7 @@ before_install:
   - go get -t -v
  
 script:
+  - cd websocket
   - go test -v -covermode=atomic
 
 after_success:
