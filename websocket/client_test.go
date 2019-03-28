@@ -1102,7 +1102,7 @@ func TestClient_closeAsyncAndWait(t *testing.T) {
 				isDone: false,
 			},
 			args: args{
-				t: time.Microsecond,
+				t: time.Millisecond,
 			},
 		},
 	}
@@ -1115,10 +1115,11 @@ func TestClient_closeAsyncAndWait(t *testing.T) {
 				},
 				init: tt.fields.init,
 			}
-			if !tt.fields.isDone {
-				defer c.asynchronous.(*mockAsynchronous).cleanup(nil)
-			} else {
-				c.asynchronous.(*mockAsynchronous).cleanup(nil)
+			if tt.fields.isDone {
+				go func() {
+					time.Sleep(time.Second)
+					c.asynchronous.(*mockAsynchronous).Finished <- SomethingError
+				}()
 			}
 
 			c.closeAsyncAndWait(tt.args.t)
@@ -1392,13 +1393,16 @@ func TestClient_Close(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
-				asynchronous: &mockAsynchronous{},
-				terminal:     false,
-				init:         true,
-				parameters:   NewDefaultSandboxParameters(),
-				shutdown:     make(chan bool),
+				asynchronous: &mockAsynchronous{
+					Finished: make(chan error),
+					Data:     make(chan []byte),
+				},
+				terminal:   false,
+				init:       false,
+				parameters: NewDefaultSandboxParameters(),
+				shutdown:   make(chan bool),
 			}
-			c.parameters.ShutdownTimeout = time.Second * 1
+			c.parameters.ShutdownTimeout = time.Second
 
 			go func() {
 				if tt.fields.isShutdown {
@@ -1520,7 +1524,8 @@ func TestClient_listenDisconnect(t *testing.T) {
 			c.parameters.AutoReconnect = false
 			go func() {
 				if tt.fields.isListenHeartbeat {
-					c.hbChannel <- tt.fields.err
+					c.heartbeat = time.Unix(0, 0)
+					c.controlHeartbeat()
 				}
 				if tt.fields.isAsynchronousDone {
 					c.asynchronous.(*mockAsynchronous).cleanup(SomethingError)

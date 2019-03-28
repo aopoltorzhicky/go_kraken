@@ -158,6 +158,9 @@ func (c *Client) reset() {
 	}
 
 	c.init = true
+	if c.asynchronous != nil {
+		c.asynchronous.Close()
+	}
 	c.asynchronous = c.asyncFactory.Create()
 	c.shutdown = make(chan bool)
 	c.updateHeartbeat()
