@@ -36,7 +36,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// subscribe to BTCUSD, XLMUSD, ADACAD spread
+	// subscribe to ADABTC, XTZBTC, XLMBTC spread
 	err = c.SubscribeSpread([]string{ws.ADABTC, ws.XTZBTC, ws.XLMBTC})
 	if err != nil {
 		log.Fatal(err)
