@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	ws "githib.com/aopoltorzhicky/go_kraken/websocket"
+	ws "github.com/aopoltorzhicky/go_kraken/websocket"
 )
 
 func main() {
