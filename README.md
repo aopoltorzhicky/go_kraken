@@ -1,4 +1,3 @@
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c537d98c06904f73b5e55270ba339abc)](https://app.codacy.com/app/aopoltorzhicky/go_kraken?utm_source=github.com&utm_medium=referral&utm_content=aopoltorzhicky/go_kraken&utm_campaign=Badge_Grade_Settings)
 [![Build Status](https://travis-ci.org/aopoltorzhicky/go_kraken.svg?branch=master)](https://travis-ci.org/aopoltorzhicky/go_kraken)
 [![codecov](https://codecov.io/gh/aopoltorzhicky/go_kraken/branch/master/graph/badge.svg)](https://codecov.io/gh/aopoltorzhicky/go_kraken)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/13668a45df3841b2803cb167beca5032)](https://www.codacy.com/app/aopoltorzhicky/go_kraken?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=aopoltorzhicky/go_kraken&amp;utm_campaign=Badge_Grade)
