@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/aopoltorzhicky/go_kraken.svg?branch=master)](https://travis-ci.org/aopoltorzhicky/go_kraken)
 [![codecov](https://codecov.io/gh/aopoltorzhicky/go_kraken/branch/master/graph/badge.svg)](https://codecov.io/gh/aopoltorzhicky/go_kraken)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/80b48b4a7c0a462aba03839821126f0c)](https://www.codacy.com/app/aopoltorzhicky/go_kraken?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=aopoltorzhicky/go_kraken&amp;utm_campaign=Badge_Grade)
 
 # Kraken WebSocket
 Go library for Kraken Websocket
