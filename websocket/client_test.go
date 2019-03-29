@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var SomethingError = fmt.Errorf("Something went wrong")
+var ErrSomething = fmt.Errorf("Something went wrong")
 
 func TestClient_createFactory(t *testing.T) {
 	type args struct {
@@ -448,13 +448,13 @@ type mockAsynchronous struct {
 
 func (m *mockAsynchronous) Connect() error {
 	if m.isConnectionError {
-		return SomethingError
+		return ErrSomething
 	}
 	return nil
 }
 func (m *mockAsynchronous) Send(ctx context.Context, msg interface{}) error {
 	if m.isSendError {
-		return SomethingError
+		return ErrSomething
 	}
 	return nil
 }
@@ -913,7 +913,7 @@ func TestClient_close(t *testing.T) {
 		{
 			name: "Close with error",
 			args: args{
-				e: SomethingError,
+				e: ErrSomething,
 			},
 			fields: fields{
 				listenerIsNil: false,
@@ -965,7 +965,7 @@ func TestClient_exit(t *testing.T) {
 		{
 			name: "Test exit method with error",
 			args: args{
-				err: SomethingError,
+				err: ErrSomething,
 			},
 			wantErr: true,
 		},
@@ -1118,7 +1118,7 @@ func TestClient_closeAsyncAndWait(t *testing.T) {
 			if tt.fields.isDone {
 				go func() {
 					time.Sleep(time.Second)
-					c.asynchronous.(*mockAsynchronous).Finished <- SomethingError
+					c.asynchronous.(*mockAsynchronous).Finished <- ErrSomething
 				}()
 			}
 
@@ -1254,7 +1254,7 @@ func TestClient_reconnect(t *testing.T) {
 				subscriptions:     make(map[int64]*SubscriptionStatus),
 			},
 			args: args{
-				err: SomethingError,
+				err: ErrSomething,
 			},
 			wantErr: true,
 		},
@@ -1280,7 +1280,7 @@ func TestClient_reconnect(t *testing.T) {
 				subscriptions:     make(map[int64]*SubscriptionStatus),
 			},
 			args: args{
-				err: SomethingError,
+				err: ErrSomething,
 			},
 			wantErr: true,
 		},
@@ -1304,7 +1304,7 @@ func TestClient_reconnect(t *testing.T) {
 				terminal:          false,
 				autoReconnect:     true,
 				isConnectError:    true,
-				reconnectInterval: time.Millisecond,
+				reconnectInterval: time.Second,
 				subscriptions:     make(map[int64]*SubscriptionStatus),
 			},
 			args: args{
@@ -1356,6 +1356,7 @@ func TestClient_reconnect(t *testing.T) {
 			}
 			c.parameters.AutoReconnect = tt.fields.autoReconnect
 			c.parameters.ReconnectInterval = tt.fields.reconnectInterval
+			c.parameters.HeartbeatTimeout = time.Hour
 			c.parameters.ReconnectAttempts = 2
 
 			go func() {
@@ -1472,7 +1473,7 @@ func TestClient_listenDisconnect(t *testing.T) {
 			fields: fields{
 				isAsynchronousDone: true,
 				isListenHeartbeat:  false,
-				err:                SomethingError,
+				err:                ErrSomething,
 			},
 		},
 		{
@@ -1487,7 +1488,7 @@ func TestClient_listenDisconnect(t *testing.T) {
 			fields: fields{
 				isAsynchronousDone: false,
 				isListenHeartbeat:  true,
-				err:                SomethingError,
+				err:                ErrSomething,
 			},
 		},
 		{
@@ -1495,7 +1496,7 @@ func TestClient_listenDisconnect(t *testing.T) {
 			fields: fields{
 				isAsynchronousDone: false,
 				isListenHeartbeat:  true,
-				err:                SomethingError,
+				err:                ErrSomething,
 			},
 		},
 		{
@@ -1516,21 +1517,22 @@ func TestClient_listenDisconnect(t *testing.T) {
 				},
 				isConnected: false,
 				terminal:    false,
+				init:        false,
 				heartbeat:   time.Now().Add(time.Hour),
 				hbChannel:   make(chan error),
 				parameters:  NewDefaultSandboxParameters(),
 				shutdown:    make(chan bool),
 			}
 			c.parameters.AutoReconnect = false
-			go func() {
-				if tt.fields.isListenHeartbeat {
-					c.heartbeat = time.Unix(0, 0)
-					c.controlHeartbeat()
-				}
-				if tt.fields.isAsynchronousDone {
-					c.asynchronous.(*mockAsynchronous).cleanup(SomethingError)
-				}
-			}()
+			if tt.fields.isListenHeartbeat {
+				c.heartbeat = time.Unix(0, 0)
+				go c.controlHeartbeat()
+			}
+			if tt.fields.isAsynchronousDone {
+				go func() {
+					c.asynchronous.(*mockAsynchronous).cleanup(ErrSomething)
+				}()
+			}
 
 			c.listenDisconnect()
 		})

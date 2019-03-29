@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"context"
+	"log"
 	"net"
 	"reflect"
 	"sync"
@@ -21,7 +22,7 @@ type (
 
 func (ws *mockWS) WriteMessage(messageType int, msg []byte) error {
 	if ws.isWriteError {
-		return SomethingError
+		return ErrSomething
 	}
 	return nil
 }
@@ -31,14 +32,14 @@ func (ws *mockWS) ReadMessage() (int, []byte, error) {
 		if ws.err != nil {
 			return 0, nil, ws.err
 		}
-		return 0, nil, SomethingError
+		return 0, nil, ErrSomething
 	}
 	return 1, []byte("Test message"), nil
 }
 
 func (ws *mockWS) Close() error {
 	if ws.isCloseError {
-		return SomethingError
+		return ErrSomething
 	}
 	return nil
 }
@@ -103,7 +104,7 @@ func Test_ws_cleanup(t *testing.T) {
 		},
 		{
 			name: "with error",
-			args: args{err: SomethingError},
+			args: args{err: ErrSomething},
 		},
 	}
 	for _, tt := range tests {
@@ -330,6 +331,7 @@ func Test_ws_Send(t *testing.T) {
 				if tt.fields.isCtxDone {
 					cnt()
 				}
+				log.Println(cnt)
 			}
 			if tt.fields.logTransport {
 				go func() {

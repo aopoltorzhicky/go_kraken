@@ -5,16 +5,19 @@ import (
 	"time"
 )
 
+// EventType - data structure for parsing events
 type EventType struct {
 	Event string `json:"event"`
 }
 
+// Subscription - data structure of subscription entity
 type Subscription struct {
 	Name     string `json:"name"`
 	Interval int64  `json:"interval,omitempty"`
 	Depth    int64  `json:"depth,omitempty"`
 }
 
+// SubscriptionRequest - data structure for subscription request
 type SubscriptionRequest struct {
 	ReqID string `json:"reqid,omitempty"`
 	Event string `json:"event"`
@@ -23,12 +26,14 @@ type SubscriptionRequest struct {
 	Subscription Subscription `json:"subscription"`
 }
 
+// UnsubscribeRequest - data structure for unsubscription request
 type UnsubscribeRequest struct {
 	Event        string       `json:"event"`
 	Pairs        []string     `json:"pair"`
 	Subscription Subscription `json:"subscription"`
 }
 
+// SubscriptionStatus - data structure for subscription status event
 type SubscriptionStatus struct {
 	ChannelID    int64        `json:"channelID"`
 	Event        string       `json:"event"`
@@ -39,16 +44,19 @@ type SubscriptionStatus struct {
 	Subscription Subscription `json:"subscription"`
 }
 
+// PingRequest - data structure for ping request
 type PingRequest struct {
 	Event string `json:"event"`
 	ReqID int    `json:"reqid,omitempty"`
 }
 
+// PongResponse - data structure for ping response
 type PongResponse struct {
 	Event string `json:"event"`
 	ReqID int    `json:"reqid,omitempty"`
 }
 
+// SystemStatus - data structure for system status event
 type SystemStatus struct {
 	Event        string  `json:"event"`
 	ConnectionID big.Int `json:"connectionID"`
@@ -56,6 +64,7 @@ type SystemStatus struct {
 	Version      string  `json:"version"`
 }
 
+// TickerUpdate - data structure for ticker update
 type TickerUpdate struct {
 	Ask                Level
 	Bid                Level
@@ -69,17 +78,20 @@ type TickerUpdate struct {
 	Pair               string
 }
 
+// Level - data structure for ticker data ask/bid
 type Level struct {
 	Price          float64
 	Volume         float64
 	WholeLotVolume int
 }
 
+// Values - data structure for ticker others data
 type Values struct {
 	Today  interface{}
 	Last24 interface{}
 }
 
+// CandleUpdate - data structure for candles update
 type CandleUpdate struct {
 	Time      time.Time
 	EndTime   time.Time
@@ -93,6 +105,7 @@ type CandleUpdate struct {
 	Pair      string
 }
 
+// TradeUpdate - data structure for trade update
 type TradeUpdate struct {
 	Price     float64
 	Volume    float64
@@ -103,6 +116,7 @@ type TradeUpdate struct {
 	Pair      string
 }
 
+// SpreadUpdate - data structure for spread update
 type SpreadUpdate struct {
 	Ask  float64
 	Bid  float64
@@ -110,12 +124,14 @@ type SpreadUpdate struct {
 	Pair string
 }
 
+// OrderBookItem - data structure for order book item
 type OrderBookItem struct {
 	Price  float64
 	Volume float64
 	Time   time.Time
 }
 
+// OrderBookUpdate - data structure for order book update
 type OrderBookUpdate struct {
 	Asks       []OrderBookItem
 	Bids       []OrderBookItem

@@ -21,6 +21,7 @@ type Parameters struct {
 	URL string
 }
 
+// NewDefaultParameters - create default Parameters object for prod
 func NewDefaultParameters() *Parameters {
 	return &Parameters{
 		AutoReconnect:          true,
@@ -36,6 +37,7 @@ func NewDefaultParameters() *Parameters {
 	}
 }
 
+// NewDefaultSandboxParameters - create default Parameters object for sandbox
 func NewDefaultSandboxParameters() *Parameters {
 	return &Parameters{
 		AutoReconnect:          true,

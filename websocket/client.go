@@ -92,6 +92,7 @@ func (c *Client) controlHeartbeat() {
 	for {
 		select {
 		case <-c.shutdown:
+			log.Printf("Shutdown control heartbeat")
 			return
 		default:
 		}
@@ -123,7 +124,7 @@ func (c *Client) listenDisconnect() {
 			log.Printf("socket disconnect: %s", err.Error())
 		}
 	case <-c.shutdown:
-		log.Printf("Shutdown")
+		log.Printf("Shutdown listen disconnect")
 		c.isConnected = false
 		return
 
@@ -158,9 +159,6 @@ func (c *Client) reset() {
 	}
 
 	c.init = true
-	if c.asynchronous != nil {
-		c.asynchronous.Close()
-	}
 	c.asynchronous = c.asyncFactory.Create()
 	c.shutdown = make(chan bool)
 	c.updateHeartbeat()
@@ -244,6 +242,7 @@ func (c *Client) listenUpstream() {
 	for {
 		select {
 		case <-c.shutdown:
+			log.Printf("Shutdown listen upstream")
 			return
 		case msg := <-c.asynchronous.Listen():
 			if msg != nil {

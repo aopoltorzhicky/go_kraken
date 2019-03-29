@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// ParseFactory - interface for parsing data
 type ParseFactory interface {
 	Parse(data interface{}, pair string) (interface{}, error)
 }
