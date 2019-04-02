@@ -8,12 +8,15 @@ go:
 
 before_install:
   - go get -v -u golang.org/x/lint/golint
-  - go get -t -v
  
 script:
   - golint .
   - cd websocket
+  - go get -t -v
   - go test -v -coverprofile=coverage.txt -covermode=atomic
+  - cd ../rest
+  - go get -t -v
+  - go test -v -coverprofile=coverage.txt -covermode=atomic -race
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

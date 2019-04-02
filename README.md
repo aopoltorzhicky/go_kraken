@@ -2,13 +2,21 @@
 [![codecov](https://codecov.io/gh/aopoltorzhicky/go_kraken/branch/master/graph/badge.svg)](https://codecov.io/gh/aopoltorzhicky/go_kraken)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/13668a45df3841b2803cb167beca5032)](https://www.codacy.com/app/aopoltorzhicky/go_kraken?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=aopoltorzhicky/go_kraken&amp;utm_campaign=Badge_Grade)
 
-# Kraken WebSocket
-Go library for Kraken Websocket
+# Kraken Go
+Go library for Kraken Websocket and REST API
 
-## Installation
+## Installation Websocket package
 
 ```bash
 go get github.com/aopoltorzhicky/go_kraken/websocket
+```
+
+## Installation REST API package
+
+Now only Public API realized. Private API is under developing.
+
+```bash
+go get github.com/aopoltorzhicky/go_kraken/rest
 ```
 
 ## Usage
@@ -52,6 +60,34 @@ func main() {
 		}
 		log.Printf("MSG RECV: %#v", obj)
 	}
+}
+
+```
+
+To learn how to use REST API read example below:
+
+```go
+package main
+
+import (
+	"log"
+
+	"github.com/aopoltorzhicky/go_kraken/rest"
+)
+
+func main() {
+	api := rest.New("", "")
+	spread, err := api.GetSpread("ADAETH", 0)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(spread)
+
+	t, err := api.Time()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(t)
 }
 
 ```
