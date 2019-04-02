@@ -5,7 +5,6 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -13,13 +12,20 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/ugorji/go/codec"
 )
+
+// clientInterface - for testing purpose
+type clientInterface interface {
+	Do(req *http.Request) (*http.Response, error)
+}
 
 // Kraken - object wraps API
 type Kraken struct {
 	key    string
 	secret string
-	client *http.Client
+	client clientInterface
 }
 
 // New - constructor of Kraken object
@@ -45,6 +51,9 @@ func (api *Kraken) getSign(requestURL string, data url.Values) string {
 }
 
 func (api *Kraken) prepareRequest(method string, isPrivate bool, data url.Values) (*http.Request, error) {
+	if data == nil {
+		data = url.Values{}
+	}
 	requestURL := ""
 	if isPrivate {
 		requestURL = fmt.Sprintf("%s/%s/private/%s", APIUrl, APIVersion, method)
@@ -70,6 +79,10 @@ func (api *Kraken) parseResponse(response *http.Response, retType interface{}) (
 		return nil, fmt.Errorf("Error during response parsing: invalid status code %d", response.StatusCode)
 	}
 
+	if response.Body == nil {
+		return nil, fmt.Errorf("Error during response parsing: can not read response body")
+	}
+
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, fmt.Errorf("Error during response parsing: can not read response body (%s)", err.Error())
@@ -79,7 +92,7 @@ func (api *Kraken) parseResponse(response *http.Response, retType interface{}) (
 		retData.Result = retType
 	}
 
-	err = json.Unmarshal(body, &retData)
+	err = codec.NewDecoderBytes(body, new(codec.JsonHandle)).Decode(&retData)
 	if err != nil {
 		return nil, fmt.Errorf("Error during response parsing: json marshalling (%s)", err.Error())
 	}

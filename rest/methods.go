@@ -66,26 +66,6 @@ func (api *Kraken) Ticker(pairs ...string) (*TickerResponse, error) {
 	return resp.(*TickerResponse), err
 }
 
-func (api *Kraken) parseCandle(candle []interface{}) Candle {
-	open, _ := strconv.ParseFloat(candle[1].(string), 64)
-	high, _ := strconv.ParseFloat(candle[2].(string), 64)
-	low, _ := strconv.ParseFloat(candle[3].(string), 64)
-	close, _ := strconv.ParseFloat(candle[4].(string), 64)
-	vwap, _ := strconv.ParseFloat(candle[5].(string), 64)
-	volume, _ := strconv.ParseFloat(candle[6].(string), 64)
-
-	return Candle{
-		Time:      int64(candle[0].(float64)),
-		Open:      open,
-		High:      high,
-		Low:       low,
-		Close:     close,
-		VolumeWAP: vwap,
-		Volume:    volume,
-		Count:     int64(candle[7].(float64)),
-	}
-}
-
 // Candles - Get OHLC data
 func (api *Kraken) Candles(pair string, interval int64, since int64) (*OHLCResponse, error) {
 	data := url.Values{
@@ -97,36 +77,52 @@ func (api *Kraken) Candles(pair string, interval int64, since int64) (*OHLCRespo
 	if interval > 1 {
 		data.Set("interval", strconv.FormatInt(interval, 10))
 	}
-	resp, err := api.request("OHLC", false, data, nil)
+	resp, err := api.request("OHLC", false, data, &OHLCResponse{})
 	if err != nil {
 		return nil, err
 	}
-	parsedResp := resp.(map[string]interface{})
-	ret := OHLCResponse{
-		Last:    int64(parsedResp["last"].(float64)),
-		Candles: make([]Candle, 0),
-	}
-	candles := parsedResp[pair].([]interface{})
-	arr := make([]Candle, 0)
-	for _, c := range candles {
-		candle := api.parseCandle(c.([]interface{}))
-		arr = append(arr, candle)
-	}
-	ret.Candles = arr
-	return &ret, err
+	return resp.(*OHLCResponse), err
 }
 
 // GetOrderBook - Gets order book for `pair` with `depth`
-func (api *Kraken) GetOrderBook(pair string, depth int64) (*OrderBook, error) {
+func (api *Kraken) GetOrderBook(pair string, depth int64) (*BookResponse, error) {
 	data := url.Values{
 		"pair":  {pair},
-		"depth": {strconv.FormatInt(depth, 10)},
+		"count": {strconv.FormatInt(depth, 10)},
 	}
-	resp, err := api.request("Depth", false, data, nil)
+	resp, err := api.request("Depth", false, data, &BookResponse{})
 	if err != nil {
 		return nil, err
 	}
-	parsedResp := resp.(map[string]interface{})
-	book := parsedResp[pair]
+	return resp.(*BookResponse), nil
+}
 
+// GetTrades - returns trades on pair from since date
+func (api *Kraken) GetTrades(pair string, since int64) (*TradeResponse, error) {
+	data := url.Values{
+		"pair": {pair},
+	}
+	if since > 0 {
+		data.Add("since", strconv.FormatInt(since, 10))
+	}
+	resp, err := api.request("Trades", false, data, &TradeResponse{})
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*TradeResponse), nil
+}
+
+// GetSpread - return array of pair name and recent spread data
+func (api *Kraken) GetSpread(pair string, since int64) (*SpreadResponse, error) {
+	data := url.Values{
+		"pair": {pair},
+	}
+	if since > 0 {
+		data.Add("since", strconv.FormatInt(since, 10))
+	}
+	resp, err := api.request("Spread", false, data, &SpreadResponse{})
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*SpreadResponse), nil
 }

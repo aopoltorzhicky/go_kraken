@@ -8,7 +8,7 @@ import (
 
 func main() {
 	api := rest.New("", "")
-	data, err := api.Candles("ADAETH", 0, 1)
+	data, err := api.GetSpread("ADAETH", 0)
 	if err != nil {
 		log.Fatalln(err)
 	}

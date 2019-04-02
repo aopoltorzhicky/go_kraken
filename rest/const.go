@@ -19,3 +19,15 @@ const (
 	Interval7d  = 10080
 	Interval1M  = 21600
 )
+
+// Order Sides
+const (
+	TradeBuy  = "b"
+	TradeSell = "s"
+)
+
+// Order types
+const (
+	TradeLimit  = "l"
+	TradeMarket = "m"
+)

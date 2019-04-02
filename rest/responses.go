@@ -8,8 +8,8 @@ type KrakenResponse struct {
 
 // TimeResponse - Result of Time request
 type TimeResponse struct {
-	Unixtime int64
-	Rfc1123  string
+	Unixtime int64  `json:"unixtime"`
+	Rfc1123  string `json:"rfc1123"`
 }
 
 // AssetResponse - Result of Assets request
@@ -148,6 +148,7 @@ type AssetPair struct {
 	FeeVolumeCurrency string      `json:"fee_volume_currency"`
 	MarginCall        int         `json:"margin_call"`
 	MarginStop        int         `json:"margin_stop"`
+	WSName            string      `json:"wsname"`
 }
 
 // TickerResponse - all pairs in ticker response
@@ -225,41 +226,130 @@ type TickerResponse struct {
 	XZECZUSD Ticker
 }
 
+// Level - ticker structure for Ask and Bid
+type Level struct {
+	Price          float64 `json:",string"`
+	WholeLotVolume float64 `json:",string"`
+	Volume         float64 `json:",string"`
+}
+
+// TimeLevel - ticker structure for Volume, VolumeAveragePrice, Low, High
+type TimeLevel struct {
+	Today       float64 `json:",string"`
+	Last24Hours float64 `json:",string"`
+}
+
+// CloseLevel - ticker structure for Close
+type CloseLevel struct {
+	Price     float64 `json:",string"`
+	LotVolume float64 `json:",string"`
+}
+
 // Ticker - struct of ticker response
 type Ticker struct {
-	Ask                []string `json:"a"`
-	Bid                []string `json:"b"`
-	Close              []string `json:"c"`
-	Volume             []string `json:"v"`
-	VolumeAveragePrice []string `json:"p"`
-	Trades             []int    `json:"t"`
-	Low                []string `json:"l"`
-	High               []string `json:"h"`
-	OpeningPrice       float64  `json:"o,string"`
+	Ask                Level      `json:"a"`
+	Bid                Level      `json:"b"`
+	Close              CloseLevel `json:"c"`
+	Volume             TimeLevel  `json:"v"`
+	VolumeAveragePrice TimeLevel  `json:"p"`
+	Trades             TimeLevel  `json:"t"`
+	Low                TimeLevel  `json:"l"`
+	High               TimeLevel  `json:"h"`
+	OpeningPrice       float64    `json:"o,string"`
 }
 
 // Candle - OHLC item
 type Candle struct {
 	Time      int64
-	Open      float64
-	High      float64
-	Low       float64
-	Close     float64
-	VolumeWAP float64
-	Volume    float64
+	Open      float64 `json:",string"`
+	High      float64 `json:",string"`
+	Low       float64 `json:",string"`
+	Close     float64 `json:",string"`
+	VolumeWAP float64 `json:",string"`
+	Volume    float64 `json:",string"`
 	Count     int64
 }
 
 // OHLCResponse - response of OHLC request
 type OHLCResponse struct {
-	Last    int64
-	Candles []Candle
+	Last     int64 `json:"last"`
+	ADACAD   []Candle
+	ADAETH   []Candle
+	ADAEUR   []Candle
+	ADAUSD   []Candle
+	ADAXBT   []Candle
+	BCHEUR   []Candle
+	BCHUSD   []Candle
+	BCHXBT   []Candle
+	DASHEUR  []Candle
+	DASHUSD  []Candle
+	DASHXBT  []Candle
+	EOSETH   []Candle
+	EOSEUR   []Candle
+	EOSUSD   []Candle
+	EOSXBT   []Candle
+	GNOETH   []Candle
+	GNOEUR   []Candle
+	GNOUSD   []Candle
+	GNOXBT   []Candle
+	QTUMCAD  []Candle
+	QTUMETH  []Candle
+	QTUMEUR  []Candle
+	QTUMUSD  []Candle
+	QTUMXBT  []Candle
+	USDTZUSD []Candle
+	XETCXETH []Candle
+	XETCXXBT []Candle
+	XETCZEUR []Candle
+	XETCZUSD []Candle
+	XETHXXBT []Candle
+	XETHZCAD []Candle
+	XETHZEUR []Candle
+	XETHZGBP []Candle
+	XETHZJPY []Candle
+	XETHZUSD []Candle
+	XICNXETH []Candle
+	XICNXXBT []Candle
+	XLTCXXBT []Candle
+	XLTCZEUR []Candle
+	XLTCZUSD []Candle
+	XMLNXETH []Candle
+	XMLNXXBT []Candle
+	XREPXETH []Candle
+	XREPXXBT []Candle
+	XREPZEUR []Candle
+	XREPZUSD []Candle
+	XXBTZCAD []Candle
+	XXBTZEUR []Candle
+	XXBTZGBP []Candle
+	XXBTZJPY []Candle
+	XXBTZUSD []Candle
+	XXDGXXBT []Candle
+	XXLMXXBT []Candle
+	XXLMZEUR []Candle
+	XXLMZUSD []Candle
+	XXMRXXBT []Candle
+	XXMRZEUR []Candle
+	XXMRZUSD []Candle
+	XXRPXXBT []Candle
+	XXRPZCAD []Candle
+	XXRPZEUR []Candle
+	XXRPZJPY []Candle
+	XXRPZUSD []Candle
+	XTZCAD   []Candle
+	XTZETH   []Candle
+	XTZEUR   []Candle
+	XTZUSD   []Candle
+	XTZXBT   []Candle
+	XZECXXBT []Candle
+	XZECZEUR []Candle
+	XZECZUSD []Candle
 }
 
 // OrderBookItem - one price level in orderbook
 type OrderBookItem struct {
-	Price     float64
-	Volume    float64
+	Price     float64 `json:",string"`
+	Volume    float64 `json:",string"`
 	Timestamp int64
 }
 
@@ -267,4 +357,248 @@ type OrderBookItem struct {
 type OrderBook struct {
 	Asks []OrderBookItem `json:"asks"`
 	Bids []OrderBookItem `json:"bids"`
+}
+
+// BookResponse - all pairs in book response
+type BookResponse struct {
+	ADACAD   OrderBook
+	ADAETH   OrderBook
+	ADAEUR   OrderBook
+	ADAUSD   OrderBook
+	ADAXBT   OrderBook
+	BCHEUR   OrderBook
+	BCHUSD   OrderBook
+	BCHXBT   OrderBook
+	DASHEUR  OrderBook
+	DASHUSD  OrderBook
+	DASHXBT  OrderBook
+	EOSETH   OrderBook
+	EOSEUR   OrderBook
+	EOSUSD   OrderBook
+	EOSXBT   OrderBook
+	GNOETH   OrderBook
+	GNOEUR   OrderBook
+	GNOUSD   OrderBook
+	GNOXBT   OrderBook
+	QTUMCAD  OrderBook
+	QTUMETH  OrderBook
+	QTUMEUR  OrderBook
+	QTUMUSD  OrderBook
+	QTUMXBT  OrderBook
+	USDTZUSD OrderBook
+	XETCXETH OrderBook
+	XETCXXBT OrderBook
+	XETCZEUR OrderBook
+	XETCZUSD OrderBook
+	XETHXXBT OrderBook
+	XETHZCAD OrderBook
+	XETHZEUR OrderBook
+	XETHZGBP OrderBook
+	XETHZJPY OrderBook
+	XETHZUSD OrderBook
+	XICNXETH OrderBook
+	XICNXXBT OrderBook
+	XLTCXXBT OrderBook
+	XLTCZEUR OrderBook
+	XLTCZUSD OrderBook
+	XMLNXETH OrderBook
+	XMLNXXBT OrderBook
+	XREPXETH OrderBook
+	XREPXXBT OrderBook
+	XREPZEUR OrderBook
+	XREPZUSD OrderBook
+	XXBTZCAD OrderBook
+	XXBTZEUR OrderBook
+	XXBTZGBP OrderBook
+	XXBTZJPY OrderBook
+	XXBTZUSD OrderBook
+	XXDGXXBT OrderBook
+	XXLMXXBT OrderBook
+	XXLMZEUR OrderBook
+	XXLMZUSD OrderBook
+	XXMRXXBT OrderBook
+	XXMRZEUR OrderBook
+	XXMRZUSD OrderBook
+	XXRPXXBT OrderBook
+	XXRPZCAD OrderBook
+	XXRPZEUR OrderBook
+	XXRPZJPY OrderBook
+	XXRPZUSD OrderBook
+	XTZCAD   OrderBook
+	XTZETH   OrderBook
+	XTZEUR   OrderBook
+	XTZUSD   OrderBook
+	XTZXBT   OrderBook
+	XZECXXBT OrderBook
+	XZECZEUR OrderBook
+	XZECZUSD OrderBook
+}
+
+// Trade - structure of public trades
+type Trade struct {
+	Price     float64 `json:",string"`
+	Volume    float64 `json:",string"`
+	Time      float64
+	Side      string
+	OrderType string
+	Misc      string
+}
+
+// TradeResponse - all pairs in trade response
+type TradeResponse struct {
+	Last     float64 `json:"last"`
+	ADACAD   []Trade
+	ADAETH   []Trade
+	ADAEUR   []Trade
+	ADAUSD   []Trade
+	ADAXBT   []Trade
+	BCHEUR   []Trade
+	BCHUSD   []Trade
+	BCHXBT   []Trade
+	DASHEUR  []Trade
+	DASHUSD  []Trade
+	DASHXBT  []Trade
+	EOSETH   []Trade
+	EOSEUR   []Trade
+	EOSUSD   []Trade
+	EOSXBT   []Trade
+	GNOETH   []Trade
+	GNOEUR   []Trade
+	GNOUSD   []Trade
+	GNOXBT   []Trade
+	QTUMCAD  []Trade
+	QTUMETH  []Trade
+	QTUMEUR  []Trade
+	QTUMUSD  []Trade
+	QTUMXBT  []Trade
+	USDTZUSD []Trade
+	XETCXETH []Trade
+	XETCXXBT []Trade
+	XETCZEUR []Trade
+	XETCZUSD []Trade
+	XETHXXBT []Trade
+	XETHZCAD []Trade
+	XETHZEUR []Trade
+	XETHZGBP []Trade
+	XETHZJPY []Trade
+	XETHZUSD []Trade
+	XICNXETH []Trade
+	XICNXXBT []Trade
+	XLTCXXBT []Trade
+	XLTCZEUR []Trade
+	XLTCZUSD []Trade
+	XMLNXETH []Trade
+	XMLNXXBT []Trade
+	XREPXETH []Trade
+	XREPXXBT []Trade
+	XREPZEUR []Trade
+	XREPZUSD []Trade
+	XXBTZCAD []Trade
+	XXBTZEUR []Trade
+	XXBTZGBP []Trade
+	XXBTZJPY []Trade
+	XXBTZUSD []Trade
+	XXDGXXBT []Trade
+	XXLMXXBT []Trade
+	XXLMZEUR []Trade
+	XXLMZUSD []Trade
+	XXMRXXBT []Trade
+	XXMRZEUR []Trade
+	XXMRZUSD []Trade
+	XXRPXXBT []Trade
+	XXRPZCAD []Trade
+	XXRPZEUR []Trade
+	XXRPZJPY []Trade
+	XXRPZUSD []Trade
+	XTZCAD   []Trade
+	XTZETH   []Trade
+	XTZEUR   []Trade
+	XTZUSD   []Trade
+	XTZXBT   []Trade
+	XZECXXBT []Trade
+	XZECZEUR []Trade
+	XZECZUSD []Trade
+}
+
+// Spread - structure of spread data
+type Spread struct {
+	Time float64
+	Bid  float64 `json:",string"`
+	Ask  float64 `json:",string"`
+}
+
+// SpreadResponse - response of spread request
+type SpreadResponse struct {
+	Last     float64 `json:"last"`
+	ADACAD   []Spread
+	ADAETH   []Spread
+	ADAEUR   []Spread
+	ADAUSD   []Spread
+	ADAXBT   []Spread
+	BCHEUR   []Spread
+	BCHUSD   []Spread
+	BCHXBT   []Spread
+	DASHEUR  []Spread
+	DASHUSD  []Spread
+	DASHXBT  []Spread
+	EOSETH   []Spread
+	EOSEUR   []Spread
+	EOSUSD   []Spread
+	EOSXBT   []Spread
+	GNOETH   []Spread
+	GNOEUR   []Spread
+	GNOUSD   []Spread
+	GNOXBT   []Spread
+	QTUMCAD  []Spread
+	QTUMETH  []Spread
+	QTUMEUR  []Spread
+	QTUMUSD  []Spread
+	QTUMXBT  []Spread
+	USDTZUSD []Spread
+	XETCXETH []Spread
+	XETCXXBT []Spread
+	XETCZEUR []Spread
+	XETCZUSD []Spread
+	XETHXXBT []Spread
+	XETHZCAD []Spread
+	XETHZEUR []Spread
+	XETHZGBP []Spread
+	XETHZJPY []Spread
+	XETHZUSD []Spread
+	XICNXETH []Spread
+	XICNXXBT []Spread
+	XLTCXXBT []Spread
+	XLTCZEUR []Spread
+	XLTCZUSD []Spread
+	XMLNXETH []Spread
+	XMLNXXBT []Spread
+	XREPXETH []Spread
+	XREPXXBT []Spread
+	XREPZEUR []Spread
+	XREPZUSD []Spread
+	XXBTZCAD []Spread
+	XXBTZEUR []Spread
+	XXBTZGBP []Spread
+	XXBTZJPY []Spread
+	XXBTZUSD []Spread
+	XXDGXXBT []Spread
+	XXLMXXBT []Spread
+	XXLMZEUR []Spread
+	XXLMZUSD []Spread
+	XXMRXXBT []Spread
+	XXMRZEUR []Spread
+	XXMRZUSD []Spread
+	XXRPXXBT []Spread
+	XXRPZCAD []Spread
+	XXRPZEUR []Spread
+	XXRPZJPY []Spread
+	XXRPZUSD []Spread
+	XTZCAD   []Spread
+	XTZETH   []Spread
+	XTZEUR   []Spread
+	XTZUSD   []Spread
+	XTZXBT   []Spread
+	XZECXXBT []Spread
+	XZECZEUR []Spread
+	XZECZUSD []Spread
 }
