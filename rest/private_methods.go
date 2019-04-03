@@ -237,7 +237,7 @@ func (api *Kraken) AddOrder(pair string, side string, orderType string, volume f
 		}
 	}
 
-	resp, err := api.request("CancelOrder", true, data, &AddOrderResponse{})
+	resp, err := api.request("AddOrder", true, data, &AddOrderResponse{})
 	if err != nil {
 		return nil, err
 	}

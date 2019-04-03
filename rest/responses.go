@@ -664,31 +664,22 @@ type ClosedOrdersResponse struct {
 
 // OrderInfo - structure contains order information
 type OrderInfo struct {
-	RefID           string  `json:"refid"`
-	UserRef         string  `json:"userref"`
-	Status          string  `json:"status"`
-	OpenTimestamp   float64 `json:"opentm"`
-	StartTimestamp  float64 `json:"starttm"`
-	ExpireTimestamp float64 `json:"expiretm"`
-	Description     struct {
-		Pair           string  `json:"pair"`
-		Side           string  `json:"type"`
-		OrderType      string  `json:"ordertype"`
-		Price          float64 `json:"price,string"`
-		Price2         float64 `json:"price2,string"`
-		Leverage       string  `json:"leverage"`
-		Info           string  `json:"order"`
-		CloseCondition string  `json:"close"`
-	} `json:"descr"`
-	Volume         float64 `json:"vol,string"`
-	VolumeExecuted float64 `json:"vol_exec,string"`
-	Cost           float64 `json:"cost,string"`
-	Fee            float64 `json:"fee,string"`
-	AveragePrice   float64 `json:"price,string"`
-	StopPrice      float64 `json:"stopprice,string"`
-	LimitPrice     float64 `json:"limitprice,string"`
-	Misc           string  `json:"misc"`
-	Flags          string  `json:"oflags"`
+	RefID           string           `json:"refid"`
+	UserRef         string           `json:"userref"`
+	Status          string           `json:"status"`
+	OpenTimestamp   float64          `json:"opentm"`
+	StartTimestamp  float64          `json:"starttm"`
+	ExpireTimestamp float64          `json:"expiretm"`
+	Description     OrderDescription `json:"descr"`
+	Volume          float64          `json:"vol,string"`
+	VolumeExecuted  float64          `json:"vol_exec,string"`
+	Cost            float64          `json:"cost,string"`
+	Fee             float64          `json:"fee,string"`
+	AveragePrice    float64          `json:"price,string"`
+	StopPrice       float64          `json:"stopprice,string"`
+	LimitPrice      float64          `json:"limitprice,string"`
+	Misc            string           `json:"misc"`
+	Flags           string           `json:"oflags"`
 }
 
 // TradesHistoryResponse - respons on TradesHistory request
@@ -781,21 +772,23 @@ type Fees struct {
 // CancelResponse - response on CancelOrder request
 type CancelResponse struct {
 	Count   int64 `json:"count"`
-	Pending bool  `json:"pending"`
+	Pending bool  `json:"pending,omitempty"`
+}
+
+// OrderDescription - structure of order description
+type OrderDescription struct {
+	Pair           string  `json:"pair"`
+	Side           string  `json:"type"`
+	OrderType      string  `json:"ordertype"`
+	Price          float64 `json:"price,string"`
+	Price2         float64 `json:"price2,string"`
+	Leverage       string  `json:"leverage"`
+	Info           string  `json:"order"`
+	CloseCondition string  `json:"close"`
 }
 
 // AddOrderResponse - response on AddOrder request
 type AddOrderResponse struct {
-	Description struct {
-		AssetPair      string `json:"pair"`
-		Close          string `json:"close"`
-		Leverage       string `json:"leverage"`
-		Order          string `json:"order"`
-		OrderType      string `json:"ordertype"`
-		PrimaryPrice   string `json:"price"`
-		SecondaryPrice string `json:"price2"`
-		Type           string `json:"type"`
-	} `json:"descr"`
-
-	TransactionIds []string `json:"txid"`
+	Description    OrderDescription `json:"descr"`
+	TransactionIds []string         `json:"txid"`
 }

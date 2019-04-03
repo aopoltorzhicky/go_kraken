@@ -7,10 +7,19 @@ import (
 )
 
 func main() {
-	api := rest.New("pZai5d5lPFm4uE+raQlSHCRRqNE4MoPU/k1C8nu0/0bZZ9+iItHsiWoc", "iNYlYHYf5j4tE8EvSV+HN6VsJyX3dhkRlw/6+NLLHzDZ+9aA8j/o3ze9gpXDXyEZVnz88vtwsqF8fPZWv82egw==")
-	data, err := api.GetTradeVolume(true, "XXBTZUSD", "XETHZEUR")
-	if err != nil {
-		log.Fatalln(err)
+	api := rest.New("", "")
+	data, err1 := api.AddOrder("XXBTZUSD", "buy", "limit", 0.1, map[string]interface{}{
+		"price":    1000.00000,
+		"leverage": "2",
+	})
+	if err1 != nil {
+		log.Fatalln(err1)
 	}
 	log.Println(data)
+	orderID := data.TransactionIds[0]
+	resp, err2 := api.Cancel(orderID)
+	if err2 != nil {
+		log.Fatalln(err2)
+	}
+	log.Println(resp)
 }
