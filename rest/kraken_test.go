@@ -59,9 +59,10 @@ func TestKraken_getSign(t *testing.T) {
 		data       url.Values
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		wantErr bool
 	}{
 		{
 			name: "Test case 1",
@@ -71,14 +72,20 @@ func TestKraken_getSign(t *testing.T) {
 				},
 				requestURL: "/test/branch",
 			},
-			want: "UpUCHWmGNrCFHktS4zqscVY1Aq+qJxkpi2fxICL5swi9IyE+jf2FpzvBlObi2FKEXzEJvVZwIF/dOiungh7q1w==",
+			want:    "UpUCHWmGNrCFHktS4zqscVY1Aq+qJxkpi2fxICL5swi9IyE+jf2FpzvBlObi2FKEXzEJvVZwIF/dOiungh7q1w==",
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			api := New("key", "secret")
-			if got := api.getSign(tt.args.requestURL, tt.args.data); got != tt.want {
-				t.Errorf("Kraken.getSign() = %v, want %v", got, tt.want)
+			got, err := api.getSign(tt.args.requestURL, tt.args.data)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Kraken.getSign() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Kraken.prepareRequest() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -222,18 +222,20 @@ func (api *Kraken) AddOrder(pair string, side string, orderType string, volume f
 		"type":      {side},
 		"ordertype": {orderType},
 	}
-	for key, value := range args {
-		switch value.(type) {
-		case string:
-			data.Set(key, value.(string))
-		case int64:
-			data.Set(key, strconv.FormatInt(value.(int64), 10))
-		case float64:
-			data.Set(key, strconv.FormatFloat(value.(float64), 'f', 8, 64))
-		case bool:
-			data.Set(key, strconv.FormatBool(value.(bool)))
-		default:
-			log.Printf("[WARNING] Unknown value type %v for key %s", value, key)
+	if args != nil {
+		for key, value := range args {
+			switch value.(type) {
+			case string:
+				data.Set(key, value.(string))
+			case int64:
+				data.Set(key, strconv.FormatInt(value.(int64), 10))
+			case float64:
+				data.Set(key, strconv.FormatFloat(value.(float64), 'f', 8, 64))
+			case bool:
+				data.Set(key, strconv.FormatBool(value.(bool)))
+			default:
+				log.Printf("[WARNING] Unknown value type %v for key %s", value, key)
+			}
 		}
 	}
 
