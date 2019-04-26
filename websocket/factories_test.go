@@ -315,8 +315,8 @@ func Test_spreadFactory_Parse(t *testing.T) {
 			args: args{
 				pair: BTCCAD,
 				data: []interface{}{
-					"5700.00000",
 					"5698.40000",
+					"5700.00000",
 					"1542057299",
 				},
 			},
