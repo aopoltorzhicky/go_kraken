@@ -19,11 +19,9 @@ func (api *Kraken) GetAccountBalances() (*BalanceResponse, error) {
 
 // GetTradeBalance - returns tradable balances info
 func (api *Kraken) GetTradeBalance(baseAsset string) (*TradeBalanceResponse, error) {
-	if baseAsset == "" {
-		baseAsset = "ZUSD"
-	}
-	data := url.Values{
-		"asset": {baseAsset},
+	data := url.Values{}
+	if baseAsset != "" {
+		data.Set("asset", baseAsset)
 	}
 
 	resp, err := api.request("TradeBalance", true, data, &TradeBalanceResponse{})

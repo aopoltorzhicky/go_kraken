@@ -110,8 +110,8 @@ func (f *spreadFactory) Parse(data interface{}, pair string) (interface{}, error
 		return SpreadUpdate{Pair: pair}, fmt.Errorf("Can't parse data %#v", data)
 	}
 	return SpreadUpdate{
-		Ask:  valToFloat64(body[0]),
-		Bid:  valToFloat64(body[1]),
+		Bid:  valToFloat64(body[0]),
+		Ask:  valToFloat64(body[1]),
 		Time: valToTime(body[2]),
 		Pair: pair,
 	}, nil
