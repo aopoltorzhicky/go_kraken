@@ -40,14 +40,18 @@ func New(key string, secret string) *Kraken {
 	}
 }
 
-func (api *Kraken) getSign(requestURL string, data url.Values) string {
+func (api *Kraken) getSign(requestURL string, data url.Values) (string, error) {
 	sha := sha256.New()
 	sha.Write([]byte(data.Get("nonce") + data.Encode()))
 	hashData := sha.Sum(nil)
-	hmacObj := hmac.New(sha512.New, []byte(api.secret))
+	s, err := base64.StdEncoding.DecodeString(api.secret)
+	if err != nil {
+		return "", err
+	}
+	hmacObj := hmac.New(sha512.New, s)
 	hmacObj.Write(append([]byte(requestURL), hashData...))
 	hmacData := hmacObj.Sum(nil)
-	return base64.StdEncoding.EncodeToString(hmacData)
+	return base64.StdEncoding.EncodeToString(hmacData), nil
 }
 
 func (api *Kraken) prepareRequest(method string, isPrivate bool, data url.Values) (*http.Request, error) {
@@ -57,6 +61,7 @@ func (api *Kraken) prepareRequest(method string, isPrivate bool, data url.Values
 	requestURL := ""
 	if isPrivate {
 		requestURL = fmt.Sprintf("%s/%s/private/%s", APIUrl, APIVersion, method)
+		data.Set("nonce", fmt.Sprintf("%d", time.Now().UnixNano()))
 	} else {
 		requestURL = fmt.Sprintf("%s/%s/public/%s", APIUrl, APIVersion, method)
 	}
@@ -66,10 +71,13 @@ func (api *Kraken) prepareRequest(method string, isPrivate bool, data url.Values
 	}
 
 	if isPrivate {
-		data.Set("nonce", fmt.Sprintf("%d", time.Now().UnixNano()))
 		urlPath := fmt.Sprintf("/%s/private/%s", APIVersion, method)
 		req.Header.Add("API-Key", api.key)
-		req.Header.Add("API-Sign", api.getSign(urlPath, data))
+		signature, err := api.getSign(urlPath, data)
+		if err != nil {
+			return nil, fmt.Errorf("Invalid secret key: %s", err.Error())
+		}
+		req.Header.Add("API-Sign", signature)
 	}
 	return req, nil
 }
@@ -92,6 +100,7 @@ func (api *Kraken) parseResponse(response *http.Response, retType interface{}) (
 		retData.Result = retType
 	}
 
+	log.Println(string(body))
 	err = codec.NewDecoderBytes(body, new(codec.JsonHandle)).Decode(&retData)
 	if err != nil {
 		return nil, fmt.Errorf("Error during response parsing: json marshalling (%s)", err.Error())

@@ -602,3 +602,193 @@ type SpreadResponse struct {
 	XZECZEUR []Spread
 	XZECZUSD []Spread
 }
+
+// BalanceResponse - response on account balance request
+type BalanceResponse struct {
+	ADA  float64 `json:",string"`
+	BCH  float64 `json:",string"`
+	BSV  float64 `json:",string"`
+	DASH float64 `json:",string"`
+	EOS  float64 `json:",string"`
+	GNO  float64 `json:",string"`
+	KFEE float64 `json:",string"`
+	QTUM float64 `json:",string"`
+	USDT float64 `json:",string"`
+	XDAO float64 `json:",string"`
+	XETC float64 `json:",string"`
+	XETH float64 `json:",string"`
+	XICN float64 `json:",string"`
+	XLTC float64 `json:",string"`
+	XMLN float64 `json:",string"`
+	XNMC float64 `json:",string"`
+	XREP float64 `json:",string"`
+	XXBT float64 `json:",string"`
+	XXDG float64 `json:",string"`
+	XXLM float64 `json:",string"`
+	XXMR float64 `json:",string"`
+	XXRP float64 `json:",string"`
+	XXTZ float64 `json:",string"`
+	XXVN float64 `json:",string"`
+	XZEC float64 `json:",string"`
+	ZCAD float64 `json:",string"`
+	ZEUR float64 `json:",string"`
+	ZGBP float64 `json:",string"`
+	ZJPY float64 `json:",string"`
+	ZKRW float64 `json:",string"`
+	ZUSD float64 `json:",string"`
+}
+
+// TradeBalanceResponse - response of get trade balance request
+type TradeBalanceResponse struct {
+	EquivalentBalance float64 `json:"eb,string"`
+	TradeBalance      float64 `json:"tb,string"`
+	OpenMargin        float64 `json:"m,string"`
+	UnrealizedProfit  float64 `json:"n,string"`
+	CostPositions     float64 `json:"c,string"`
+	CurrentValue      float64 `json:"v,string"`
+	Equity            float64 `json:"e,string"`
+	FreeMargin        float64 `json:"mf,string"`
+	MarginLevel       float64 `json:"ml,string"`
+}
+
+// OpenOrdersResponse - response on OpenOrders request
+type OpenOrdersResponse struct {
+	Orders map[string]OrderInfo `json:"open"`
+}
+
+// ClosedOrdersResponse - response on ClosedOrders request
+type ClosedOrdersResponse struct {
+	Count  int64                `json:"count"`
+	Orders map[string]OrderInfo `json:"closed"`
+}
+
+// OrderInfo - structure contains order information
+type OrderInfo struct {
+	RefID           string           `json:"refid"`
+	UserRef         string           `json:"userref"`
+	Status          string           `json:"status"`
+	OpenTimestamp   float64          `json:"opentm"`
+	StartTimestamp  float64          `json:"starttm"`
+	ExpireTimestamp float64          `json:"expiretm"`
+	Description     OrderDescription `json:"descr"`
+	Volume          float64          `json:"vol,string"`
+	VolumeExecuted  float64          `json:"vol_exec,string"`
+	Cost            float64          `json:"cost,string"`
+	Fee             float64          `json:"fee,string"`
+	AveragePrice    float64          `json:"price,string"`
+	StopPrice       float64          `json:"stopprice,string"`
+	LimitPrice      float64          `json:"limitprice,string"`
+	Misc            string           `json:"misc"`
+	Flags           string           `json:"oflags"`
+}
+
+// TradesHistoryResponse - respons on TradesHistory request
+type TradesHistoryResponse struct {
+	Trades map[string]PrivateTrade `json:"trades"`
+	Count  int64                   `json:"count"`
+}
+
+// PrivateTrade - structure of account's trades
+type PrivateTrade struct {
+	OrderID              string   `json:"ordertxid"`
+	PositionID           string   `json:"postxid"`
+	Pair                 string   `json:"pair"`
+	Time                 float64  `json:"time"`
+	Side                 string   `json:"type"`
+	OrderType            string   `json:"ordertype"`
+	Price                float64  `json:"price,string"`
+	Cost                 float64  `json:"cost,string"`
+	Fee                  float64  `json:"fee,string"`
+	Volume               float64  `json:"vol,string"`
+	Margin               float64  `json:"margin,string"`
+	Misc                 string   `json:"misc"`
+	PositionStatus       string   `json:"posstatus,omitempty"`
+	PositionAveragePrice float64  `json:"cprice,omitempty,string"`
+	PositionCost         float64  `json:"ccost,omitempty,string"`
+	PositionFee          float64  `json:"cfee,omitempty,string"`
+	PositionVolume       float64  `json:"cvol,omitempty,string"`
+	PositionMargin       float64  `json:"cmargin,omitempty,string"`
+	PositionProfit       float64  `json:"net,omitempty,string"`
+	PositionTrades       []string `json:"trades,omitempty"`
+}
+
+// Position - structure of account position
+type Position struct {
+	OrderID      string  `json:"ordertxid"`
+	Status       string  `json:"posstatus"`
+	Pair         string  `json:"pair"`
+	Time         float64 `json:"time"`
+	Side         string  `json:"type"`
+	OrderType    string  `json:"ordertype"`
+	Price        float64 `json:"price,string"`
+	Cost         float64 `json:"cost,string"`
+	Fee          float64 `json:"fee,string"`
+	Volume       float64 `json:"vol,string"`
+	VolumeClosed float64 `json:"vol_closed,string"`
+	Margin       float64 `json:"margin,string"`
+	Misc         string  `json:"misc"`
+	Value        float64 `json:"value,omitempty,string"`
+	Profit       float64 `json:"net,omitempty,string"`
+	Terms        string  `json:"terms,omitempty"`
+	RolloverTime float64 `json:"rollovertm,omitempty,string"`
+	Flags        string  `json:"oflags"`
+}
+
+// LedgerInfoResponse - response on ledger request
+type LedgerInfoResponse struct {
+	Ledgers map[string]Ledger `json:"ledger"`
+}
+
+// Ledger - structure of account's ledger
+type Ledger struct {
+	RefID      string  `json:"refid"`
+	Time       float64 `json:"time"`
+	LedgerType string  `json:"type"`
+	AssetClass string  `json:"aclass"`
+	Asset      string  `json:"asset"`
+	Amount     float64 `json:"amount,string"`
+	Fee        float64 `json:"fee,string"`
+	Balance    float64 `json:"balance,string"`
+}
+
+// TradeVolumeResponse - response on TradeVolume request
+type TradeVolumeResponse struct {
+	Currency  string          `json:"currency"`
+	Volume    float64         `json:"volume,string"`
+	Fees      map[string]Fees `json:"fees,omitempty"`
+	FeesMaker map[string]Fees `json:"fees_maker,omitempty"`
+}
+
+// Fees - structure of fees info
+type Fees struct {
+	Fee        float64 `json:"fee,string"`
+	MinFee     float64 `json:"minfee,string"`
+	MaxFee     float64 `json:"maxfee,string"`
+	NextFee    float64 `json:"nextfee,string"`
+	NextVolume float64 `json:"nextvolume,string"`
+	TierVolume float64 `json:"tiervolume,string"`
+}
+
+// CancelResponse - response on CancelOrder request
+type CancelResponse struct {
+	Count   int64 `json:"count"`
+	Pending bool  `json:"pending,omitempty"`
+}
+
+// OrderDescription - structure of order description
+type OrderDescription struct {
+	Pair           string  `json:"pair"`
+	Side           string  `json:"type"`
+	OrderType      string  `json:"ordertype"`
+	Price          float64 `json:"price,string"`
+	Price2         float64 `json:"price2,string"`
+	Leverage       string  `json:"leverage"`
+	Info           string  `json:"order"`
+	CloseCondition string  `json:"close"`
+}
+
+// AddOrderResponse - response on AddOrder request
+type AddOrderResponse struct {
+	Description    OrderDescription `json:"descr"`
+	TransactionIds []string         `json:"txid"`
+}

@@ -3,7 +3,7 @@ package websocket
 // URLs
 const (
 	prodBaseURL    = "wss://ws.kraken.com"
-	sandboxBaseURL = "wss://ws-sandbox.kraken.com"
+	sandboxBaseURL = "wss://ws-beta.kraken.com"
 )
 
 // Available channels
