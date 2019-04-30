@@ -39,6 +39,7 @@ const (
 // Assets
 const (
 	ADA  = "ADA"
+	ATOM = "ATOM"
 	BCH  = "BCH"
 	BSV  = "BSV"
 	DASH = "DASH"
@@ -55,12 +56,12 @@ const (
 	XMLN = "XMLN"
 	XNMC = "XNMC"
 	XREP = "XREP"
+	XTZ  = "XTZ"
 	XXBT = "XXBT"
 	XXDG = "XXDG"
 	XXLM = "XXLM"
 	XXMR = "XXMR"
 	XXRP = "XXRP"
-	XXTZ = "XXTZ"
 	XXVN = "XXVN"
 	XZEC = "XZEC"
 	ZCAD = "ZCAD"
@@ -104,4 +105,13 @@ const (
 	OTTrailingStopLimit   = "trailing-stop-limit"    // (price = trailing stop offset, price2 = triggered limit offset)
 	OTStopLossAndLimit    = "stop-loss-and-limit"    // (price = stop loss price, price2 = limit price)
 	OTSettlePosition      = "settle-position"
+)
+
+// OrderStatuses
+const (
+	StatusPending   = "pending"
+	StatusOpen      = "open"
+	StatusClosed    = "closed"
+	StatusCancelled = "canceled"
+	StatusExpired   = "expired"
 )
