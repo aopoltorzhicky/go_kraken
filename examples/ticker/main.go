@@ -14,7 +14,7 @@ func main() {
 	}
 
 	// subscribe to BTCUSD ticker
-	err = c.SubscribeTicker([]string{ws.BTCCAD})
+	err = c.SubscribeTicker([]string{ws.BTCUSD})
 	if err != nil {
 		log.Fatal(err)
 	}

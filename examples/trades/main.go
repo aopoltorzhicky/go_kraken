@@ -23,7 +23,7 @@ func main() {
 	}
 
 	go func() {
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Second * 30)
 		log.Print("Unsubsribing...")
 		err = c.Unsubscribe(ws.ChanTrades, pairs)
 		if err != nil {

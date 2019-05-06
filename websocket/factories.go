@@ -65,7 +65,7 @@ func (f *candlesFactory) Parse(data interface{}, pair string) (interface{}, erro
 		Close:     valToFloat64(body[5]),
 		VolumeWAP: valToFloat64(body[6]),
 		Volume:    valToFloat64(body[7]),
-		Count:     body[8].(int),
+		Count:     int(body[8].(float64)),
 		Pair:      pair,
 	}, nil
 }
