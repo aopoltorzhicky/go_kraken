@@ -158,7 +158,7 @@ func Test_candlesFactory_Parse(t *testing.T) {
 					"3586.60000",
 					"3586.68894",
 					"0.03373000",
-					2,
+					2.,
 				},
 			},
 			want: CandleUpdate{
