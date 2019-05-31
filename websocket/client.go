@@ -294,6 +294,7 @@ func (c *Client) handleMessage(msg []byte) error {
 
 	c.updateHeartbeat()
 	if bytes.HasPrefix(t, []byte("[")) {
+		log.Printf("%s", msg)
 		err = c.handleChannel(msg)
 	} else if bytes.HasPrefix(t, []byte("{")) {
 		err = c.handleEvent(msg)
@@ -402,11 +403,13 @@ func (c *Client) handleChannel(msg []byte) error {
 		return fmt.Errorf("Unknown message type: %s", sub.Subscription.Name)
 	}
 
-	result, err := factory.Parse(raw[1], sub.Pair)
-	if err != nil {
-		return err
+	for i := range raw[1:] {
+		result, err := factory.Parse(raw[i+1], sub.Pair)
+		if err != nil {
+			return err
+		}
+		c.listener <- result
 	}
-	c.listener <- result
 	return nil
 }
 
