@@ -37,17 +37,19 @@ func main() {
 		switch obj.(type) {
 		case error:
 			log.Printf("channel closed: %s", obj)
-		default:
+		case ws.DataUpdate:
+			data := obj.(ws.DataUpdate)
+			for _, trade := range data.Data.([]ws.TradeUpdate) {
+				log.Print("----------------")
+				log.Printf("Price: %f", trade.Price)
+				log.Printf("Volume: %f", trade.Volume)
+				log.Printf("Time: %s", trade.Time.String())
+				log.Printf("Pair: %s", trade.Pair)
+				log.Printf("Order type: %s", trade.OrderType)
+				log.Printf("Side: %s", trade.Side)
+				log.Printf("Misc: %s", trade.Misc)
+			}
 		}
-		for _, trade := range obj.([]ws.TradeUpdate) {
-			log.Print("----------------")
-			log.Printf("Price: %f", trade.Price)
-			log.Printf("Volume: %f", trade.Volume)
-			log.Printf("Time: %s", trade.Time.String())
-			log.Printf("Pair: %s", trade.Pair)
-			log.Printf("Order type: %s", trade.OrderType)
-			log.Printf("Side: %s", trade.Side)
-			log.Printf("Misc: %s", trade.Misc)
-		}
+
 	}
 }

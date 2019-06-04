@@ -160,66 +160,6 @@ func TestClient_handleEvent(t *testing.T) {
 	}
 }
 
-func TestClient_lookupByChannelID(t *testing.T) {
-	type fields struct {
-		subscriptions map[int64]*SubscriptionStatus
-	}
-	type args struct {
-		chanID int64
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		want    *SubscriptionStatus
-		wantErr bool
-	}{
-		{
-			name: "Test `found subscription` case",
-			fields: fields{
-				subscriptions: map[int64]*SubscriptionStatus{
-					1: &SubscriptionStatus{
-						Pair: BTCCAD,
-					},
-				},
-			},
-			args: args{
-				chanID: int64(1),
-			},
-			want: &SubscriptionStatus{
-				Pair: BTCCAD,
-			},
-			wantErr: false,
-		},
-		{
-			name: "Test `not found subscription` case",
-			fields: fields{
-				subscriptions: make(map[int64]*SubscriptionStatus),
-			},
-			args: args{
-				chanID: 1,
-			},
-			want:    nil,
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			c := &Client{
-				subscriptions: tt.fields.subscriptions,
-			}
-			got, err := c.lookupByChannelID(tt.args.chanID)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Client.lookupByChannelID() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Client.lookupByChannelID() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func TestClient_handleChannel(t *testing.T) {
 	type fields struct {
 		subscriptions map[int64]*SubscriptionStatus
@@ -244,28 +184,12 @@ func TestClient_handleChannel(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:   "Test invalid array length",
-			fields: fields{},
-			args: args{
-				[]byte("[ 1 ]"),
-			},
-			wantErr: true,
-		},
-		{
-			name:   "Test invalid channel ID value",
-			fields: fields{},
-			args: args{
-				[]byte("[ \"1\", [] ]"),
-			},
-			wantErr: true,
-		},
-		{
 			name: "Test `not found subscription`",
 			fields: fields{
 				subscriptions: make(map[int64]*SubscriptionStatus),
 			},
 			args: args{
-				[]byte("[ 1, [] ]"),
+				[]byte("[ 1, [], \"trades\", \"XBT/USD\" ]"),
 			},
 			wantErr: true,
 		},
@@ -282,7 +206,7 @@ func TestClient_handleChannel(t *testing.T) {
 				factories: make(map[string]ParseFactory),
 			},
 			args: args{
-				[]byte("[ 1, [] ]"),
+				[]byte("[ 1, [], \"trades\", \"XBT/USD\" ]"),
 			},
 			wantErr: true,
 		},
@@ -301,7 +225,7 @@ func TestClient_handleChannel(t *testing.T) {
 				},
 			},
 			args: args{
-				[]byte("[ 1, [] ]"),
+				[]byte("[ 1, [], \"ticker\", \"XBT/USD\" ]"),
 			},
 			wantErr: true,
 		},
@@ -321,7 +245,7 @@ func TestClient_handleChannel(t *testing.T) {
 				listener: make(chan interface{}),
 			},
 			args: args{
-				[]byte("[1 ,[ \"5698.40000\",  \"5700.00000\", \"1542057299.545897\" ]]"),
+				[]byte("[1 ,[ \"5698.40000\",  \"5700.00000\", \"1542057299.545897\" ], \"spread\", \"BTC/USD\"]"),
 			},
 			wantErr: false,
 		},
@@ -398,7 +322,7 @@ func TestClient_handleMessage(t *testing.T) {
 				},
 			},
 			args: args{
-				[]byte("[1 ,[ \"5698.40000\",  \"5700.00000\", \"1542057299.545897\" ]]"),
+				[]byte("[1 ,[ \"5698.40000\",  \"5700.00000\", \"1542057299.545897\" ], \"spread\", \"XBT/USD\"]"),
 			},
 			wantErr: false,
 		},

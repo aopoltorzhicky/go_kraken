@@ -111,10 +111,12 @@ func (f *spreadFactory) Parse(data interface{}, pair string) (interface{}, error
 		return SpreadUpdate{Pair: pair}, fmt.Errorf("Can't parse data %#v", data)
 	}
 	return SpreadUpdate{
-		Bid:  valToFloat64(body[0]),
-		Ask:  valToFloat64(body[1]),
-		Time: valToTime(body[2]),
-		Pair: pair,
+		Bid:       valToFloat64(body[0]),
+		Ask:       valToFloat64(body[1]),
+		Time:      valToTime(body[2]),
+		BidVolume: valToFloat64(body[3]),
+		AskVolume: valToFloat64(body[4]),
+		Pair:      pair,
 	}, nil
 }
 
@@ -143,6 +145,7 @@ func (f *bookFactory) Parse(data interface{}, pair string) (interface{}, error) 
 				Volume: valToFloat64(entity[1]),
 				Time:   valToTime(entity[2]),
 			}
+			orderBookItem.Republish = (len(entity) == 4 && entity[3] == "r")
 			items = append(items, orderBookItem)
 		}
 
