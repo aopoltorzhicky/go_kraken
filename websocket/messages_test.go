@@ -42,11 +42,11 @@ func TestDataUpdate_UnmarshalJSON(t *testing.T) {
 			},
 			wantErr: true,
 		}, {
-			name: "Invalid pair",
+			name: "Valid data",
 			args: args{
 				data: []byte("[1, [], \"trades\", \"XBT/USD\"]"),
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
