@@ -5,7 +5,7 @@ env:
 
 deploy:
   on:
-    tag
+    tags: true
 
 go:
 - "1.12"
