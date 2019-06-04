@@ -455,8 +455,8 @@ func Test_bookFactory_Parse(t *testing.T) {
 						[]interface{}{
 							"5541.30000",
 							"2.50700000",
-							"r",
 							"1534614248",
+							"r",
 						},
 					},
 					"b": []interface{}{
