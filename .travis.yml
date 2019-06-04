@@ -3,6 +3,10 @@ language: go
 env:
   - GO111MODULE=on
 
+deploy:
+  on:
+    tag
+
 go:
 - "1.12"
 
