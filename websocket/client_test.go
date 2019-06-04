@@ -245,7 +245,7 @@ func TestClient_handleChannel(t *testing.T) {
 				listener: make(chan interface{}),
 			},
 			args: args{
-				[]byte("[1 ,[ \"5698.40000\",  \"5700.00000\", \"1542057299.545897\" ], \"spread\", \"BTC/USD\"]"),
+				[]byte("[1 ,[ \"5698.40000\",  \"5700.00000\", \"1542057299.545897\", \"1\", \"2\" ], \"spread\", \"BTC/USD\"]"),
 			},
 			wantErr: false,
 		},
@@ -322,7 +322,7 @@ func TestClient_handleMessage(t *testing.T) {
 				},
 			},
 			args: args{
-				[]byte("[1 ,[ \"5698.40000\",  \"5700.00000\", \"1542057299.545897\" ], \"spread\", \"XBT/USD\"]"),
+				[]byte("[1 ,[ \"5698.40000\",  \"5700.00000\", \"1542057299.545897\", \"1\", \"2\" ], \"spread\", \"XBT/USD\"]"),
 			},
 			wantErr: false,
 		},
