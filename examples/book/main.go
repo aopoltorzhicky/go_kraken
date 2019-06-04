@@ -23,8 +23,10 @@ func main() {
 		switch obj.(type) {
 		case error:
 			log.Printf("channel closed: %s", obj)
+		case ws.DataUpdate:
+			data := obj.(ws.DataUpdate)
+			log.Printf("MSG RECV: %#v", data)
 		default:
 		}
-		log.Printf("MSG RECV: %#v", obj)
 	}
 }

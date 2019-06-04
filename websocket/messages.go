@@ -1,6 +1,8 @@
 package websocket
 
 import (
+	"encoding/json"
+	"fmt"
 	"math/big"
 	"time"
 )
@@ -64,6 +66,43 @@ type SystemStatus struct {
 	Version      string  `json:"version"`
 }
 
+// DataUpdate - data structure of default Kraken WS update
+type DataUpdate struct {
+	ChannelID   int64
+	Data        interface{}
+	ChannelName string
+	Pair        string
+}
+
+// UnmarshalJSON - unmarshal update
+func (u *DataUpdate) UnmarshalJSON(data []byte) error {
+	var raw []interface{}
+	err := json.Unmarshal(data, &raw)
+	if err != nil {
+		return err
+	} else if len(raw) < 4 {
+		return fmt.Errorf("invalid data length: %#v", raw)
+	}
+
+	chID, ok := raw[0].(float64)
+	if !ok {
+		return fmt.Errorf("expected message to start with a channel id but got %#v instead", raw[0])
+	}
+
+	u.ChannelID = int64(chID)
+	u.ChannelName, ok = raw[len(raw)-2].(string)
+	if !ok {
+		return fmt.Errorf("expected message with (n - 2) element channel name but got %#v instead", raw[len(raw)-2])
+	}
+	u.Pair, ok = raw[len(raw)-1].(string)
+	if !ok {
+		return fmt.Errorf("expected message  with (n - 2) element pair but got %#v instead", raw[len(raw)-1])
+	}
+	u.Data = raw[1 : len(raw)-2][0]
+
+	return nil
+}
+
 // TickerUpdate - data structure for ticker update
 type TickerUpdate struct {
 	Ask                Level
@@ -118,17 +157,20 @@ type TradeUpdate struct {
 
 // SpreadUpdate - data structure for spread update
 type SpreadUpdate struct {
-	Ask  float64
-	Bid  float64
-	Time time.Time
-	Pair string
+	Ask       float64
+	Bid       float64
+	AskVolume float64
+	BidVolume float64
+	Time      time.Time
+	Pair      string
 }
 
 // OrderBookItem - data structure for order book item
 type OrderBookItem struct {
-	Price  float64
-	Volume float64
-	Time   time.Time
+	Price     float64
+	Volume    float64
+	Time      time.Time
+	Republish bool
 }
 
 // OrderBookUpdate - data structure for order book update

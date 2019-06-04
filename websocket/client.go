@@ -371,45 +371,24 @@ func (c *Client) handleEvent(msg []byte) error {
 	return nil
 }
 
-func (c *Client) lookupByChannelID(chanID int64) (*SubscriptionStatus, error) {
-	sub, ok := c.subscriptions[chanID]
-	if ok {
-		return sub, nil
-	}
-	return nil, fmt.Errorf("Unknown channel ID: %d", chanID)
-}
-
 func (c *Client) handleChannel(msg []byte) error {
-	var raw []interface{}
-	err := json.Unmarshal(msg, &raw)
-	if err != nil {
-		return err
-	} else if len(raw) < 2 {
-		return fmt.Errorf("Inalid message length: %#v", msg)
-	}
-
-	chID, ok := raw[0].(float64)
-	if !ok {
-		return fmt.Errorf("expected message to start with a channel id but got %#v instead", raw[0])
-	}
-	chanID := int64(chID)
-	sub, err := c.lookupByChannelID(chanID)
+	var data DataUpdate
+	err := json.Unmarshal(msg, &data)
 	if err != nil {
 		return err
 	}
 
-	factory, ok := c.factories[sub.Subscription.Name]
+	factory, ok := c.factories[data.ChannelName]
 	if !ok {
-		return fmt.Errorf("Unknown message type: %s", sub.Subscription.Name)
+		return fmt.Errorf("Unknown message type: %s", data.ChannelName)
 	}
 
-	for i := range raw[1:] {
-		result, err := factory.Parse(raw[i+1], sub.Pair)
-		if err != nil {
-			return err
-		}
-		c.listener <- result
+	result, err := factory.Parse(data.Data, data.Pair)
+	if err != nil {
+		return err
 	}
+	data.Data = result
+	c.listener <- data
 	return nil
 }
 
