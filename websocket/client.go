@@ -294,7 +294,6 @@ func (c *Client) handleMessage(msg []byte) error {
 
 	c.updateHeartbeat()
 	if bytes.HasPrefix(t, []byte("[")) {
-		log.Printf("%s", msg)
 		err = c.handleChannel(msg)
 	} else if bytes.HasPrefix(t, []byte("{")) {
 		err = c.handleEvent(msg)
