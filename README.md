@@ -46,8 +46,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// subscribe to ADABTC, XTZBTC, XLMBTC spread
-	err = c.SubscribeSpread([]string{ws.ADABTC, ws.XTZBTC, ws.XLMBTC})
+	// subscribe to BTCUSD, XLMUSD, ADACAD spread
+	err = c.SubscribeSpread([]string{ws.BTCUSD, ws.XLMUSD, ws.ADACAD})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -56,9 +56,11 @@ func main() {
 		switch obj.(type) {
 		case error:
 			log.Printf("channel closed: %s", obj)
+		case ws.DataUpdate:
+			data := obj.(ws.DataUpdate)
+			log.Printf("MSG RECV: %#v", data)
 		default:
 		}
-		log.Printf("MSG RECV: %#v", obj)
 	}
 }
 
