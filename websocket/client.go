@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 	"unicode"
@@ -377,7 +378,8 @@ func (c *Client) handleChannel(msg []byte) error {
 		return err
 	}
 
-	factory, ok := c.factories[data.ChannelName]
+	channel := strings.Split(data.ChannelName, "-")[0]
+	factory, ok := c.factories[channel]
 	if !ok {
 		return fmt.Errorf("Unknown message type: %s", data.ChannelName)
 	}
