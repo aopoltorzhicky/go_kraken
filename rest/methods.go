@@ -20,7 +20,7 @@ func (api *Kraken) Time() (*TimeResponse, error) {
 // `assets` - array of needed assets. All by default if empty array passed or `assets` is nil.
 func (api *Kraken) Assets(assets ...string) (*AssetResponse, error) {
 	data := url.Values{}
-	if assets != nil && len(assets) > 0 {
+	if len(assets) > 0 {
 		data.Add("asset", strings.Join(assets, ","))
 	} else {
 		data = nil
@@ -36,7 +36,7 @@ func (api *Kraken) Assets(assets ...string) (*AssetResponse, error) {
 // `pairs` - array of needed pairs. All by default if empty array passed or `pairs` is nil.
 func (api *Kraken) AssetPairs(pairs ...string) (*AssetPairsResponse, error) {
 	data := url.Values{}
-	if pairs != nil && len(pairs) > 0 {
+	if len(pairs) > 0 {
 		data.Add("pair", strings.Join(pairs, ","))
 	} else {
 		data = nil
@@ -52,7 +52,7 @@ func (api *Kraken) AssetPairs(pairs ...string) (*AssetPairsResponse, error) {
 // `pairs` - array of needed pairs. All by default if empty array passed or `pairs` is nil.
 func (api *Kraken) Ticker(pairs ...string) (*TickerResponse, error) {
 	var data url.Values
-	if pairs != nil && len(pairs) > 0 {
+	if len(pairs) > 0 {
 		data = url.Values{
 			"pair": {strings.Join(pairs, ",")},
 		}

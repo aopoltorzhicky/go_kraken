@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"fmt"
-	"log"
 )
 
 type tickerFactory struct{}
@@ -134,7 +133,7 @@ func (f *bookFactory) Parse(data interface{}, pair string) (interface{}, error) 
 	if !ok {
 		return result, fmt.Errorf("Can't parse data %#v", data)
 	}
-	log.Println(body)
+
 	for k, v := range body {
 		items := make([]OrderBookItem, 0)
 		updates := v.([]interface{})

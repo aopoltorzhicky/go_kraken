@@ -1470,7 +1470,6 @@ func TestNew(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *Client
 	}{
 		{
 			name: "Test sandbox",
@@ -1489,12 +1488,12 @@ func TestNew(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := New(tt.args.sandbox)
 			if tt.args.sandbox {
-				if got.parameters.URL != sandboxBaseURL {
-					t.Errorf("URL = %s, want %s", got.parameters.URL, sandboxBaseURL)
+				if got.parameters.URL != SandboxBaseURL {
+					t.Errorf("URL = %s, want %s", got.parameters.URL, SandboxBaseURL)
 				}
 			} else {
-				if got.parameters.URL != prodBaseURL {
-					t.Errorf("URL = %s, want %s", got.parameters.URL, prodBaseURL)
+				if got.parameters.URL != ProdBaseURL {
+					t.Errorf("URL = %s, want %s", got.parameters.URL, ProdBaseURL)
 				}
 			}
 			if len(got.factories) != 5 {

@@ -792,3 +792,9 @@ type AddOrderResponse struct {
 	Description    OrderDescription `json:"descr"`
 	TransactionIds []string         `json:"txid"`
 }
+
+// GetWebSocketTokenResponse - response on GetWebSocketsToken request
+type GetWebSocketTokenResponse struct {
+	Token   string `json:"token"`
+	Expires int64  `json:"expires"`
+}

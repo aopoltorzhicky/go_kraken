@@ -231,7 +231,7 @@ func TestKraken_prepareRequest(t *testing.T) {
 						t.Errorf("Kraken.prepareRequest() expected = https, got %v", got.URL.Scheme)
 						return
 					}
-				} else if got == nil {
+				} else {
 					t.Errorf("Kraken.prepareRequest() got = %v, wantErr %v", got, tt.wantErr)
 					return
 				}

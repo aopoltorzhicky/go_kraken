@@ -219,7 +219,6 @@ func (c *Client) reconnect(err error) error {
 			err := c.resubscribe()
 			if err == nil {
 				log.Print("reconnect OK")
-				reconnectTry = 0
 				return nil
 			}
 			log.Printf("reconnect failed: %s", err.Error())
@@ -247,7 +246,7 @@ func (c *Client) listenUpstream() {
 			return
 		case msg := <-c.asynchronous.Listen():
 			if msg != nil {
-				// log.Printf("[DEBUG]: %s\n", msg)
+				log.Printf("[DEBUG]: %s\n", msg)
 				err := c.handleMessage(msg)
 				if err != nil {
 					log.Printf("[WARN]: %s\n", err)
@@ -289,10 +288,8 @@ func (c *Client) closeAsyncAndWait(t time.Duration) {
 	c.waitGroup.Wait()
 }
 
-func (c *Client) handleMessage(msg []byte) error {
+func (c *Client) handleMessage(msg []byte) (err error) {
 	t := bytes.TrimLeftFunc(msg, unicode.IsSpace)
-	err := error(nil)
-
 	c.updateHeartbeat()
 	if bytes.HasPrefix(t, []byte("[")) {
 		err = c.handleChannel(msg)

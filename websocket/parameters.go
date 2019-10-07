@@ -28,7 +28,7 @@ func NewDefaultParameters() *Parameters {
 		ReconnectInterval:      time.Second,
 		reconnectTry:           0,
 		ReconnectAttempts:      5,
-		URL:                    prodBaseURL,
+		URL:                    ProdBaseURL,
 		ShutdownTimeout:        time.Second * 5,
 		ResubscribeOnReconnect: true,
 		HeartbeatTimeout:       time.Second * 3, // HB = 3s
@@ -44,7 +44,7 @@ func NewDefaultSandboxParameters() *Parameters {
 		ReconnectInterval:      time.Second,
 		reconnectTry:           0,
 		ReconnectAttempts:      5,
-		URL:                    sandboxBaseURL,
+		URL:                    SandboxBaseURL,
 		ShutdownTimeout:        time.Second * 5,
 		ResubscribeOnReconnect: true,
 		HeartbeatTimeout:       time.Second * 3, // HB = 3s

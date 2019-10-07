@@ -220,20 +220,18 @@ func (api *Kraken) AddOrder(pair string, side string, orderType string, volume f
 		"type":      {side},
 		"ordertype": {orderType},
 	}
-	if args != nil {
-		for key, value := range args {
-			switch value.(type) {
-			case string:
-				data.Set(key, value.(string))
-			case int64:
-				data.Set(key, strconv.FormatInt(value.(int64), 10))
-			case float64:
-				data.Set(key, strconv.FormatFloat(value.(float64), 'f', 8, 64))
-			case bool:
-				data.Set(key, strconv.FormatBool(value.(bool)))
-			default:
-				log.Printf("[WARNING] Unknown value type %v for key %s", value, key)
-			}
+	for key, value := range args {
+		switch v := value.(type) {
+		case string:
+			data.Set(key, v)
+		case int64:
+			data.Set(key, strconv.FormatInt(v, 10))
+		case float64:
+			data.Set(key, strconv.FormatFloat(v, 'f', 8, 64))
+		case bool:
+			data.Set(key, strconv.FormatBool(v))
+		default:
+			log.Printf("[WARNING] Unknown value type %v for key %s", value, key)
 		}
 	}
 
@@ -254,4 +252,13 @@ func (api *Kraken) Cancel(orderID string) (*CancelResponse, error) {
 		return nil, err
 	}
 	return resp.(*CancelResponse), nil
+}
+
+// GetWebSocketsToken - WebSockets authentication
+func (api *Kraken) GetWebSocketsToken() (*GetWebSocketTokenResponse, error) {
+	resp, err := api.request("GetWebSocketsToken", true, nil, &GetWebSocketTokenResponse{})
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*GetWebSocketTokenResponse), nil
 }

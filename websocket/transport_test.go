@@ -362,7 +362,7 @@ func Test_ws_Connect(t *testing.T) {
 			name:    "WS is nil",
 			wantErr: false,
 			fields: fields{
-				baseURL: sandboxBaseURL,
+				baseURL: SandboxBaseURL,
 			},
 		},
 		{

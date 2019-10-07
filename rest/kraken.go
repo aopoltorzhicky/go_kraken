@@ -42,14 +42,20 @@ func New(key string, secret string) *Kraken {
 
 func (api *Kraken) getSign(requestURL string, data url.Values) (string, error) {
 	sha := sha256.New()
-	sha.Write([]byte(data.Get("nonce") + data.Encode()))
+
+	if _, err := sha.Write([]byte(data.Get("nonce") + data.Encode())); err != nil {
+		return "", err
+	}
 	hashData := sha.Sum(nil)
 	s, err := base64.StdEncoding.DecodeString(api.secret)
 	if err != nil {
 		return "", err
 	}
 	hmacObj := hmac.New(sha512.New, s)
-	hmacObj.Write(append([]byte(requestURL), hashData...))
+
+	if _, err := hmacObj.Write(append([]byte(requestURL), hashData...)); err != nil {
+		return "", err
+	}
 	hmacData := hmacObj.Sum(nil)
 	return base64.StdEncoding.EncodeToString(hmacData), nil
 }
