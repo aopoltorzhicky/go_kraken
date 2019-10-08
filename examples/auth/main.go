@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	c := ws.NewAuth("l+GpEJ7HT+8qOQJnNGl4rFTwcWYuYb8I1ua3n1MrWthsD67/aui7UQ7p", "LQ7LzKfLnRU8iKZrhKtIF74nd5tibb0tlCQr3JyoWS7RjK8bhKCO5xEV/FZiQTggqTiDQOCEQvNIrwZ2S+GnQA==", true)
+	c := ws.NewAuth("", "", true)
 
 	if err := c.Connect(); err != nil {
 		log.Fatal("Error connecting to web socket : ", err)

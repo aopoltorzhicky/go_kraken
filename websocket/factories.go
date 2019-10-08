@@ -163,3 +163,96 @@ func (f *bookFactory) Parse(data interface{}, pair string) (interface{}, error) 
 	}
 	return result, nil
 }
+
+type ownTradesFactory struct{}
+
+func newOwnTradesFactory() *ownTradesFactory {
+	return &ownTradesFactory{}
+}
+
+func (f *ownTradesFactory) Parse(data interface{}, pair string) (interface{}, error) {
+	upd := OwnTradesUpdate{
+		ChannelName: ChanOwnTrades,
+		Trades:      make(map[string]OwnTrade),
+	}
+	body, ok := data.([]interface{})
+	if !ok {
+		return upd, fmt.Errorf("Can't parse data %#v", data)
+	}
+
+	if len(body) != 2 {
+		return upd, fmt.Errorf("Can't parse data %#v", data)
+	}
+
+	for key, value := range body[0].(map[string]map[string]interface{}) {
+		upd.Trades[key] = OwnTrade{
+			Cost:      valToFloat64(value["cost"]),
+			Fee:       valToFloat64(value["fee"]),
+			Margin:    valToFloat64(value["margin"]),
+			OrderID:   value["ordertxid"].(string),
+			OrderType: value["ordertype"].(string),
+			Pair:      value["pair"].(string),
+			PosTxID:   value["postxid"].(string),
+			Price:     valToFloat64(value["price"]),
+			Time:      valToTime(value["time"]),
+			Type:      value["type"].(string),
+			Vol:       valToFloat64(value["vol"]),
+		}
+	}
+
+	return upd, nil
+}
+
+type openOrdersFactory struct{}
+
+func newOpenOrdersFactory() *openOrdersFactory {
+	return &openOrdersFactory{}
+}
+
+func (f *openOrdersFactory) Parse(data interface{}, pair string) (interface{}, error) {
+	upd := OpenOrdersUpdate{
+		ChannelName: ChanOpenOrders,
+		Order:       make(map[string]OpenOrder),
+	}
+	body, ok := data.([]interface{})
+	if !ok {
+		return upd, fmt.Errorf("Can't parse data %#v", data)
+	}
+
+	if len(body) != 2 {
+		return upd, fmt.Errorf("Can't parse data %#v", data)
+	}
+
+	for key, value := range body[0].(map[string]map[string]interface{}) {
+		upd.Order[key] = OpenOrder{
+			Cost:       valToFloat64(value["cost"]),
+			Fee:        valToFloat64(value["fee"]),
+			LimitPrice: valToFloat64(value["limitprice"]),
+			Misc:       value["misc"].(string),
+			Oflags:     value["oflags"].(string),
+			OpenTime:   valToTime(value["opentm"]),
+			StartTime:  valToTime(value["starttm"]),
+			ExpireTime: valToTime(value["expiretm"]),
+			Price:      valToFloat64(value["price"]),
+			Refid:      value["refid"].(string),
+			Status:     value["status"].(string),
+			StopPrice:  valToFloat64(value["stopprice"]),
+			UserRef:    int(value["userref"].(float64)),
+			Vol:        valToFloat64(value["vol"]),
+			VolExec:    valToFloat64(value["vol_exec"]),
+
+			Descr: OpenOrderDescr{
+				Close:     value["close"].(string),
+				Leverage:  value["leverage"].(string),
+				Order:     value["order"].(string),
+				Ordertype: value["ordertype"].(string),
+				Pair:      value["pair"].(string),
+				Price:     valToFloat64(value["price"]),
+				Price2:    valToFloat64(value["price2"]),
+				Type:      value["type"].(string),
+			},
+		}
+	}
+
+	return upd, nil
+}

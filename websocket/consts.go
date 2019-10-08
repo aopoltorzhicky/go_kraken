@@ -150,3 +150,9 @@ const (
 	ZECJPY  = "ZEC/JPY"
 	ZECUSD  = "ZEC/USD"
 )
+
+// Statuses
+const (
+	StatusOK    = "ok"
+	StatusError = "error"
+)

@@ -23,12 +23,19 @@ func NewAuth(key, secret string, sandbox bool) *AuthClient {
 	if err != nil {
 		panic(err)
 	}
-	return &AuthClient{
+	c := &AuthClient{
 		Client:            New(sandbox),
 		restAPI:           api,
 		token:             data.Token,
 		tokenExpiresTimer: time.NewTimer(time.Duration(data.Expires)),
 	}
+	c.createAuthFactories()
+	return c
+}
+
+func (c *AuthClient) createAuthFactories() {
+	c.createFactory(ChanOwnTrades, newOwnTradesFactory())
+	c.createFactory(ChanOpenOrders, newOpenOrdersFactory())
 }
 
 func (c *AuthClient) subscribeAuthChannel(channelName string) error {
@@ -52,4 +59,28 @@ func (c *AuthClient) SubscribeOwnTrades() error {
 // SubscribeOpenOrders - method tries to subscribe on OpenOrders channel events
 func (c *AuthClient) SubscribeOpenOrders() error {
 	return c.subscribeAuthChannel(ChanOpenOrders)
+}
+
+// AddOrder - method adds new order.
+func (c *AuthClient) AddOrder(req AddOrderRequest) error {
+	req.Event = EventAddOrder
+	req.Token = c.token
+
+	ctx, cxl := context.WithTimeout(context.Background(), c.parameters.ContextTimeout)
+	defer cxl()
+	return c.asynchronous.Send(ctx, req)
+}
+
+// CancelOrder - method cancels order or list of orders.
+func (c *AuthClient) CancelOrder(orderIDs []string) error {
+	req := CancelOrderRequest{
+		AuthRequest: AuthRequest{
+			Token: c.token,
+			Event: EventCancelOrder,
+		},
+		TxID: orderIDs,
+	}
+	ctx, cxl := context.WithTimeout(context.Background(), c.parameters.ContextTimeout)
+	defer cxl()
+	return c.asynchronous.Send(ctx, req)
 }

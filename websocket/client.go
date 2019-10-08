@@ -361,6 +361,42 @@ func (c *Client) handleEvent(msg []byte) error {
 				delete(c.subscriptions, status.ChannelID)
 			}
 		}
+	case EventCancelOrderStatus:
+		cancelOrderResponse := CancelOrderResponse{}
+		err = json.Unmarshal(msg, &cancelOrderResponse)
+		if err != nil {
+			return err
+		}
+
+		if cancelOrderResponse.Status == StatusError {
+			log.Printf("[ERROR] %s", cancelOrderResponse.ErrorMessage)
+		} else if cancelOrderResponse.Status == StatusOK {
+			log.Print("[INFO] Order successfully cancelled")
+			c.listener <- DataUpdate{
+				ChannelName: EventCancelOrder,
+				Data:        cancelOrderResponse,
+			}
+		} else {
+			log.Printf("[ERROR] Unknown status: %s", cancelOrderResponse.Status)
+		}
+	case EventAddOrderStatus:
+		addOrderResponse := AddOrderResponse{}
+		err = json.Unmarshal(msg, &addOrderResponse)
+		if err != nil {
+			return err
+		}
+
+		if addOrderResponse.Status == StatusError {
+			log.Printf("[ERROR] %s", addOrderResponse.ErrorMessage)
+		} else if addOrderResponse.Status == StatusOK {
+			log.Print("[INFO] Order successfully sent")
+			c.listener <- DataUpdate{
+				ChannelName: EventAddOrder,
+				Data:        addOrderResponse,
+			}
+		} else {
+			log.Printf("[ERROR] Unknown status: %s", addOrderResponse.Status)
+		}
 	case EventHeartbeat:
 	default:
 		fmt.Printf("unknown event: %s", msg)

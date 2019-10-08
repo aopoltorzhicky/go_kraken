@@ -208,43 +208,85 @@ type OwnTrade struct {
 	Vol       float64   `json:"vol,string"`
 }
 
-// OpenOrder -
-type OpenOrder struct {
-	Cost  float64 `json:"cost,string"`
-	Descr struct {
-		Close     string  `json:"close"`
-		Leverage  string  `json:"leverage"`
-		Order     string  `json:"order"`
-		Ordertype string  `json:"ordertype"`
-		Pair      string  `json:"pair"`
-		Price     float64 `json:"price,string"`
-		Price2    float64 `json:"price2,string"`
-		Type      string  `json:"type"`
-	} `json:"descr"`
-	Fee        float64   `json:"fee,string"`
-	LimitPrice float64   `json:"limitprice,string"`
-	Misc       string    `json:"misc"`
-	Oflags     string    `json:"oflags"`
-	OpenTime   time.Time `json:"opentm"`
-	StartTime  time.Time `json:"starttm"`
-	ExpireTime time.Time `json:"expiretm"`
-	Price      float64   `json:"price,string"`
-	Refid      string    `json:"refid"`
-	Status     string    `json:"status"`
-	StopPrice  float64   `json:"stopprice,string"`
-	UserRef    int       `json:"userref"`
-	Vol        float64   `json:"vol,string"`
-	VolExec    float64   `json:"vol_exec,string"`
+// OpenOrderDescr -
+type OpenOrderDescr struct {
+	Close     string  `json:"close"`
+	Leverage  string  `json:"leverage"`
+	Order     string  `json:"order"`
+	Ordertype string  `json:"ordertype"`
+	Pair      string  `json:"pair"`
+	Price     float64 `json:"price,string"`
+	Price2    float64 `json:"price2,string"`
+	Type      string  `json:"type"`
 }
 
-// OwnTradesResponse -
-type OwnTradesResponse struct {
+// OpenOrder -
+type OpenOrder struct {
+	Cost       float64        `json:"cost,string"`
+	Descr      OpenOrderDescr `json:"descr"`
+	Fee        float64        `json:"fee,string"`
+	LimitPrice float64        `json:"limitprice,string"`
+	Misc       string         `json:"misc"`
+	Oflags     string         `json:"oflags"`
+	OpenTime   time.Time      `json:"opentm"`
+	StartTime  time.Time      `json:"starttm"`
+	ExpireTime time.Time      `json:"expiretm"`
+	Price      float64        `json:"price,string"`
+	Refid      string         `json:"refid"`
+	Status     string         `json:"status"`
+	StopPrice  float64        `json:"stopprice,string"`
+	UserRef    int            `json:"userref"`
+	Vol        float64        `json:"vol,string"`
+	VolExec    float64        `json:"vol_exec,string"`
+}
+
+// OwnTradesUpdate -
+type OwnTradesUpdate struct {
 	Trades      map[string]OwnTrade
 	ChannelName string
 }
 
-// OpenOrdersResponse -
-type OpenOrdersResponse struct {
+// OpenOrdersUpdate -
+type OpenOrdersUpdate struct {
 	Order       map[string]OpenOrder
 	ChannelName string
+}
+
+// AuthRequest -
+type AuthRequest struct {
+	Token string `json:"token"`
+	Event string `json:"event"`
+}
+
+// AddOrderRequest -
+type AddOrderRequest struct {
+	AuthRequest
+	ClosePrice string `json:"close[price]"`
+	Ordertype  string `json:"ordertype"`
+	Pair       string `json:"pair"`
+	Price      string `json:"price"`
+	Type       string `json:"type"`
+	Volume     string `json:"volume"`
+}
+
+// AddOrderResponse -
+type AddOrderResponse struct {
+	Description  string `json:"descr"`
+	Event        string `json:"event"`
+	Status       string `json:"status"`
+	TxID         string `json:"txid"`
+	ErrorMessage string `json:"errorMessage,omiempty"`
+}
+
+// CancelOrderRequest -
+type CancelOrderRequest struct {
+	AuthRequest
+	TxID []string `json:"txid"`
+}
+
+// CancelOrderResponse -
+type CancelOrderResponse struct {
+	ErrorMessage string `json:"errorMessage,omiempty"`
+	Event        string `json:"event"`
+	Status       string `json:"status"`
 }
