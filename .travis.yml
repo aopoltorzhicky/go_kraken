@@ -17,10 +17,10 @@ script:
   - golint .
   - cd websocket
   - go get -t -v
-  - go test -v -coverprofile=coverage.txt -covermode=atomic
+  - go test -v -coverprofile=coverage.txt -covermode=atomic -race
   - cd ../rest
   - go get -t -v
-  - go test -v -coverprofile=coverage.txt -covermode=atomic
+  - go test -v -coverprofile=coverage.txt -covermode=atomic -race
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

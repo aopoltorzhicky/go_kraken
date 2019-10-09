@@ -2,18 +2,21 @@ package websocket
 
 // URLs
 const (
-	prodBaseURL    = "wss://ws.kraken.com"
-	sandboxBaseURL = "wss://ws-beta.kraken.com"
+	ProdBaseURL    = "wss://ws.kraken.com"
+	AuthBaseURL    = "wss://ws-auth.kraken.com"
+	SandboxBaseURL = "wss://beta-ws.kraken.com"
 )
 
 // Available channels
 const (
-	ChanBook    = "book"
-	ChanTrades  = "trade"
-	ChanTicker  = "ticker"
-	ChanCandles = "ohlc"
-	ChanSpread  = "spread"
-	ChanAll     = "*"
+	ChanBook       = "book"
+	ChanTrades     = "trade"
+	ChanTicker     = "ticker"
+	ChanCandles    = "ohlc"
+	ChanSpread     = "spread"
+	ChanOpenOrders = "openOrders"
+	ChanOwnTrades  = "ownTrades"
+	ChanAll        = "*"
 )
 
 // Events
@@ -25,6 +28,10 @@ const (
 	EventSystemStatus       = "systemStatus"
 	EventSubscriptionStatus = "subscriptionStatus"
 	EventHeartbeat          = "heartbeat"
+	EventAddOrder           = "addOrder"
+	EventAddOrderStatus     = "addOrderStatus"
+	EventCancelOrder        = "cancelOrder"
+	EventCancelOrderStatus  = "cancelOrderStatus"
 )
 
 // Intervals
@@ -142,4 +149,10 @@ const (
 	ZECEUR  = "ZEC/EUR"
 	ZECJPY  = "ZEC/JPY"
 	ZECUSD  = "ZEC/USD"
+)
+
+// Statuses
+const (
+	StatusOK    = "ok"
+	StatusError = "error"
 )

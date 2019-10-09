@@ -432,7 +432,7 @@ func TestClient_connect(t *testing.T) {
 		},
 		{
 			name:    "Test does not connect",
-			wantErr: false,
+			wantErr: true,
 			fields: fields{
 				isError: true,
 			},
@@ -1464,38 +1464,39 @@ func TestClient_listenDisconnect(t *testing.T) {
 }
 
 func TestNew(t *testing.T) {
-	type args struct {
-		sandbox bool
-	}
 	tests := []struct {
 		name string
-		args args
-		want *Client
 	}{
 		{
-			name: "Test sandbox",
-			args: args{
-				sandbox: true,
-			},
-		},
-		{
 			name: "Test prod",
-			args: args{
-				sandbox: false,
-			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := New(tt.args.sandbox)
-			if tt.args.sandbox {
-				if got.parameters.URL != sandboxBaseURL {
-					t.Errorf("URL = %s, want %s", got.parameters.URL, sandboxBaseURL)
-				}
-			} else {
-				if got.parameters.URL != prodBaseURL {
-					t.Errorf("URL = %s, want %s", got.parameters.URL, prodBaseURL)
-				}
+			got := New()
+			if got.parameters.URL != ProdBaseURL {
+				t.Errorf("URL = %s, want %s", got.parameters.URL, ProdBaseURL)
+			}
+			if len(got.factories) != 5 {
+				t.Errorf("Factories count = %d, want %d", len(got.factories), 5)
+			}
+		})
+	}
+}
+
+func TestNewSandbox(t *testing.T) {
+	tests := []struct {
+		name string
+	}{
+		{
+			name: "Test sandbox",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := NewSandbox()
+			if got.parameters.URL != SandboxBaseURL {
+				t.Errorf("URL = %s, want %s", got.parameters.URL, ProdBaseURL)
 			}
 			if len(got.factories) != 5 {
 				t.Errorf("Factories count = %d, want %d", len(got.factories), 5)

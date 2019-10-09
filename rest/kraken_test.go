@@ -231,7 +231,7 @@ func TestKraken_prepareRequest(t *testing.T) {
 						t.Errorf("Kraken.prepareRequest() expected = https, got %v", got.URL.Scheme)
 						return
 					}
-				} else if got == nil {
+				} else {
 					t.Errorf("Kraken.prepareRequest() got = %v, wantErr %v", got, tt.wantErr)
 					return
 				}
@@ -319,13 +319,10 @@ func TestKraken_parseResponse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			api := New(tt.fields.key, tt.fields.secret)
-			got, err := api.parseResponse(tt.args.response, tt.args.retType)
+			err := api.parseResponse(tt.args.response, tt.args.retType)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Kraken.parseResponse() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Kraken.parseResponse() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -368,13 +365,10 @@ func TestKraken_request(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			api := New(tt.fields.key, tt.fields.secret)
-			got, err := api.request(tt.args.method, tt.args.isPrivate, tt.args.data, tt.args.retType)
+			err := api.request(tt.args.method, tt.args.isPrivate, tt.args.data, tt.args.retType)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Kraken.request() error = %v, wantErr %v", err, tt.wantErr)
 				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Kraken.request() = %v, want %v", got, tt.want)
 			}
 		})
 	}
