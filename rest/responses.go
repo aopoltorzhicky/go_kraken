@@ -1,5 +1,40 @@
 package rest
 
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strconv"
+)
+
+func getFloat64FromStr(value interface{}) (float64, error) {
+	str, ok := value.(string)
+	if !ok {
+		return .0, errors.New("Field must be a string")
+	}
+	f, err := strconv.ParseFloat(str, 64)
+	if err != nil {
+		return .0, err
+	}
+	return f, nil
+}
+
+func getFloat64(value interface{}) (float64, error) {
+	f, ok := value.(float64)
+	if !ok {
+		return .0, errors.New("Field must be a float64")
+	}
+	return f, nil
+}
+
+func getTimestamp(value interface{}) (int64, error) {
+	f, ok := value.(float64)
+	if !ok {
+		return 0, errors.New("Field must be a float64")
+	}
+	return int64(f), nil
+}
+
 // KrakenResponse - template of Kraken API response
 type KrakenResponse struct {
 	Error  []string    `json:"error"`
@@ -12,122 +47,12 @@ type TimeResponse struct {
 	Rfc1123  string `json:"rfc1123"`
 }
 
-// AssetResponse - Result of Assets request
-type AssetResponse struct {
-	ADA  Asset
-	BCH  Asset
-	BSV  Asset
-	DASH Asset
-	EOS  Asset
-	GNO  Asset
-	KFEE Asset
-	QTUM Asset
-	USDT Asset
-	XDAO Asset
-	XETC Asset
-	XETH Asset
-	XICN Asset
-	XLTC Asset
-	XMLN Asset
-	XNMC Asset
-	XREP Asset
-	XXBT Asset
-	XXDG Asset
-	XXLM Asset
-	XXMR Asset
-	XXRP Asset
-	XXTZ Asset
-	XXVN Asset
-	XZEC Asset
-	ZCAD Asset
-	ZEUR Asset
-	ZGBP Asset
-	ZJPY Asset
-	ZKRW Asset
-	ZUSD Asset
-}
-
 // Asset - asset information
 type Asset struct {
 	AlternateName   string `json:"altname"`
 	AssetClass      string `json:"aclass"`
 	Decimals        int    `json:"decimals"`
 	DisplayDecimals int    `json:"display_decimals"`
-}
-
-// AssetPairsResponse - struct with asset pair informations
-type AssetPairsResponse struct {
-	ADACAD   AssetPair
-	ADAETH   AssetPair
-	ADAEUR   AssetPair
-	ADAUSD   AssetPair
-	ADAXBT   AssetPair
-	BCHEUR   AssetPair
-	BCHUSD   AssetPair
-	BCHXBT   AssetPair
-	DASHEUR  AssetPair
-	DASHUSD  AssetPair
-	DASHXBT  AssetPair
-	EOSETH   AssetPair
-	EOSEUR   AssetPair
-	EOSUSD   AssetPair
-	EOSXBT   AssetPair
-	GNOETH   AssetPair
-	GNOEUR   AssetPair
-	GNOUSD   AssetPair
-	GNOXBT   AssetPair
-	QTUMCAD  AssetPair
-	QTUMETH  AssetPair
-	QTUMEUR  AssetPair
-	QTUMUSD  AssetPair
-	QTUMXBT  AssetPair
-	USDTZUSD AssetPair
-	XETCXETH AssetPair
-	XETCXXBT AssetPair
-	XETCZEUR AssetPair
-	XETCZUSD AssetPair
-	XETHXXBT AssetPair
-	XETHZCAD AssetPair
-	XETHZEUR AssetPair
-	XETHZGBP AssetPair
-	XETHZJPY AssetPair
-	XETHZUSD AssetPair
-	XICNXETH AssetPair
-	XICNXXBT AssetPair
-	XLTCXXBT AssetPair
-	XLTCZEUR AssetPair
-	XLTCZUSD AssetPair
-	XMLNXETH AssetPair
-	XMLNXXBT AssetPair
-	XREPXETH AssetPair
-	XREPXXBT AssetPair
-	XREPZEUR AssetPair
-	XREPZUSD AssetPair
-	XTZCAD   AssetPair
-	XTZETH   AssetPair
-	XTZEUR   AssetPair
-	XTZUSD   AssetPair
-	XTZXBT   AssetPair
-	XXBTZCAD AssetPair
-	XXBTZEUR AssetPair
-	XXBTZGBP AssetPair
-	XXBTZJPY AssetPair
-	XXBTZUSD AssetPair
-	XXDGXXBT AssetPair
-	XXLMXXBT AssetPair
-	XXLMZEUR AssetPair
-	XXLMZUSD AssetPair
-	XXMRXXBT AssetPair
-	XXMRZEUR AssetPair
-	XXMRZUSD AssetPair
-	XXRPXXBT AssetPair
-	XXRPZCAD AssetPair
-	XXRPZEUR AssetPair
-	XXRPZJPY AssetPair
-	XXRPZUSD AssetPair
-	XZECXXBT AssetPair
-	XZECZEUR AssetPair
-	XZECZUSD AssetPair
 }
 
 // AssetPair - asset pair information
@@ -151,98 +76,103 @@ type AssetPair struct {
 	WSName            string      `json:"wsname"`
 }
 
-// TickerResponse - all pairs in ticker response
-type TickerResponse struct {
-	ADACAD   Ticker
-	ADAETH   Ticker
-	ADAEUR   Ticker
-	ADAUSD   Ticker
-	ADAXBT   Ticker
-	BCHEUR   Ticker
-	BCHUSD   Ticker
-	BCHXBT   Ticker
-	DASHEUR  Ticker
-	DASHUSD  Ticker
-	DASHXBT  Ticker
-	EOSETH   Ticker
-	EOSEUR   Ticker
-	EOSUSD   Ticker
-	EOSXBT   Ticker
-	GNOETH   Ticker
-	GNOEUR   Ticker
-	GNOUSD   Ticker
-	GNOXBT   Ticker
-	QTUMCAD  Ticker
-	QTUMETH  Ticker
-	QTUMEUR  Ticker
-	QTUMUSD  Ticker
-	QTUMXBT  Ticker
-	USDTZUSD Ticker
-	XETCXETH Ticker
-	XETCXXBT Ticker
-	XETCZEUR Ticker
-	XETCZUSD Ticker
-	XETHXXBT Ticker
-	XETHZCAD Ticker
-	XETHZEUR Ticker
-	XETHZGBP Ticker
-	XETHZJPY Ticker
-	XETHZUSD Ticker
-	XICNXETH Ticker
-	XICNXXBT Ticker
-	XLTCXXBT Ticker
-	XLTCZEUR Ticker
-	XLTCZUSD Ticker
-	XMLNXETH Ticker
-	XMLNXXBT Ticker
-	XREPXETH Ticker
-	XREPXXBT Ticker
-	XREPZEUR Ticker
-	XREPZUSD Ticker
-	XXBTZCAD Ticker
-	XXBTZEUR Ticker
-	XXBTZGBP Ticker
-	XXBTZJPY Ticker
-	XXBTZUSD Ticker
-	XXDGXXBT Ticker
-	XXLMXXBT Ticker
-	XXLMZEUR Ticker
-	XXLMZUSD Ticker
-	XXMRXXBT Ticker
-	XXMRZEUR Ticker
-	XXMRZUSD Ticker
-	XXRPXXBT Ticker
-	XXRPZCAD Ticker
-	XXRPZEUR Ticker
-	XXRPZJPY Ticker
-	XXRPZUSD Ticker
-	XTZCAD   Ticker
-	XTZETH   Ticker
-	XTZEUR   Ticker
-	XTZUSD   Ticker
-	XTZXBT   Ticker
-	XZECXXBT Ticker
-	XZECZEUR Ticker
-	XZECZUSD Ticker
-}
-
 // Level - ticker structure for Ask and Bid
 type Level struct {
-	Price          float64 `json:",string"`
-	WholeLotVolume float64 `json:",string"`
-	Volume         float64 `json:",string"`
+	Price          float64
+	WholeLotVolume float64
+	Volume         float64
+}
+
+// UnmarshalJSON -
+func (item *Level) UnmarshalJSON(buf []byte) error {
+	var tmp []interface{}
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if g, e := len(tmp), 3; g != e {
+		return fmt.Errorf("wrong number of fields in Level: %d != %d", g, e)
+	}
+
+	price, err := getFloat64FromStr(tmp[0])
+	if err != nil {
+		return err
+	}
+	item.Price = price
+
+	whole, err := getFloat64FromStr(tmp[1])
+	if err != nil {
+		return err
+	}
+	item.WholeLotVolume = whole
+
+	vol, err := getFloat64FromStr(tmp[2])
+	if err != nil {
+		return err
+	}
+	item.Volume = vol
+	return nil
 }
 
 // TimeLevel - ticker structure for Volume, VolumeAveragePrice, Low, High
 type TimeLevel struct {
-	Today       float64 `json:",string"`
-	Last24Hours float64 `json:",string"`
+	Today       float64
+	Last24Hours float64
+}
+
+// UnmarshalJSON -
+func (item *TimeLevel) UnmarshalJSON(buf []byte) error {
+	var tmp []interface{}
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if g, e := len(tmp), 2; g != e {
+		return fmt.Errorf("wrong number of fields in TimeLevel: %d != %d", g, e)
+	}
+
+	today, err := getFloat64(tmp[0])
+	if err != nil {
+		return err
+	}
+	item.Today = today
+
+	last, err := getFloat64(tmp[1])
+	if err != nil {
+		return err
+	}
+	item.Last24Hours = last
+
+	return nil
 }
 
 // CloseLevel - ticker structure for Close
 type CloseLevel struct {
-	Price     float64 `json:",string"`
-	LotVolume float64 `json:",string"`
+	Price     float64
+	LotVolume float64
+}
+
+// UnmarshalJSON -
+func (item *CloseLevel) UnmarshalJSON(buf []byte) error {
+	var tmp []interface{}
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if g, e := len(tmp), 2; g != e {
+		return fmt.Errorf("wrong number of fields in CloseLevel: %d != %d", g, e)
+	}
+
+	price, err := getFloat64FromStr(tmp[0])
+	if err != nil {
+		return err
+	}
+	item.Price = price
+
+	lot, err := getFloat64FromStr(tmp[1])
+	if err != nil {
+		return err
+	}
+	item.LotVolume = lot
+
+	return nil
 }
 
 // Ticker - struct of ticker response
@@ -250,11 +180,11 @@ type Ticker struct {
 	Ask                Level      `json:"a"`
 	Bid                Level      `json:"b"`
 	Close              CloseLevel `json:"c"`
-	Volume             TimeLevel  `json:"v"`
-	VolumeAveragePrice TimeLevel  `json:"p"`
+	Volume             CloseLevel `json:"v"`
+	VolumeAveragePrice CloseLevel `json:"p"`
 	Trades             TimeLevel  `json:"t"`
-	Low                TimeLevel  `json:"l"`
-	High               TimeLevel  `json:"h"`
+	Low                CloseLevel `json:"l"`
+	High               CloseLevel `json:"h"`
 	OpeningPrice       float64    `json:"o,string"`
 }
 
@@ -272,85 +202,110 @@ type Candle struct {
 
 // OHLCResponse - response of OHLC request
 type OHLCResponse struct {
-	Last     int64 `json:"last"`
-	ADACAD   []Candle
-	ADAETH   []Candle
-	ADAEUR   []Candle
-	ADAUSD   []Candle
-	ADAXBT   []Candle
-	BCHEUR   []Candle
-	BCHUSD   []Candle
-	BCHXBT   []Candle
-	DASHEUR  []Candle
-	DASHUSD  []Candle
-	DASHXBT  []Candle
-	EOSETH   []Candle
-	EOSEUR   []Candle
-	EOSUSD   []Candle
-	EOSXBT   []Candle
-	GNOETH   []Candle
-	GNOEUR   []Candle
-	GNOUSD   []Candle
-	GNOXBT   []Candle
-	QTUMCAD  []Candle
-	QTUMETH  []Candle
-	QTUMEUR  []Candle
-	QTUMUSD  []Candle
-	QTUMXBT  []Candle
-	USDTZUSD []Candle
-	XETCXETH []Candle
-	XETCXXBT []Candle
-	XETCZEUR []Candle
-	XETCZUSD []Candle
-	XETHXXBT []Candle
-	XETHZCAD []Candle
-	XETHZEUR []Candle
-	XETHZGBP []Candle
-	XETHZJPY []Candle
-	XETHZUSD []Candle
-	XICNXETH []Candle
-	XICNXXBT []Candle
-	XLTCXXBT []Candle
-	XLTCZEUR []Candle
-	XLTCZUSD []Candle
-	XMLNXETH []Candle
-	XMLNXXBT []Candle
-	XREPXETH []Candle
-	XREPXXBT []Candle
-	XREPZEUR []Candle
-	XREPZUSD []Candle
-	XXBTZCAD []Candle
-	XXBTZEUR []Candle
-	XXBTZGBP []Candle
-	XXBTZJPY []Candle
-	XXBTZUSD []Candle
-	XXDGXXBT []Candle
-	XXLMXXBT []Candle
-	XXLMZEUR []Candle
-	XXLMZUSD []Candle
-	XXMRXXBT []Candle
-	XXMRZEUR []Candle
-	XXMRZUSD []Candle
-	XXRPXXBT []Candle
-	XXRPZCAD []Candle
-	XXRPZEUR []Candle
-	XXRPZJPY []Candle
-	XXRPZUSD []Candle
-	XTZCAD   []Candle
-	XTZETH   []Candle
-	XTZEUR   []Candle
-	XTZUSD   []Candle
-	XTZXBT   []Candle
-	XZECXXBT []Candle
-	XZECZEUR []Candle
-	XZECZUSD []Candle
+	Candles map[string][]Candle `json:"-"`
+	Last    int64               `json:"last"`
+}
+
+// UnmarshalJSON -
+func (item *OHLCResponse) UnmarshalJSON(buf []byte) error {
+	res := make(map[string]interface{})
+	if err := json.Unmarshal(buf, &res); err != nil {
+		return err
+	}
+
+	last, err := getTimestamp(res["last"])
+	if err != nil {
+		return err
+	}
+	item.Last = last
+	delete(res, "last")
+
+	item.Candles = make(map[string][]Candle)
+	for k, v := range res {
+		items := v.([]interface{})
+		item.Candles[k] = make([]Candle, len(items))
+		for idx, c := range items {
+			candle := c.([]interface{})
+
+			ts, err := getTimestamp(candle[0])
+			if err != nil {
+				continue
+			}
+			open, err := getFloat64FromStr(candle[1])
+			if err != nil {
+				continue
+			}
+			high, err := getFloat64FromStr(candle[2])
+			if err != nil {
+				continue
+			}
+			low, err := getFloat64FromStr(candle[3])
+			if err != nil {
+				continue
+			}
+			close, err := getFloat64FromStr(candle[4])
+			if err != nil {
+				continue
+			}
+			vwap, err := getFloat64FromStr(candle[5])
+			if err != nil {
+				continue
+			}
+			vol, err := getFloat64FromStr(candle[6])
+			if err != nil {
+				continue
+			}
+			item.Candles[k][idx] = Candle{
+				Time:      ts,
+				Open:      open,
+				High:      high,
+				Low:       low,
+				Close:     close,
+				VolumeWAP: vwap,
+				Volume:    vol,
+				Count:     int64(candle[7].(float64)),
+			}
+		}
+	}
+	return nil
 }
 
 // OrderBookItem - one price level in orderbook
 type OrderBookItem struct {
-	Price     float64 `json:",string"`
-	Volume    float64 `json:",string"`
+	Price     float64
+	Volume    float64
 	Timestamp int64
+}
+
+// UnmarshalJSON -
+func (item *OrderBookItem) UnmarshalJSON(buf []byte) error {
+	var tmp []interface{}
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if g, e := len(tmp), 3; g != e {
+		return fmt.Errorf("wrong number of fields in OrderBookItem: %d != %d", g, e)
+	}
+
+	price, err := getFloat64FromStr(tmp[0])
+	if err != nil {
+		return err
+	}
+	item.Price = price
+
+	vol, err := getFloat64FromStr(tmp[1])
+	if err != nil {
+		return err
+	}
+	item.Volume = vol
+
+	ts, err := getTimestamp(tmp[2])
+	if err != nil {
+		return err
+	}
+	item.Timestamp = ts
+
+	return nil
 }
 
 // OrderBook - struct of order book levels
@@ -359,89 +314,62 @@ type OrderBook struct {
 	Bids []OrderBookItem `json:"bids"`
 }
 
-// BookResponse - all pairs in book response
-type BookResponse struct {
-	ADACAD   OrderBook
-	ADAETH   OrderBook
-	ADAEUR   OrderBook
-	ADAUSD   OrderBook
-	ADAXBT   OrderBook
-	BCHEUR   OrderBook
-	BCHUSD   OrderBook
-	BCHXBT   OrderBook
-	DASHEUR  OrderBook
-	DASHUSD  OrderBook
-	DASHXBT  OrderBook
-	EOSETH   OrderBook
-	EOSEUR   OrderBook
-	EOSUSD   OrderBook
-	EOSXBT   OrderBook
-	GNOETH   OrderBook
-	GNOEUR   OrderBook
-	GNOUSD   OrderBook
-	GNOXBT   OrderBook
-	QTUMCAD  OrderBook
-	QTUMETH  OrderBook
-	QTUMEUR  OrderBook
-	QTUMUSD  OrderBook
-	QTUMXBT  OrderBook
-	USDTZUSD OrderBook
-	XETCXETH OrderBook
-	XETCXXBT OrderBook
-	XETCZEUR OrderBook
-	XETCZUSD OrderBook
-	XETHXXBT OrderBook
-	XETHZCAD OrderBook
-	XETHZEUR OrderBook
-	XETHZGBP OrderBook
-	XETHZJPY OrderBook
-	XETHZUSD OrderBook
-	XICNXETH OrderBook
-	XICNXXBT OrderBook
-	XLTCXXBT OrderBook
-	XLTCZEUR OrderBook
-	XLTCZUSD OrderBook
-	XMLNXETH OrderBook
-	XMLNXXBT OrderBook
-	XREPXETH OrderBook
-	XREPXXBT OrderBook
-	XREPZEUR OrderBook
-	XREPZUSD OrderBook
-	XXBTZCAD OrderBook
-	XXBTZEUR OrderBook
-	XXBTZGBP OrderBook
-	XXBTZJPY OrderBook
-	XXBTZUSD OrderBook
-	XXDGXXBT OrderBook
-	XXLMXXBT OrderBook
-	XXLMZEUR OrderBook
-	XXLMZUSD OrderBook
-	XXMRXXBT OrderBook
-	XXMRZEUR OrderBook
-	XXMRZUSD OrderBook
-	XXRPXXBT OrderBook
-	XXRPZCAD OrderBook
-	XXRPZEUR OrderBook
-	XXRPZJPY OrderBook
-	XXRPZUSD OrderBook
-	XTZCAD   OrderBook
-	XTZETH   OrderBook
-	XTZEUR   OrderBook
-	XTZUSD   OrderBook
-	XTZXBT   OrderBook
-	XZECXXBT OrderBook
-	XZECZEUR OrderBook
-	XZECZUSD OrderBook
-}
-
 // Trade - structure of public trades
 type Trade struct {
-	Price     float64 `json:",string"`
-	Volume    float64 `json:",string"`
+	Price     float64
+	Volume    float64
 	Time      float64
 	Side      string
 	OrderType string
 	Misc      string
+}
+
+// UnmarshalJSON -
+func (item *Trade) UnmarshalJSON(buf []byte) error {
+	var tmp []interface{}
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if g, e := len(tmp), 6; g != e {
+		return fmt.Errorf("wrong number of fields in CloseLevel: %d != %d", g, e)
+	}
+
+	price, err := getFloat64FromStr(tmp[0])
+	if err != nil {
+		return err
+	}
+	item.Price = price
+
+	vol, err := getFloat64FromStr(tmp[1])
+	if err != nil {
+		return err
+	}
+	item.Volume = vol
+
+	ts, err := getFloat64(tmp[2])
+	if err != nil {
+		return err
+	}
+	item.Time = ts
+
+	side, ok := tmp[3].(string)
+	if !ok {
+		return fmt.Errorf("Invalid side type")
+	}
+	item.Side = side
+
+	t, ok := tmp[4].(string)
+	if !ok {
+		return fmt.Errorf("Invalid order type")
+	}
+	item.OrderType = t
+
+	misc, ok := tmp[5].(string)
+	if !ok {
+		return fmt.Errorf("Invalid misc type")
+	}
+	item.Misc = misc
+	return nil
 }
 
 // TradeResponse - all pairs in trade response
@@ -523,8 +451,38 @@ type TradeResponse struct {
 // Spread - structure of spread data
 type Spread struct {
 	Time float64
-	Bid  float64 `json:",string"`
-	Ask  float64 `json:",string"`
+	Bid  float64
+	Ask  float64
+}
+
+// UnmarshalJSON -
+func (item *Spread) UnmarshalJSON(buf []byte) error {
+	var tmp []interface{}
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	if g, e := len(tmp), 3; g != e {
+		return fmt.Errorf("wrong number of fields in CloseLevel: %d != %d", g, e)
+	}
+
+	ts, err := getFloat64(tmp[0])
+	if err != nil {
+		return err
+	}
+	item.Time = ts
+
+	bid, err := getFloat64FromStr(tmp[1])
+	if err != nil {
+		return err
+	}
+	item.Bid = bid
+
+	ask, err := getFloat64FromStr(tmp[2])
+	if err != nil {
+		return err
+	}
+	item.Ask = ask
+	return nil
 }
 
 // SpreadResponse - response of spread request
@@ -664,11 +622,13 @@ type ClosedOrdersResponse struct {
 
 // OrderInfo - structure contains order information
 type OrderInfo struct {
-	RefID           string           `json:"refid"`
-	UserRef         string           `json:"userref"`
+	RefID           *string          `json:"refid"`
+	UserRef         interface{}      `json:"userref"`
 	Status          string           `json:"status"`
+	Reason          string           `json:"reason,omitempty"`
 	OpenTimestamp   float64          `json:"opentm"`
 	StartTimestamp  float64          `json:"starttm"`
+	CloseTimestamp  float64          `json:"closetm,omitempty"`
 	ExpireTimestamp float64          `json:"expiretm"`
 	Description     OrderDescription `json:"descr"`
 	Volume          float64          `json:"vol,string"`

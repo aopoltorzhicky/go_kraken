@@ -29,14 +29,14 @@ func TestKraken_Time(t *testing.T) {
 		name    string
 		err     error
 		resp    *http.Response
-		want    *TimeResponse
+		want    TimeResponse
 		wantErr bool
 	}{
 		{
 			name:    "Error returned from Kraken",
 			err:     ErrSomething,
 			resp:    &http.Response{},
-			want:    nil,
+			want:    TimeResponse{},
 			wantErr: true,
 		},
 		{
@@ -46,7 +46,7 @@ func TestKraken_Time(t *testing.T) {
 				StatusCode: 200,
 				Body:       ioutil.NopCloser(bytes.NewReader(json)),
 			},
-			want: &TimeResponse{
+			want: TimeResponse{
 				Unixtime: 1554218108,
 				Rfc1123:  "Tue,  2 Apr 19 15:15:08 +0000",
 			},
@@ -83,7 +83,7 @@ func TestKraken_Assets(t *testing.T) {
 		err     error
 		resp    *http.Response
 		args    args
-		want    *AssetResponse
+		want    map[string]Asset
 		wantErr bool
 	}{
 		{
@@ -93,7 +93,7 @@ func TestKraken_Assets(t *testing.T) {
 			args: args{
 				assets: nil,
 			},
-			want:    nil,
+			want:    map[string]Asset{},
 			wantErr: true,
 		},
 		{
@@ -106,8 +106,8 @@ func TestKraken_Assets(t *testing.T) {
 			args: args{
 				assets: nil,
 			},
-			want: &AssetResponse{
-				ADA: Asset{
+			want: map[string]Asset{
+				"ADA": Asset{
 					AlternateName:   "ADA",
 					AssetClass:      "currency",
 					Decimals:        8,
@@ -126,8 +126,8 @@ func TestKraken_Assets(t *testing.T) {
 			args: args{
 				assets: []string{"ADA"},
 			},
-			want: &AssetResponse{
-				ADA: Asset{
+			want: map[string]Asset{
+				"ADA": Asset{
 					AlternateName:   "ADA",
 					AssetClass:      "currency",
 					Decimals:        8,
@@ -167,7 +167,7 @@ func TestKraken_AssetPairs(t *testing.T) {
 		args    args
 		err     error
 		resp    *http.Response
-		want    *AssetPairsResponse
+		want    map[string]AssetPair
 		wantErr bool
 	}{
 		{
@@ -189,8 +189,8 @@ func TestKraken_AssetPairs(t *testing.T) {
 			args: args{
 				pairs: []string{"ADACAD"},
 			},
-			want: &AssetPairsResponse{
-				ADACAD: AssetPair{
+			want: map[string]AssetPair{
+				"ADACAD": AssetPair{
 					Altname:           "ADACAD",
 					WSName:            "ADA/CAD",
 					AssetClassBase:    "currency",
@@ -221,8 +221,8 @@ func TestKraken_AssetPairs(t *testing.T) {
 			args: args{
 				pairs: nil,
 			},
-			want: &AssetPairsResponse{
-				ADACAD: AssetPair{
+			want: map[string]AssetPair{
+				"ADACAD": AssetPair{
 					Altname:           "ADACAD",
 					WSName:            "ADA/CAD",
 					AssetClassBase:    "currency",
@@ -275,7 +275,7 @@ func TestKraken_Ticker(t *testing.T) {
 		err     error
 		resp    *http.Response
 		args    args
-		want    *TickerResponse
+		want    map[string]Ticker
 		wantErr bool
 	}{
 		{
@@ -306,8 +306,8 @@ func TestKraken_Ticker(t *testing.T) {
 			args: args{
 				pairs: []string{"ADACAD"},
 			},
-			want: &TickerResponse{
-				ADACAD: Ticker{
+			want: map[string]Ticker{
+				"ADACAD": Ticker{
 					Ask: Level{
 						Price:          0.108312,
 						WholeLotVolume: 6418.,
@@ -322,25 +322,25 @@ func TestKraken_Ticker(t *testing.T) {
 						Price:     0.090043,
 						LotVolume: 0.00000091,
 					},
-					Volume: TimeLevel{
-						Today:       115805.23341809,
-						Last24Hours: 136512.79974015,
+					Volume: CloseLevel{
+						Price:     115805.23341809,
+						LotVolume: 136512.79974015,
 					},
-					VolumeAveragePrice: TimeLevel{
-						Today:       0.102010,
-						Last24Hours: 0.100786,
+					VolumeAveragePrice: CloseLevel{
+						Price:     0.102010,
+						LotVolume: 0.100786,
 					},
 					Trades: TimeLevel{
 						Today:       54.,
 						Last24Hours: 67.,
 					},
-					Low: TimeLevel{
-						Today:       0.090000,
-						Last24Hours: 0.090000,
+					Low: CloseLevel{
+						Price:     0.090000,
+						LotVolume: 0.090000,
 					},
-					High: TimeLevel{
-						Today:       0.109000,
-						Last24Hours: 0.109000,
+					High: CloseLevel{
+						Price:     0.109000,
+						LotVolume: 0.109000,
 					},
 					OpeningPrice: 0.093911,
 				},
@@ -370,18 +370,20 @@ func TestKraken_Ticker(t *testing.T) {
 
 func TestKraken_Candles(t *testing.T) {
 	json := []byte(`{"error":[],"result":{"ADACAD":[[1554179640,"0.0005000","0.0005000","0.0005000","0.0005000","0.0000000","0.00000000",0]],"last":1554222360}}`)
-	response := &OHLCResponse{
+	response := OHLCResponse{
 		Last: 1554222360,
-		ADACAD: []Candle{{
-			Time:      1554179640,
-			Open:      0.0005000,
-			High:      0.0005000,
-			Low:       0.0005000,
-			Close:     0.0005000,
-			VolumeWAP: 0.0000000,
-			Volume:    0.0000000,
-			Count:     0,
-		}},
+		Candles: map[string][]Candle{
+			"ADACAD": []Candle{{
+				Time:      1554179640,
+				Open:      0.0005000,
+				High:      0.0005000,
+				Low:       0.0005000,
+				Close:     0.0005000,
+				VolumeWAP: 0.0000000,
+				Volume:    0.0000000,
+				Count:     0,
+			}},
+		},
 	}
 	type args struct {
 		pair     string
@@ -393,7 +395,7 @@ func TestKraken_Candles(t *testing.T) {
 		err     error
 		resp    *http.Response
 		args    args
-		want    *OHLCResponse
+		want    OHLCResponse
 		wantErr bool
 	}{
 
@@ -406,7 +408,7 @@ func TestKraken_Candles(t *testing.T) {
 				interval: 0,
 				since:    0,
 			},
-			want:    nil,
+			want:    OHLCResponse{},
 			wantErr: true,
 		}, {
 			name: "Get candles from kraken",
@@ -469,7 +471,7 @@ func TestKraken_GetOrderBook(t *testing.T) {
 		err     error
 		resp    *http.Response
 		args    args
-		want    *BookResponse
+		want    map[string]OrderBook
 		wantErr bool
 	}{
 		{
@@ -493,8 +495,8 @@ func TestKraken_GetOrderBook(t *testing.T) {
 				pair:  "ADACAD",
 				depth: 2,
 			},
-			want: &BookResponse{
-				ADACAD: OrderBook{
+			want: map[string]OrderBook{
+				"ADACAD": OrderBook{
 					Asks: []OrderBookItem{
 						OrderBookItem{
 							Price:     0.109441,
@@ -555,7 +557,7 @@ func TestKraken_GetTrades(t *testing.T) {
 		err     error
 		resp    *http.Response
 		args    args
-		want    *TradeResponse
+		want    TradeResponse
 		wantErr bool
 	}{
 		{
@@ -566,7 +568,7 @@ func TestKraken_GetTrades(t *testing.T) {
 				pair:  "ADACAD",
 				since: 2,
 			},
-			want:    nil,
+			want:    TradeResponse{},
 			wantErr: true,
 		}, {
 			name: "Get trades",
@@ -579,7 +581,7 @@ func TestKraken_GetTrades(t *testing.T) {
 				pair:  "ADACAD",
 				since: 2,
 			},
-			want: &TradeResponse{
+			want: TradeResponse{
 				Last: 1554221914617956627,
 				ADACAD: []Trade{
 					Trade{
@@ -626,7 +628,7 @@ func TestKraken_GetSpread(t *testing.T) {
 		err     error
 		resp    *http.Response
 		args    args
-		want    *SpreadResponse
+		want    SpreadResponse
 		wantErr bool
 	}{
 		{
@@ -637,7 +639,7 @@ func TestKraken_GetSpread(t *testing.T) {
 				pair:  "ADACAD",
 				since: 2,
 			},
-			want:    nil,
+			want:    SpreadResponse{},
 			wantErr: true,
 		}, {
 			name: "Get spread",
@@ -650,7 +652,7 @@ func TestKraken_GetSpread(t *testing.T) {
 				pair:  "ADACAD",
 				since: 2,
 			},
-			want: &SpreadResponse{
+			want: SpreadResponse{
 				Last: 1554224725,
 				ADACAD: []Spread{
 					Spread{

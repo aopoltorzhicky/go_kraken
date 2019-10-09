@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -12,8 +13,6 @@ import (
 	"net/url"
 	"strings"
 	"time"
-
-	"github.com/ugorji/go/codec"
 )
 
 // clientInterface - for testing purpose
@@ -88,45 +87,45 @@ func (api *Kraken) prepareRequest(method string, isPrivate bool, data url.Values
 	return req, nil
 }
 
-func (api *Kraken) parseResponse(response *http.Response, retType interface{}) (interface{}, error) {
+func (api *Kraken) parseResponse(response *http.Response, retType interface{}) error {
 	if response.StatusCode != 200 {
-		return nil, fmt.Errorf("Error during response parsing: invalid status code %d", response.StatusCode)
+		return fmt.Errorf("Error during response parsing: invalid status code %d", response.StatusCode)
 	}
 
 	if response.Body == nil {
-		return nil, fmt.Errorf("Error during response parsing: can not read response body")
+		return fmt.Errorf("Error during response parsing: can not read response body")
 	}
 
 	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return nil, fmt.Errorf("Error during response parsing: can not read response body (%s)", err.Error())
+		return fmt.Errorf("Error during response parsing: can not read response body (%s)", err.Error())
 	}
+
+	log.Println(string(body))
 	var retData KrakenResponse
 	if retType != nil {
 		retData.Result = retType
 	}
 
-	log.Println(string(body))
-	err = codec.NewDecoderBytes(body, new(codec.JsonHandle)).Decode(&retData)
-	if err != nil {
-		return nil, fmt.Errorf("Error during response parsing: json marshalling (%s)", err.Error())
+	if err = json.Unmarshal(body, &retData); err != nil {
+		return fmt.Errorf("Error during response parsing: json marshalling (%s)", err.Error())
 	}
 
 	if len(retData.Error) > 0 {
-		return nil, fmt.Errorf("Kraken return errors: %s", retData.Error)
+		return fmt.Errorf("Kraken return errors: %s", retData.Error)
 	}
 
-	return retData.Result, nil
+	return nil
 }
 
-func (api *Kraken) request(method string, isPrivate bool, data url.Values, retType interface{}) (interface{}, error) {
+func (api *Kraken) request(method string, isPrivate bool, data url.Values, retType interface{}) error {
 	req, err := api.prepareRequest(method, isPrivate, data)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	resp, err := api.client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Error during request execution: %s", err.Error())
+		return fmt.Errorf("Error during request execution: %s", err.Error())
 	}
 	defer resp.Body.Close()
 	return api.parseResponse(resp, retType)

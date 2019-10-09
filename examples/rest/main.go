@@ -3,14 +3,15 @@ package main
 import (
 	"log"
 
-	"../../rest"
+	"github.com/aopoltorzhicky/go_kraken/rest"
 )
 
 func main() {
-	api := rest.New("api-key", "secret")
-	data, err1 := api.GetWebSocketsToken()
-	if err1 != nil {
-		log.Fatalln(err1)
+	api := rest.New("api_key", "secret")
+	data, err := api.GetAccountBalances()
+	if err != nil {
+		log.Panicln(err)
+		return
 	}
 	log.Println(data)
 }

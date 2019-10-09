@@ -9,30 +9,30 @@ import (
 )
 
 // GetAccountBalances - methods returns account balances
-func (api *Kraken) GetAccountBalances() (*BalanceResponse, error) {
-	resp, err := api.request("Balance", true, nil, &BalanceResponse{})
-	if err != nil {
-		return nil, err
+func (api *Kraken) GetAccountBalances() (BalanceResponse, error) {
+	response := BalanceResponse{}
+	if err := api.request("Balance", true, nil, &response); err != nil {
+		return response, err
 	}
-	return resp.(*BalanceResponse), nil
+	return response, nil
 }
 
 // GetTradeBalance - returns tradable balances info
-func (api *Kraken) GetTradeBalance(baseAsset string) (*TradeBalanceResponse, error) {
+func (api *Kraken) GetTradeBalance(baseAsset string) (TradeBalanceResponse, error) {
 	data := url.Values{}
 	if baseAsset != "" {
 		data.Set("asset", baseAsset)
 	}
 
-	resp, err := api.request("TradeBalance", true, data, &TradeBalanceResponse{})
-	if err != nil {
-		return nil, err
+	response := TradeBalanceResponse{}
+	if err := api.request("TradeBalance", true, data, &response); err != nil {
+		return response, err
 	}
-	return resp.(*TradeBalanceResponse), nil
+	return response, nil
 }
 
 // GetOpenOrders - returns account open order
-func (api *Kraken) GetOpenOrders(needTrades bool, userRef string) (*OpenOrdersResponse, error) {
+func (api *Kraken) GetOpenOrders(needTrades bool, userRef string) (OpenOrdersResponse, error) {
 	data := url.Values{}
 	if needTrades {
 		data.Set("trades", "true")
@@ -41,15 +41,15 @@ func (api *Kraken) GetOpenOrders(needTrades bool, userRef string) (*OpenOrdersRe
 		data.Set("userref", userRef)
 	}
 
-	resp, err := api.request("OpenOrders", true, data, &OpenOrdersResponse{})
-	if err != nil {
-		return nil, err
+	response := OpenOrdersResponse{}
+	if err := api.request("OpenOrders", true, data, &response); err != nil {
+		return response, err
 	}
-	return resp.(*OpenOrdersResponse), nil
+	return response, nil
 }
 
 // GetClosedOrders - returns account closed order
-func (api *Kraken) GetClosedOrders(needTrades bool, userRef string, start int64, end int64) (*ClosedOrdersResponse, error) {
+func (api *Kraken) GetClosedOrders(needTrades bool, userRef string, start int64, end int64) (ClosedOrdersResponse, error) {
 	data := url.Values{}
 	if needTrades {
 		data.Set("trades", "true")
@@ -64,15 +64,15 @@ func (api *Kraken) GetClosedOrders(needTrades bool, userRef string, start int64,
 		data.Set("end", strconv.FormatInt(end, 10))
 	}
 
-	resp, err := api.request("ClosedOrders", true, data, &ClosedOrdersResponse{})
-	if err != nil {
-		return nil, err
+	response := ClosedOrdersResponse{}
+	if err := api.request("ClosedOrders", true, data, &response); err != nil {
+		return response, err
 	}
-	return resp.(*ClosedOrdersResponse), nil
+	return response, nil
 }
 
 // QueryOrders - returns account's order by IDs
-func (api *Kraken) QueryOrders(needTrades bool, userRef string, txIDs ...string) (*map[string]OrderInfo, error) {
+func (api *Kraken) QueryOrders(needTrades bool, userRef string, txIDs ...string) (map[string]OrderInfo, error) {
 	data := url.Values{}
 	if needTrades {
 		data.Set("trades", "true")
@@ -88,15 +88,15 @@ func (api *Kraken) QueryOrders(needTrades bool, userRef string, txIDs ...string)
 		data.Set("txid", strings.Join(txIDs, ","))
 	}
 
-	resp, err := api.request("QueryOrders", true, data, &map[string]OrderInfo{})
-	if err != nil {
+	response := make(map[string]OrderInfo)
+	if err := api.request("QueryOrders", true, data, &response); err != nil {
 		return nil, err
 	}
-	return resp.(*map[string]OrderInfo), nil
+	return response, nil
 }
 
 // GetTradesHistory - returns account's trade history
-func (api *Kraken) GetTradesHistory(tradeType string, needTrades bool, start int64, end int64) (*TradesHistoryResponse, error) {
+func (api *Kraken) GetTradesHistory(tradeType string, needTrades bool, start int64, end int64) (TradesHistoryResponse, error) {
 	data := url.Values{
 		"type": {"all"},
 	}
@@ -112,15 +112,15 @@ func (api *Kraken) GetTradesHistory(tradeType string, needTrades bool, start int
 	if end != 0 {
 		data.Set("end", strconv.FormatInt(end, 10))
 	}
-	resp, err := api.request("TradesHistory", true, data, &TradesHistoryResponse{})
-	if err != nil {
-		return nil, err
+	response := TradesHistoryResponse{}
+	if err := api.request("TradesHistory", true, data, &response); err != nil {
+		return response, err
 	}
-	return resp.(*TradesHistoryResponse), nil
+	return response, nil
 }
 
 // QueryTrades - returns trades by IDs
-func (api *Kraken) QueryTrades(trades bool, txIDs ...string) (*map[string]PrivateTrade, error) {
+func (api *Kraken) QueryTrades(trades bool, txIDs ...string) (map[string]PrivateTrade, error) {
 	data := url.Values{}
 	if trades {
 		data.Set("trades", "true")
@@ -130,15 +130,15 @@ func (api *Kraken) QueryTrades(trades bool, txIDs ...string) (*map[string]Privat
 	}
 	data.Set("txid", strings.Join(txIDs, ","))
 
-	resp, err := api.request("QueryTrades", true, data, &map[string]PrivateTrade{})
-	if err != nil {
+	response := make(map[string]PrivateTrade)
+	if err := api.request("QueryTrades", true, data, &response); err != nil {
 		return nil, err
 	}
-	return resp.(*map[string]PrivateTrade), nil
+	return response, nil
 }
 
 // GetOpenPositions - returns list of open positions
-func (api *Kraken) GetOpenPositions(docalcs bool, txIDs ...string) (*map[string]Position, error) {
+func (api *Kraken) GetOpenPositions(docalcs bool, txIDs ...string) (map[string]Position, error) {
 	data := url.Values{}
 	if docalcs {
 		data.Set("docalcs", "true")
@@ -148,15 +148,16 @@ func (api *Kraken) GetOpenPositions(docalcs bool, txIDs ...string) (*map[string]
 	}
 	data.Set("txid", strings.Join(txIDs, ","))
 
-	resp, err := api.request("OpenPositions", true, data, &map[string]Position{})
-	if err != nil {
+	response := make(map[string]Position)
+	if err := api.request("OpenPositions", true, data, &response); err != nil {
 		return nil, err
 	}
-	return resp.(*map[string]Position), nil
+	return response, nil
 }
 
 // GetLedgersInfo - returns ledgers info
-func (api *Kraken) GetLedgersInfo(ledgerType string, start int64, end int64, assets ...string) (*LedgerInfoResponse, error) {
+func (api *Kraken) GetLedgersInfo(ledgerType string, start int64, end int64, assets ...string) (LedgerInfoResponse, error) {
+	response := LedgerInfoResponse{}
 	data := url.Values{}
 	if ledgerType != "" {
 		data.Set("type", LedgerTypeAll)
@@ -167,53 +168,54 @@ func (api *Kraken) GetLedgersInfo(ledgerType string, start int64, end int64, ass
 	if end != 0 {
 		data.Set("end", strconv.FormatInt(end, 10))
 	}
-	if len(assets) == 0 {
-		return nil, fmt.Errorf("`assets` is required")
+	if len(assets) > 0 {
+		data.Set("assets", strings.Join(assets, ","))
 	}
-	data.Set("assets", strings.Join(assets, ","))
 
-	resp, err := api.request("Ledgers", true, data, &LedgerInfoResponse{})
-	if err != nil {
-		return nil, err
+	if err := api.request("Ledgers", true, data, &response); err != nil {
+		return response, err
 	}
-	return resp.(*LedgerInfoResponse), nil
+	return response, nil
 }
 
 // QueryLedgers - get ledgers by ID
-func (api *Kraken) QueryLedgers(ledgerIds ...string) (*map[string]Ledger, error) {
+func (api *Kraken) QueryLedgers(ledgerIds ...string) (map[string]Ledger, error) {
 	data := url.Values{}
 	if len(ledgerIds) == 0 {
 		return nil, fmt.Errorf("`ledgerIds` is required")
 	}
+	if len(ledgerIds) > 20 {
+		return nil, fmt.Errorf("Maximum count of requested ledgers is 20")
+	}
 	data.Set("id", strings.Join(ledgerIds, ","))
 
-	resp, err := api.request("QueryLedgers", true, data, &map[string]Ledger{})
-	if err != nil {
+	response := make(map[string]Ledger)
+	if err := api.request("QueryLedgers", true, data, &response); err != nil {
 		return nil, err
 	}
-	return resp.(*map[string]Ledger), nil
+	return response, nil
 }
 
 // GetTradeVolume - returns trade volumes
-func (api *Kraken) GetTradeVolume(needFeeInfo bool, pairs ...string) (*TradeVolumeResponse, error) {
+func (api *Kraken) GetTradeVolume(needFeeInfo bool, pairs ...string) (TradeVolumeResponse, error) {
+	response := TradeVolumeResponse{}
 	data := url.Values{}
 	if len(pairs) == 0 {
-		return nil, fmt.Errorf("`pairs` is required")
+		return response, fmt.Errorf("`pairs` is required")
 	}
 	if needFeeInfo {
 		data.Set("fee-info", "true")
 	}
 	data.Set("pair", strings.Join(pairs, ","))
 
-	resp, err := api.request("TradeVolume", true, data, &TradeVolumeResponse{})
-	if err != nil {
-		return nil, err
+	if err := api.request("TradeVolume", true, data, &response); err != nil {
+		return response, err
 	}
-	return resp.(*TradeVolumeResponse), nil
+	return response, nil
 }
 
 // AddOrder - method sends order to exchange
-func (api *Kraken) AddOrder(pair string, side string, orderType string, volume float64, args map[string]interface{}) (*AddOrderResponse, error) {
+func (api *Kraken) AddOrder(pair string, side string, orderType string, volume float64, args map[string]interface{}) (AddOrderResponse, error) {
 	data := url.Values{
 		"pair":      {pair},
 		"volume":    {strconv.FormatFloat(volume, 'f', 8, 64)},
@@ -235,30 +237,30 @@ func (api *Kraken) AddOrder(pair string, side string, orderType string, volume f
 		}
 	}
 
-	resp, err := api.request("AddOrder", true, data, &AddOrderResponse{})
-	if err != nil {
-		return nil, err
+	response := AddOrderResponse{}
+	if err := api.request("AddOrder", true, data, &response); err != nil {
+		return response, err
 	}
-	return resp.(*AddOrderResponse), nil
+	return response, nil
 }
 
 // Cancel - method cancels order
-func (api *Kraken) Cancel(orderID string) (*CancelResponse, error) {
+func (api *Kraken) Cancel(orderID string) (CancelResponse, error) {
 	data := url.Values{
 		"txid": {orderID},
 	}
-	resp, err := api.request("CancelOrder", true, data, &CancelResponse{})
-	if err != nil {
-		return nil, err
+	response := CancelResponse{}
+	if err := api.request("CancelOrder", true, data, &response); err != nil {
+		return response, err
 	}
-	return resp.(*CancelResponse), nil
+	return response, nil
 }
 
 // GetWebSocketsToken - WebSockets authentication
-func (api *Kraken) GetWebSocketsToken() (*GetWebSocketTokenResponse, error) {
-	resp, err := api.request("GetWebSocketsToken", true, nil, &GetWebSocketTokenResponse{})
-	if err != nil {
-		return nil, err
+func (api *Kraken) GetWebSocketsToken() (GetWebSocketTokenResponse, error) {
+	response := GetWebSocketTokenResponse{}
+	if err := api.request("GetWebSocketsToken", true, nil, &response); err != nil {
+		return response, err
 	}
-	return resp.(*GetWebSocketTokenResponse), nil
+	return response, nil
 }
