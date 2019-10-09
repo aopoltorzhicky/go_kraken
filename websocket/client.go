@@ -55,6 +55,9 @@ type Client struct {
 
 	subscriptions map[int64]*SubscriptionStatus
 	factories     map[string]ParseFactory
+
+	isConnectedMux sync.Mutex
+	heartbeatMux   sync.Mutex
 }
 
 // Create returns a new websocket transport.
@@ -63,13 +66,30 @@ func (w *websocketAsynchronousFactory) Create() asynchronous {
 }
 
 // New creates a default client.
-func New(sandbox bool) *Client {
-	var params *Parameters
-	if sandbox {
-		params = NewDefaultSandboxParameters()
-	} else {
-		params = NewDefaultParameters()
+func New() *Client {
+	params := NewDefaultParameters()
+	c := &Client{
+		asyncFactory: &websocketAsynchronousFactory{
+			parameters: params,
+		},
+		isConnected:   false,
+		parameters:    params,
+		listener:      make(chan interface{}),
+		terminal:      false,
+		shutdown:      nil,
+		asynchronous:  nil,
+		heartbeat:     time.Now().Add(params.HeartbeatTimeout),
+		hbChannel:     make(chan error),
+		subscriptions: make(map[int64]*SubscriptionStatus),
+		factories:     make(map[string]ParseFactory),
 	}
+	c.createFactories()
+	return c
+}
+
+// NewSandbox - creates a default sandbox client.
+func NewSandbox() *Client {
+	params := NewDefaultSandboxParameters()
 	c := &Client{
 		asyncFactory: &websocketAsynchronousFactory{
 			parameters: params,
@@ -97,10 +117,13 @@ func (c *Client) controlHeartbeat() {
 			return
 		default:
 		}
+		c.heartbeatMux.Lock()
 		if time.Now().After(c.heartbeat) {
 			c.hbChannel <- fmt.Errorf("Heartbeat disconnect on client")
+			c.heartbeatMux.Unlock()
 			return
 		}
+		c.heartbeatMux.Unlock()
 	}
 }
 
@@ -109,6 +132,8 @@ func (c *Client) listenHeartbeat() <-chan error {
 }
 
 func (c *Client) updateHeartbeat() {
+	c.heartbeatMux.Lock()
+	defer c.heartbeatMux.Unlock()
 	c.heartbeat = time.Now().Add(c.parameters.HeartbeatTimeout)
 }
 
@@ -119,27 +144,26 @@ func (c *Client) listenDisconnect() {
 		if e != nil {
 			log.Printf("socket disconnect: %s", e.Error())
 		}
-		c.isConnected = false
+		c.setIsConnected(false)
 		err := c.reconnect(e)
 		if err != nil {
 			log.Printf("socket disconnect: %s", err.Error())
 		}
 	case <-c.shutdown:
 		log.Printf("Shutdown listen disconnect")
-		c.isConnected = false
+		c.setIsConnected(false)
 		return
 
 	case e := <-c.listenHeartbeat():
 		log.Printf("Heartbeat")
 		if e != nil {
-			log.Println(e.Error())
 			c.closeAsyncAndWait(c.parameters.ShutdownTimeout)
 			err := c.reconnect(nil)
 			if err != nil {
 				log.Printf("socket disconnect: %s", err.Error())
 			}
 		}
-		c.isConnected = false
+		c.setIsConnected(false)
 	}
 }
 
@@ -155,13 +179,11 @@ func (c *Client) dumpParams() {
 }
 
 func (c *Client) reset() {
-	if c.shutdown != nil {
-		close(c.shutdown)
+	if c.asynchronous == nil {
+		c.asynchronous = c.asyncFactory.Create()
 	}
-
 	c.init = true
-	c.asynchronous = c.asyncFactory.Create()
-	c.shutdown = make(chan bool)
+
 	c.updateHeartbeat()
 
 	go c.listenDisconnect()
@@ -173,9 +195,7 @@ func (c *Client) reset() {
 
 func (c *Client) connect() error {
 	err := c.asynchronous.Connect()
-	if err == nil {
-		c.isConnected = true
-	}
+	c.setIsConnected(err == nil)
 	return err
 }
 
@@ -214,9 +234,9 @@ func (c *Client) reconnect(err error) error {
 		time.Sleep(c.parameters.ReconnectInterval)
 		log.Printf("reconnect attempt %d/%d", reconnectTry+1, c.parameters.ReconnectAttempts)
 		c.reset()
-		err = c.connect()
-		if err == nil {
-			err := c.resubscribe()
+
+		if err = c.connect(); err == nil {
+			err = c.resubscribe()
 			if err == nil {
 				log.Print("reconnect OK")
 				return nil
@@ -224,6 +244,7 @@ func (c *Client) reconnect(err error) error {
 			log.Printf("reconnect failed: %s", err.Error())
 			return c.exit(err)
 		}
+
 		log.Printf("reconnect failed: %s", err.Error())
 	}
 	if err != nil {
@@ -428,7 +449,17 @@ func (c *Client) handleChannel(msg []byte) error {
 
 // IsConnected returns true if the underlying asynchronous transport is connected to an endpoint.
 func (c *Client) IsConnected() bool {
+	c.isConnectedMux.Lock()
+	defer c.isConnectedMux.Unlock()
+
 	return c.isConnected
+}
+
+func (c *Client) setIsConnected(value bool) {
+	c.isConnectedMux.Lock()
+	defer c.isConnectedMux.Unlock()
+
+	c.isConnected = true
 }
 
 // Connect to the Kraken API, this should only be called once.

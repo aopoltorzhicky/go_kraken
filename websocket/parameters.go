@@ -52,3 +52,19 @@ func NewDefaultSandboxParameters() *Parameters {
 		ContextTimeout:         time.Second * 5,
 	}
 }
+
+// NewDefaultAuthParameters - create default Parameters object for auth socket
+func NewDefaultAuthParameters() *Parameters {
+	return &Parameters{
+		AutoReconnect:          true,
+		ReconnectInterval:      time.Second,
+		reconnectTry:           0,
+		ReconnectAttempts:      5,
+		URL:                    AuthBaseURL,
+		ShutdownTimeout:        time.Second * 5,
+		ResubscribeOnReconnect: true,
+		HeartbeatTimeout:       time.Second * 3, // HB = 3s
+		LogTransport:           false,           // log transport send/recv,
+		ContextTimeout:         time.Second * 5,
+	}
+}
