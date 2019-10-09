@@ -101,7 +101,7 @@ func (api *Kraken) parseResponse(response *http.Response, retType interface{}) e
 		return fmt.Errorf("Error during response parsing: can not read response body (%s)", err.Error())
 	}
 
-	log.Println(string(body))
+	// log.Println(string(body))
 	var retData KrakenResponse
 	if retType != nil {
 		retData.Result = retType
