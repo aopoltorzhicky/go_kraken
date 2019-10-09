@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	c := ws.New(false)
+	c := ws.New()
 	err := c.Connect()
 	if err != nil {
 		log.Fatal("Error connecting to web socket : ", err)
