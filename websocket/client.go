@@ -267,7 +267,7 @@ func (c *Client) listenUpstream() {
 			return
 		case msg := <-c.asynchronous.Listen():
 			if msg != nil {
-				log.Printf("[DEBUG]: %s\n", msg)
+				// log.Printf("[DEBUG]: %s\n", msg)
 				err := c.handleMessage(msg)
 				if err != nil {
 					log.Printf("[WARN]: %s\n", err)
