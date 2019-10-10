@@ -44,8 +44,8 @@ type Client struct {
 	// connection & operational behavior
 	parameters *Parameters
 
-	// close signal sent to user on shutdown
-	shutdown chan bool
+	// channel to stop all routines
+	shutdown chan struct{}
 
 	// downstream listener channel to deliver API objects
 	listener chan interface{}
@@ -76,7 +76,7 @@ func New() *Client {
 		parameters:    params,
 		listener:      make(chan interface{}),
 		terminal:      false,
-		shutdown:      nil,
+		shutdown:      make(chan struct{}),
 		asynchronous:  nil,
 		heartbeat:     time.Now().Add(params.HeartbeatTimeout),
 		hbChannel:     make(chan error),
@@ -98,7 +98,7 @@ func NewSandbox() *Client {
 		parameters:    params,
 		listener:      make(chan interface{}),
 		terminal:      false,
-		shutdown:      nil,
+		shutdown:      make(chan struct{}),
 		asynchronous:  nil,
 		heartbeat:     time.Now().Add(params.HeartbeatTimeout),
 		hbChannel:     make(chan error),
@@ -181,9 +181,8 @@ func (c *Client) dumpParams() {
 func (c *Client) reset() {
 	if c.asynchronous == nil {
 		c.asynchronous = c.asyncFactory.Create()
+		c.init = true
 	}
-	c.init = true
-
 	c.updateHeartbeat()
 
 	go c.listenDisconnect()
@@ -284,7 +283,10 @@ func (c *Client) close(e error) {
 		}
 		close(c.listener)
 	}
-	close(c.shutdown)
+
+	if c.shutdown != nil {
+		close(c.shutdown)
+	}
 }
 
 func (c *Client) closeAsyncAndWait(t time.Duration) {
