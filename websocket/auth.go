@@ -34,7 +34,7 @@ func NewAuth(key, secret string) *AuthClient {
 			parameters:    params,
 			listener:      make(chan interface{}),
 			terminal:      false,
-			shutdown:      nil,
+			shutdown:      make(chan struct{}),
 			asynchronous:  nil,
 			heartbeat:     time.Now().Add(params.HeartbeatTimeout),
 			hbChannel:     make(chan error),

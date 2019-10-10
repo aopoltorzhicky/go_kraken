@@ -1,9 +1,4 @@
-github.com/aopoltorzhicky/go_kraken v0.0.0-20190605153553-ae21135d148e h1:mdF0mUnFpakK8cgJxay0hr5gmKe6/j3aEy+XCxMu6tU=
-github.com/aopoltorzhicky/go_kraken/rest v0.0.0-20190605153553-ae21135d148e h1:TbWk0E283N7vcZ3MlUJ4K9GvryVWwDkCIOblKDBgJdk=
-github.com/aopoltorzhicky/go_kraken/rest v0.0.0-20190605153553-ae21135d148e/go.mod h1:lJqZhOEiRSssxjeOOhkHhbSMuWykTrU0tRb4Zyy9kPU=
+github.com/aopoltorzhicky/go_kraken/rest v0.0.3 h1:oTRp0xqqsq0g83UOu6dCQtbKTk1lZjqtH3TsaDwDt/o=
+github.com/aopoltorzhicky/go_kraken/rest v0.0.3/go.mod h1:cen8hPWBicFQ1T4EoseSAkxvCD7zzZYIzxb0OVTHDk0=
 github.com/gorilla/websocket v1.4.1 h1:q7AeDBpnBk8AogcD4DSag/Ukw/KV+YhzLj2bP5HvKCM=
 github.com/gorilla/websocket v1.4.1/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
-github.com/ugorji/go v1.1.2 h1:JON3E2/GPW2iDNGoSAusl1KDf5TRQ8k8q7Tp097pZGs=
-github.com/ugorji/go v1.1.2/go.mod h1:hnLbHMwcvSihnDhEfx2/BzKp2xb0Y+ErdfYcrs9tkJQ=
-github.com/ugorji/go/codec v0.0.0-20190320090025-2dc34c0b8780 h1:vG/gY/PxA3v3l04qxe3tDjXyu3bozii8ulSlIPOYKhI=
-github.com/ugorji/go/codec v0.0.0-20190320090025-2dc34c0b8780/go.mod h1:iT03XoTwV7xq/+UGwKO3UbC1nNNlopQiY61beSdrtOA=

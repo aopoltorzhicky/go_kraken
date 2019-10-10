@@ -825,6 +825,7 @@ func TestClient_SubscribeTicker(t *testing.T) {
 func TestClient_close(t *testing.T) {
 	type fields struct {
 		listenerIsNil bool
+		shutdownIsNil bool
 	}
 	type args struct {
 		e error
@@ -839,18 +840,14 @@ func TestClient_close(t *testing.T) {
 			args: args{
 				e: ErrSomething,
 			},
-			fields: fields{
-				listenerIsNil: false,
-			},
+			fields: fields{},
 		},
 		{
 			name: "Close without error",
 			args: args{
 				e: nil,
 			},
-			fields: fields{
-				listenerIsNil: false,
-			},
+			fields: fields{},
 		},
 		{
 			name: "Close with nil listener",
@@ -861,17 +858,40 @@ func TestClient_close(t *testing.T) {
 				listenerIsNil: true,
 			},
 		},
+		{
+			name: "Close with nil shutdown",
+			args: args{
+				e: nil,
+			},
+			fields: fields{
+				shutdownIsNil: true,
+			},
+		},
+		{
+			name: "Close with nil both channels",
+			args: args{
+				e: nil,
+			},
+			fields: fields{
+				shutdownIsNil: true,
+				listenerIsNil: true,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &Client{
-				shutdown: make(chan bool),
+			c := &Client{}
+			if !tt.fields.shutdownIsNil {
+				c.shutdown = make(chan struct{})
 			}
-			c.listener = make(chan interface{})
+			if !tt.fields.listenerIsNil {
+				c.listener = make(chan interface{})
 
-			go func() {
-				<-c.listener
-			}()
+				go func() {
+					<-c.listener
+				}()
+			}
+
 			c.close(tt.args.e)
 		})
 	}
@@ -905,7 +925,7 @@ func TestClient_exit(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				terminal: false,
-				shutdown: make(chan bool),
+				shutdown: make(chan struct{}),
 				listener: make(chan interface{}),
 			}
 			go func() {
@@ -1077,7 +1097,7 @@ func TestClient_controlHeartbeat(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
-				shutdown:  make(chan bool),
+				shutdown:  make(chan struct{}),
 				heartbeat: time.Unix(0, 0),
 				hbChannel: make(chan error),
 			}
@@ -1086,7 +1106,7 @@ func TestClient_controlHeartbeat(t *testing.T) {
 
 			go func() {
 				if tt.fields.isShutdown {
-					c.shutdown <- true
+					c.shutdown <- struct{}{}
 				} else {
 					<-c.hbChannel
 				}
@@ -1119,7 +1139,7 @@ func TestClient_listenUpstream(t *testing.T) {
 				asynchronous: &mockAsynchronous{
 					Data: make(chan []byte),
 				},
-				shutdown:   make(chan bool),
+				shutdown:   make(chan struct{}),
 				hbChannel:  make(chan error),
 				heartbeat:  time.Now().Add(time.Hour),
 				parameters: NewDefaultSandboxParameters(),
@@ -1130,7 +1150,7 @@ func TestClient_listenUpstream(t *testing.T) {
 
 			go func() {
 				c.asynchronous.(*mockAsynchronous).Data <- tt.fields.data
-				c.shutdown <- true
+				c.shutdown <- struct{}{}
 			}()
 
 			time.Sleep(time.Microsecond)
@@ -1273,7 +1293,7 @@ func TestClient_reconnect(t *testing.T) {
 				heartbeat:     time.Now().Add(time.Hour),
 				hbChannel:     make(chan error),
 				parameters:    NewDefaultSandboxParameters(),
-				shutdown:      make(chan bool),
+				shutdown:      make(chan struct{}),
 				listener:      make(chan interface{}),
 				subscriptions: tt.fields.subscriptions,
 				factories:     make(map[string]ParseFactory),
@@ -1325,13 +1345,13 @@ func TestClient_Close(t *testing.T) {
 				terminal:   false,
 				init:       false,
 				parameters: NewDefaultSandboxParameters(),
-				shutdown:   make(chan bool),
+				shutdown:   make(chan struct{}),
 			}
 			c.parameters.ShutdownTimeout = time.Second
 
 			go func() {
 				if tt.fields.isShutdown {
-					c.shutdown <- true
+					c.shutdown <- struct{}{}
 				}
 			}()
 
@@ -1445,7 +1465,7 @@ func TestClient_listenDisconnect(t *testing.T) {
 				heartbeat:   time.Now().Add(time.Hour),
 				hbChannel:   make(chan error),
 				parameters:  NewDefaultSandboxParameters(),
-				shutdown:    make(chan bool),
+				shutdown:    make(chan struct{}),
 			}
 			c.parameters.AutoReconnect = false
 			if tt.fields.isListenHeartbeat {
