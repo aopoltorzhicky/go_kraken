@@ -57,8 +57,8 @@ func (f *candlesFactory) Parse(data interface{}, pair string) (interface{}, erro
 		return CandleUpdate{Pair: pair}, fmt.Errorf("Can't parse data %#v", data)
 	}
 	return CandleUpdate{
-		Time:      valToTime(body[0]),
-		EndTime:   valToTime(body[1]),
+		Time:      valToFloat64(body[0]),
+		EndTime:   valToFloat64(body[1]),
 		Open:      valToFloat64(body[2]),
 		High:      valToFloat64(body[3]),
 		Low:       valToFloat64(body[4]),
@@ -87,7 +87,7 @@ func (f *tradesFactory) Parse(data interface{}, pair string) (interface{}, error
 		trade := TradeUpdate{
 			Price:     valToFloat64(entity[0]),
 			Volume:    valToFloat64(entity[1]),
-			Time:      valToTime(entity[2]),
+			Time:      valToFloat64(entity[2]),
 			Side:      parseSide(entity[3].(string)),
 			OrderType: parseOrderType(entity[4].(string)),
 			Misc:      entity[5].(string),
@@ -112,7 +112,7 @@ func (f *spreadFactory) Parse(data interface{}, pair string) (interface{}, error
 	return SpreadUpdate{
 		Bid:       valToFloat64(body[0]),
 		Ask:       valToFloat64(body[1]),
-		Time:      valToTime(body[2]),
+		Time:      valToFloat64(body[2]),
 		BidVolume: valToFloat64(body[3]),
 		AskVolume: valToFloat64(body[4]),
 		Pair:      pair,
@@ -142,7 +142,7 @@ func (f *bookFactory) Parse(data interface{}, pair string) (interface{}, error) 
 			orderBookItem := OrderBookItem{
 				Price:  valToFloat64(entity[0]),
 				Volume: valToFloat64(entity[1]),
-				Time:   valToTime(entity[2]),
+				Time:   valToFloat64(entity[2]),
 			}
 			orderBookItem.Republish = (len(entity) == 4 && entity[3] == "r")
 			items = append(items, orderBookItem)
@@ -194,7 +194,7 @@ func (f *ownTradesFactory) Parse(data interface{}, pair string) (interface{}, er
 			Pair:      value["pair"].(string),
 			PosTxID:   value["postxid"].(string),
 			Price:     valToFloat64(value["price"]),
-			Time:      valToTime(value["time"]),
+			Time:      valToFloat64(value["time"]),
 			Type:      value["type"].(string),
 			Vol:       valToFloat64(value["vol"]),
 		}
@@ -230,9 +230,9 @@ func (f *openOrdersFactory) Parse(data interface{}, pair string) (interface{}, e
 			LimitPrice: valToFloat64(value["limitprice"]),
 			Misc:       value["misc"].(string),
 			Oflags:     value["oflags"].(string),
-			OpenTime:   valToTime(value["opentm"]),
-			StartTime:  valToTime(value["starttm"]),
-			ExpireTime: valToTime(value["expiretm"]),
+			OpenTime:   valToFloat64(value["opentm"]),
+			StartTime:  valToFloat64(value["starttm"]),
+			ExpireTime: valToFloat64(value["expiretm"]),
 			Price:      valToFloat64(value["price"]),
 			Refid:      value["refid"].(string),
 			Status:     value["status"].(string),

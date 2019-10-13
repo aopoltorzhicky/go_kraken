@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"time"
 )
 
 // EventType - data structure for parsing events
@@ -132,8 +131,8 @@ type Values struct {
 
 // CandleUpdate - data structure for candles update
 type CandleUpdate struct {
-	Time      time.Time
-	EndTime   time.Time
+	Time      float64
+	EndTime   float64
 	Open      float64
 	High      float64
 	Low       float64
@@ -148,7 +147,7 @@ type CandleUpdate struct {
 type TradeUpdate struct {
 	Price     float64
 	Volume    float64
-	Time      time.Time
+	Time      float64
 	Side      string
 	OrderType string
 	Misc      string
@@ -161,7 +160,7 @@ type SpreadUpdate struct {
 	Bid       float64
 	AskVolume float64
 	BidVolume float64
-	Time      time.Time
+	Time      float64
 	Pair      string
 }
 
@@ -169,7 +168,7 @@ type SpreadUpdate struct {
 type OrderBookItem struct {
 	Price     float64
 	Volume    float64
-	Time      time.Time
+	Time      float64
 	Republish bool
 }
 
@@ -195,17 +194,17 @@ type AuthSubscriptionRequest struct {
 
 // OwnTrade - Own trades.
 type OwnTrade struct {
-	Cost      float64   `json:"cost,string"`
-	Fee       float64   `json:"fee,string"`
-	Margin    float64   `json:"margin,string"`
-	OrderID   string    `json:"ordertxid"`
-	OrderType string    `json:"ordertype"`
-	Pair      string    `json:"pair"`
-	PosTxID   string    `json:"postxid"`
-	Price     float64   `json:"price,string"`
-	Time      time.Time `json:"time"`
-	Type      string    `json:"type"`
-	Vol       float64   `json:"vol,string"`
+	Cost      float64 `json:"cost,string"`
+	Fee       float64 `json:"fee,string"`
+	Margin    float64 `json:"margin,string"`
+	OrderID   string  `json:"ordertxid"`
+	OrderType string  `json:"ordertype"`
+	Pair      string  `json:"pair"`
+	PosTxID   string  `json:"postxid"`
+	Price     float64 `json:"price,string"`
+	Time      float64 `json:"time"`
+	Type      string  `json:"type"`
+	Vol       float64 `json:"vol,string"`
 }
 
 // OpenOrderDescr -
@@ -228,9 +227,9 @@ type OpenOrder struct {
 	LimitPrice float64        `json:"limitprice,string"`
 	Misc       string         `json:"misc"`
 	Oflags     string         `json:"oflags"`
-	OpenTime   time.Time      `json:"opentm"`
-	StartTime  time.Time      `json:"starttm"`
-	ExpireTime time.Time      `json:"expiretm"`
+	OpenTime   float64        `json:"opentm"`
+	StartTime  float64        `json:"starttm"`
+	ExpireTime float64        `json:"expiretm"`
 	Price      float64        `json:"price,string"`
 	Refid      string         `json:"refid"`
 	Status     string         `json:"status"`

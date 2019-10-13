@@ -162,8 +162,8 @@ func Test_candlesFactory_Parse(t *testing.T) {
 				},
 			},
 			want: CandleUpdate{
-				Time:      t1.UTC(),
-				EndTime:   t2.UTC(),
+				Time:      float64(t1.Unix()),
+				EndTime:   float64(t2.Unix()),
 				Open:      3586.7,
 				High:      3586.7,
 				Low:       3586.6,
@@ -248,7 +248,7 @@ func Test_tradesFactory_Parse(t *testing.T) {
 			want: []TradeUpdate{
 				TradeUpdate{
 					Pair:      BTCCAD,
-					Time:      t1.UTC(),
+					Time:      float64(t1.Unix()),
 					Price:     5541.2,
 					Volume:    0.15850568,
 					Side:      Sell,
@@ -257,7 +257,7 @@ func Test_tradesFactory_Parse(t *testing.T) {
 				},
 				TradeUpdate{
 					Pair:      BTCCAD,
-					Time:      t2.UTC(),
+					Time:      float64(t2.Unix()),
 					Price:     6060.,
 					Volume:    0.02455000,
 					Side:      Buy,
@@ -326,7 +326,7 @@ func Test_spreadFactory_Parse(t *testing.T) {
 				Pair:      BTCCAD,
 				Bid:       5698.4,
 				Ask:       5700,
-				Time:      t1.UTC(),
+				Time:      float64(t1.Unix()),
 				BidVolume: 1.01234567,
 				AskVolume: 0.98765432,
 			},
@@ -418,13 +418,13 @@ func Test_bookFactory_Parse(t *testing.T) {
 					OrderBookItem{
 						Price:     5541.3,
 						Volume:    2.50700000,
-						Time:      t1.UTC(),
+						Time:      float64(t1.Unix()),
 						Republish: false,
 					},
 					OrderBookItem{
 						Price:     5541.8,
 						Volume:    0.33000000,
-						Time:      t2.UTC(),
+						Time:      float64(t2.Unix()),
 						Republish: false,
 					},
 				},
@@ -432,13 +432,13 @@ func Test_bookFactory_Parse(t *testing.T) {
 					OrderBookItem{
 						Price:     5541.2,
 						Volume:    1.52900000,
-						Time:      t1.UTC(),
+						Time:      float64(t1.Unix()),
 						Republish: false,
 					},
 					OrderBookItem{
 						Price:     5539.9,
 						Volume:    0.30000000,
-						Time:      t2.UTC(),
+						Time:      float64(t2.Unix()),
 						Republish: false,
 					},
 				},
@@ -475,7 +475,7 @@ func Test_bookFactory_Parse(t *testing.T) {
 					OrderBookItem{
 						Price:     5541.3,
 						Volume:    2.50700000,
-						Time:      t1.UTC(),
+						Time:      float64(t1.Unix()),
 						Republish: true,
 					},
 				},
@@ -483,7 +483,7 @@ func Test_bookFactory_Parse(t *testing.T) {
 					OrderBookItem{
 						Price:     5541.2,
 						Volume:    1.52900000,
-						Time:      t1.UTC(),
+						Time:      float64(t1.Unix()),
 						Republish: false,
 					},
 				},
