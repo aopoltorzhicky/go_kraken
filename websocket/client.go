@@ -124,6 +124,7 @@ func (c *Client) controlHeartbeat() {
 			return
 		}
 		c.heartbeatMux.Unlock()
+		time.Sleep(c.parameters.HeartbeatCheckPeriod)
 	}
 }
 
