@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"fmt"
+	"strings"
 )
 
 type tickerFactory struct{}
@@ -135,33 +136,46 @@ func (f *bookFactory) Parse(data interface{}, pair string) (interface{}, error) 
 	}
 
 	for k, v := range body {
-		items := make([]OrderBookItem, 0)
-		updates := v.([]interface{})
-		for _, item := range updates {
-			entity := item.([]interface{})
-			orderBookItem := OrderBookItem{
-				Price:  valToFloat64(entity[0]),
-				Volume: valToFloat64(entity[1]),
-				Time:   valToFloat64(entity[2]),
-			}
-			orderBookItem.Republish = (len(entity) == 4 && entity[3] == "r")
-			items = append(items, orderBookItem)
-		}
-
 		switch k {
-		case "as":
-			result.IsSnapshot = true
-			result.Asks = items
-		case "a":
-			result.Asks = items
-		case "bs":
-			result.IsSnapshot = true
-			result.Bids = items
-		case "b":
-			result.Bids = items
+		case "c":
+			checkSum, ok := v.(string)
+			if !ok {
+				return nil, fmt.Errorf("[bookFactory] Invalid checkSum type: %v %T", v, v)
+			}
+			result.CheckSum = checkSum
+		default:
+			items, err := f.parseItems(v)
+			if err != nil {
+				return nil, err
+			}
+			result.IsSnapshot = len(k) == 2 && strings.HasSuffix(k, "s")
+			if strings.HasPrefix(k, "a") {
+				result.Asks = items
+			} else {
+				result.Bids = items
+			}
 		}
 	}
 	return result, nil
+}
+
+func (f *bookFactory) parseItems(value interface{}) ([]OrderBookItem, error) {
+	items := make([]OrderBookItem, 0)
+	updates, ok := value.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("[bookFactory] Invalid items type: %v %T", value, value)
+	}
+	for _, item := range updates {
+		entity := item.([]interface{})
+		orderBookItem := OrderBookItem{
+			Price:  valToFloat64(entity[0]),
+			Volume: valToFloat64(entity[1]),
+			Time:   valToFloat64(entity[2]),
+		}
+		orderBookItem.Republish = (len(entity) == 4 && entity[3] == "r")
+		items = append(items, orderBookItem)
+	}
+	return items, nil
 }
 
 type ownTradesFactory struct{}
