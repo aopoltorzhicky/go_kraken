@@ -178,6 +178,7 @@ type OrderBookUpdate struct {
 	Bids       []OrderBookItem
 	IsSnapshot bool
 	Pair       string
+	CheckSum   string
 }
 
 // AuthDataRequest - data structure for private subscription request

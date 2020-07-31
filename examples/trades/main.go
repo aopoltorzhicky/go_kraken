@@ -43,7 +43,7 @@ func main() {
 				log.Print("----------------")
 				log.Printf("Price: %f", trade.Price)
 				log.Printf("Volume: %f", trade.Volume)
-				log.Printf("Time: %s", trade.Time.String())
+				log.Printf("Time: %f", trade.Time)
 				log.Printf("Pair: %s", trade.Pair)
 				log.Printf("Order type: %s", trade.OrderType)
 				log.Printf("Side: %s", trade.Side)
