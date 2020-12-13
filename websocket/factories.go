@@ -191,14 +191,12 @@ func (f *ownTradesFactory) Parse(data interface{}, pair string) (interface{}, er
 	}
 	body, ok := data.([]interface{})
 	if !ok {
-		return upd, fmt.Errorf("Can't parse data %#v", data)
+		return upd, fmt.Errorf("Can't parse data, expected slice, but got %#v", data)
 	}
 
-	if len(body) != 2 {
-		return upd, fmt.Errorf("Can't parse data %#v", data)
-	}
+	for key, valueRaw := range body[0].(map[string]interface{}) {
+		value := valueRaw.(map[string]interface{})
 
-	for key, value := range body[0].(map[string]map[string]interface{}) {
 		upd.Trades[key] = OwnTrade{
 			Cost:      valToFloat64(value["cost"]),
 			Fee:       valToFloat64(value["fee"]),

@@ -71,6 +71,7 @@ type DataUpdate struct {
 	Data        interface{}
 	ChannelName string
 	Pair        string
+	Sequence	int64
 }
 
 // UnmarshalJSON - unmarshal update
@@ -79,8 +80,37 @@ func (u *DataUpdate) UnmarshalJSON(data []byte) error {
 	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return err
-	} else if len(raw) < 4 {
+	}
+
+	if len(raw) < 3 {
 		return fmt.Errorf("invalid data length: %#v", raw)
+	}
+
+	if len(raw) == 3 {
+		var ok bool
+		u.Data = raw[0]
+
+		if u.ChannelName, ok = raw[1].(string); !ok {
+			return fmt.Errorf("expected message to have channel name as 2nd element but got %#v instead", raw[1])
+		}
+
+		var sequenceMap map[string]interface{}
+		if sequenceMap, ok = raw[2].(map[string]interface{}); !ok {
+			return fmt.Errorf("expected message to have JSON object as 3rd element but got %#v instead", raw[2])
+		}
+
+		var sequenceRaw interface{}
+		if sequenceRaw, ok = sequenceMap["sequence"]; !ok {
+			return fmt.Errorf("expected message to have sequence in JSON object as 3rd element but got %#v instead", raw[2])
+		}
+
+		var seq float64
+		if seq, ok = sequenceRaw.(float64); !ok {
+			return fmt.Errorf("expected message to have sequence integer in JSON object as 3rd element but got %#v instead", raw[2])
+		}
+
+		u.Sequence = int64(seq)
+		return nil
 	}
 
 	chID, ok := raw[0].(float64)

@@ -24,27 +24,61 @@ func TestDataUpdate_UnmarshalJSON(t *testing.T) {
 			},
 			wantErr: true,
 		}, {
-			name: "Invalid channel_id",
+			name: "Length 4, Invalid channel_id",
 			args: args{
 				data: []byte("[\"asdas\", [], \"\", \"\"]"),
 			},
 			wantErr: true,
 		}, {
-			name: "Invalid channel_name",
+			name: "Length 4, Invalid channel_name",
 			args: args{
 				data: []byte("[1, [], 123, \"\"]"),
 			},
 			wantErr: true,
 		}, {
-			name: "Invalid pair",
+			name: "Length 4, Invalid pair",
 			args: args{
 				data: []byte("[1, [], \"trades\", 123]"),
 			},
 			wantErr: true,
 		}, {
-			name: "Valid data",
+			name: "Length 4, Valid data",
 			args: args{
 				data: []byte("[1, [], \"trades\", \"XBT/USD\"]"),
+			},
+			wantErr: false,
+		}, {
+			name: "Length 3, invalid channel name",
+			args: args{
+				data: []byte(`[1, 123, {}]`),
+			},
+			wantErr: true,
+		},
+		{
+			name: "Length 3, invalid sequence number kind",
+			args: args{
+				data: []byte(`[1, "", ""]`),
+			},
+			wantErr: true,
+		},
+		{
+			name: "Length 3, sequence missing from object",
+			args: args{
+				data: []byte(`[1, "", {}]`),
+			},
+			wantErr: true,
+		},
+		{
+			name: "Length 3, sequence not a number",
+			args: args{
+				data: []byte(`[1, "", {"sequence": "foo"}]`),
+			},
+			wantErr: true,
+		},
+		{
+			name: "Length 3, valid data",
+			args: args{
+				data: []byte(`[1, "", {"sequence": 456}]`),
 			},
 			wantErr: false,
 		},
