@@ -71,7 +71,7 @@ type DataUpdate struct {
 	Data        interface{}
 	ChannelName string
 	Pair        string
-	Sequence	int64
+	Sequence    int64
 }
 
 // UnmarshalJSON - unmarshal update
