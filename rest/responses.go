@@ -648,6 +648,28 @@ type TradesHistoryResponse struct {
 	Count  int64                   `json:"count"`
 }
 
+// DepositMethods - respons on GetDepositMethods request
+type DepositMethods struct {
+	Method     string `json:"method"`
+	Limit      bool   `json:"limit"`
+	Fee        string `json:"fee"`
+	GenAddress bool   `json:"gen-address"`
+}
+
+// GetDepositStatus - respons on GetDepositMethods request
+type DepositStatuses struct {
+	Method string `json:"method"`
+	Aclass string `json:"aclass"`
+	Asset  string `json:"asset"`
+	Refid  string `json:"refid"`
+	Txid   string `json:"txid"`
+	Info   string `json:"info"`
+	Amount string `json:"amount"`
+	Fee    string `json:"fee"`
+	Time   int    `json:"time"`
+	Status string `json:"status"`
+}
+
 // PrivateTrade - structure of account's trades
 type PrivateTrade struct {
 	OrderID              string   `json:"ordertxid"`
