@@ -119,6 +119,41 @@ func (api *Kraken) GetTradesHistory(tradeType string, needTrades bool, start int
 	return response, nil
 }
 
+// GetDepositMethods - returns deposit methods
+func (api *Kraken) GetDepositMethods(assets ...string) ([]DepositMethods, error) {
+
+	data := url.Values{}
+	if len(assets) > 0 {
+		data.Add("asset", strings.Join(assets, ","))
+	} else {
+		data = nil
+	}
+
+	response := make([]DepositMethods, 0)
+	if err := api.request("DepositMethods", true, data, &response); err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
+// GetDepositStatus - returns deposit status
+func (api *Kraken) GetDepositStatus(method string, assets ...string) ([]DepositStatuses, error) {
+
+	data := url.Values{}
+	if len(assets) > 0 {
+		data.Add("asset", strings.Join(assets, ","))
+	}
+
+	if len(method) > 0 {
+		data.Add("method", method)
+	}
+	response := make([]DepositStatuses, 0)
+	if err := api.request("DepositStatus", true, data, &response); err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
 // QueryTrades - returns trades by IDs
 func (api *Kraken) QueryTrades(trades bool, txIDs ...string) (map[string]PrivateTrade, error) {
 	data := url.Values{}

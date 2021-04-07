@@ -9,19 +9,113 @@ import (
 )
 
 var (
-	balancesJSON       = []byte(`{"error":[],"result":{"ZUSD":"435.9135","USDT":"2.00000000","BSV":"0.0000053898"}}`)
-	tradeBalancesJSON  = []byte(`{"error":[],"result":{"eb":"33.50","tb":"33.50","m":"23.77","n":"4.3750","c":"11.8999","v":"12.2","e":"32.1","mf":"33.1","ml":"12.97"}}`)
-	openOrdersJSON     = []byte(`{"error":[],"result":{"open":{"OR3XZM-5EN2R-LS5X51":{"refid":null,"userref":null,"status":"open","opentm":1570622342.3552,"starttm":0,"expiretm":0,"descr":{"pair":"XBTEUR","type":"sell","ordertype":"limit","price":"7712.2","price2":"0","leverage":"4:1","order":"sell 1.10000000 XBTEUR @ limit 7712.2 with 4:1 leverage","close":""},"vol":"1.10000000","vol_exec":"0.00000000","cost":"0.00000","fee":"0.00000","price":"0.00000","stopprice":"0.00000","limitprice":"0.00000","misc":"","oflags":"fciq"}}}}`)
-	closedOrdersJSON   = []byte(`{"error":[],"result":{"closed":{"OK46ER-A2BXK-YOLKE1":{"refid":null,"userref":null,"status":"canceled","reason":"User requested","opentm":1570623817.6537,"closetm":1570623823.9012,"starttm":0,"expiretm":0,"descr":{"pair":"ETHEUR","type":"buy","ordertype":"limit","price":"160.87","price2":"0","leverage":"4:1","order":"buy 21.00000000 ETHEUR @ limit 160.87 with 4:1 leverage","close":""},"vol":"21.00000000","vol_exec":"0.00000000","cost":"0.00000","fee":"0.00000","price":"0.00000","stopprice":"0.00000","limitprice":"0.00000","misc":"","oflags":"fciq"}},"count":20}}`)
-	queryOrdersJSON    = []byte(`{"error":[],"result":{"OLNYE1-H3BBJ-JD2LGC":{"refid":null,"userref":null,"status":"canceled","reason":"User requested","opentm":1570623816.1101,"closetm":1570623819.639,"starttm":0,"expiretm":0,"descr":{"pair":"XBTUSD","type":"buy","ordertype":"limit","price":"7920.9","price2":"0","leverage":"4:1","order":"buy 1.10000000 XBTUSD @ limit 7920.9 with 4:1 leverage","close":""},"vol":"1.10000000","vol_exec":"0.00000000","cost":"0.00000","fee":"0.00000","price":"0.00000","stopprice":"0.00000","limitprice":"0.00000","misc":"","oflags":"fciq"}}}`)
-	tradeHistoryJSON   = []byte(`{"error":[],"result":{"trades":{"TO3MMA-BSBGV-XUV4A1":{"ordertxid":"OSQQQ5-MBKL6-O4YYE1","postxid":"TYE7IH-QCG76-BVMCM1","pair":"XXBTZUSD","time":1570477513.2,"type":"buy","ordertype":"limit","price":"7000.60000","cost":"1000.38301","fee":"0.00000","vol":"0.2","margin":"320","misc":"closing"}},"count":1}}`)
-	queryTradesJSON    = []byte(`{"error":[],"result":{"TO3MMA-BSBGV-XUV4A1":{"ordertxid":"OSQQQ5-MBKL6-O4YYE1","postxid":"TYE7IH-QCG76-BVMCM1","pair":"XXBTZUSD","time":1570477513.2,"type":"buy","ordertype":"limit","price":"7000.60000","cost":"1000.38301","fee":"0.00000","vol":"0.2","margin":"320","misc":"closing"}}}`)
-	openPositionsJSON  = []byte(`{"error":[],"result":{"TYE7IH-QCG76-BVMCM1":{"ordertxid":"OK7SOC-SGF3O-F54S51","posstatus":"open","pair":"XXBTZUSD","time":1569513333.0361,"type":"buy","ordertype":"limit","cost":"570.39712","fee":"39","vol":"7","vol_closed":"6.66208817","margin":"9.2","terms":"0.0100% per 4 hours","rollovertm":"1570638129","misc":"","oflags":""}}}`)
-	getLedgersJSON     = []byte(`{"error":[],"result":{"ledger":{"LGPNZQ-2SLSA-C7QCT1":{"refid":"TI2NBU-IICD2-BAVYO1","time":1570623111.9096,"type":"rollover","aclass":"currency","asset":"ZUSD","amount":"0.0000","fee":"0.7169","balance":"1.7326"}}}}`)
-	queryLedgerJSON    = []byte(`{"error":[],"result":{"LTCH4T-LG5FS-MKGVD1":{"refid":"TYE7IH-QCG76-BVMCM1","time":1570551111.2568,"type":"rollover","aclass":"currency","asset":"ZUSD","amount":"0.0000","fee":"0.4640","balance":"1.3540"}}}`)
-	getTradeVolumeJSON = []byte(`{"error":[],"result":{"currency":"ZUSD","volume":"1000","fees":{"XXBTZUSD":{"fee":"0.1600","minfee":"0.1000","maxfee":"0.2600","nextfee":"0.1400","nextvolume":"2500000.0000","tiervolume":"1000000.0000"}},"fees_maker":{"XXBTZUSD":{"fee":"0.0600","minfee":"0.0000","maxfee":"0.1600","nextfee":"0.0400","nextvolume":"2500000.0000","tiervolume":"1000000.0000"}}}}`)
-	getWSTokenJSON     = []byte(`{"error":[],"result":{"token": "test", "expires": 900}}`)
+	depositMethodsJSON  = []byte(`{"error":[],"result":[{"method": "Ether (Hex)","limit": false,"fee": "0.0000000000","gen-address": true}]}`)
+	depositStatusesJSON = []byte(`{"error":[],"result":[{"method": "Ether (Hex)","aclass": "currency","asset": "XETH","refid": "sometest1","txid": "sometest2","info": "sometest3","amount": "6.91","fee": "0.0000000000","time": 1617014556,"status": "Success"}]}`)
+	balancesJSON        = []byte(`{"error":[],"result":{"ZUSD":"435.9135","USDT":"2.00000000","BSV":"0.0000053898"}}`)
+	tradeBalancesJSON   = []byte(`{"error":[],"result":{"eb":"33.50","tb":"33.50","m":"23.77","n":"4.3750","c":"11.8999","v":"12.2","e":"32.1","mf":"33.1","ml":"12.97"}}`)
+	openOrdersJSON      = []byte(`{"error":[],"result":{"open":{"OR3XZM-5EN2R-LS5X51":{"refid":null,"userref":null,"status":"open","opentm":1570622342.3552,"starttm":0,"expiretm":0,"descr":{"pair":"XBTEUR","type":"sell","ordertype":"limit","price":"7712.2","price2":"0","leverage":"4:1","order":"sell 1.10000000 XBTEUR @ limit 7712.2 with 4:1 leverage","close":""},"vol":"1.10000000","vol_exec":"0.00000000","cost":"0.00000","fee":"0.00000","price":"0.00000","stopprice":"0.00000","limitprice":"0.00000","misc":"","oflags":"fciq"}}}}`)
+	closedOrdersJSON    = []byte(`{"error":[],"result":{"closed":{"OK46ER-A2BXK-YOLKE1":{"refid":null,"userref":null,"status":"canceled","reason":"User requested","opentm":1570623817.6537,"closetm":1570623823.9012,"starttm":0,"expiretm":0,"descr":{"pair":"ETHEUR","type":"buy","ordertype":"limit","price":"160.87","price2":"0","leverage":"4:1","order":"buy 21.00000000 ETHEUR @ limit 160.87 with 4:1 leverage","close":""},"vol":"21.00000000","vol_exec":"0.00000000","cost":"0.00000","fee":"0.00000","price":"0.00000","stopprice":"0.00000","limitprice":"0.00000","misc":"","oflags":"fciq"}},"count":20}}`)
+	queryOrdersJSON     = []byte(`{"error":[],"result":{"OLNYE1-H3BBJ-JD2LGC":{"refid":null,"userref":null,"status":"canceled","reason":"User requested","opentm":1570623816.1101,"closetm":1570623819.639,"starttm":0,"expiretm":0,"descr":{"pair":"XBTUSD","type":"buy","ordertype":"limit","price":"7920.9","price2":"0","leverage":"4:1","order":"buy 1.10000000 XBTUSD @ limit 7920.9 with 4:1 leverage","close":""},"vol":"1.10000000","vol_exec":"0.00000000","cost":"0.00000","fee":"0.00000","price":"0.00000","stopprice":"0.00000","limitprice":"0.00000","misc":"","oflags":"fciq"}}}`)
+	tradeHistoryJSON    = []byte(`{"error":[],"result":{"trades":{"TO3MMA-BSBGV-XUV4A1":{"ordertxid":"OSQQQ5-MBKL6-O4YYE1","postxid":"TYE7IH-QCG76-BVMCM1","pair":"XXBTZUSD","time":1570477513.2,"type":"buy","ordertype":"limit","price":"7000.60000","cost":"1000.38301","fee":"0.00000","vol":"0.2","margin":"320","misc":"closing"}},"count":1}}`)
+	queryTradesJSON     = []byte(`{"error":[],"result":{"TO3MMA-BSBGV-XUV4A1":{"ordertxid":"OSQQQ5-MBKL6-O4YYE1","postxid":"TYE7IH-QCG76-BVMCM1","pair":"XXBTZUSD","time":1570477513.2,"type":"buy","ordertype":"limit","price":"7000.60000","cost":"1000.38301","fee":"0.00000","vol":"0.2","margin":"320","misc":"closing"}}}`)
+	openPositionsJSON   = []byte(`{"error":[],"result":{"TYE7IH-QCG76-BVMCM1":{"ordertxid":"OK7SOC-SGF3O-F54S51","posstatus":"open","pair":"XXBTZUSD","time":1569513333.0361,"type":"buy","ordertype":"limit","cost":"570.39712","fee":"39","vol":"7","vol_closed":"6.66208817","margin":"9.2","terms":"0.0100% per 4 hours","rollovertm":"1570638129","misc":"","oflags":""}}}`)
+	getLedgersJSON      = []byte(`{"error":[],"result":{"ledger":{"LGPNZQ-2SLSA-C7QCT1":{"refid":"TI2NBU-IICD2-BAVYO1","time":1570623111.9096,"type":"rollover","aclass":"currency","asset":"ZUSD","amount":"0.0000","fee":"0.7169","balance":"1.7326"}}}}`)
+	queryLedgerJSON     = []byte(`{"error":[],"result":{"LTCH4T-LG5FS-MKGVD1":{"refid":"TYE7IH-QCG76-BVMCM1","time":1570551111.2568,"type":"rollover","aclass":"currency","asset":"ZUSD","amount":"0.0000","fee":"0.4640","balance":"1.3540"}}}`)
+	getTradeVolumeJSON  = []byte(`{"error":[],"result":{"currency":"ZUSD","volume":"1000","fees":{"XXBTZUSD":{"fee":"0.1600","minfee":"0.1000","maxfee":"0.2600","nextfee":"0.1400","nextvolume":"2500000.0000","tiervolume":"1000000.0000"}},"fees_maker":{"XXBTZUSD":{"fee":"0.0600","minfee":"0.0000","maxfee":"0.1600","nextfee":"0.0400","nextvolume":"2500000.0000","tiervolume":"1000000.0000"}}}}`)
+	getWSTokenJSON      = []byte(`{"error":[],"result":{"token": "test", "expires": 900}}`)
 )
+
+func TestKraken_GetDepositMethods(t *testing.T) {
+	tests := []struct {
+		name    string
+		err     error
+		resp    *http.Response
+		want    []DepositMethods
+		wantErr bool
+	}{
+		{
+			name:    "Kraken returns error",
+			err:     ErrSomething,
+			resp:    &http.Response{},
+			want:    []DepositMethods{},
+			wantErr: true,
+		}, {
+			name: "Get Deposit Methods",
+			err:  nil,
+			resp: &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(bytes.NewReader(depositMethodsJSON)),
+			},
+			want:    []DepositMethods{DepositMethods{Method: "Ether (Hex)", Limit: false, Fee: "0.0000000000", GenAddress: true}},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			api := &Kraken{
+				client: &httpMock{
+					Error:    tt.err,
+					Response: tt.resp,
+				},
+			}
+			got, err := api.GetDepositMethods()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Kraken.GetDepositMethods() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Kraken.GetDepositMethods() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestKraken_GetDepositStatuses(t *testing.T) {
+	tests := []struct {
+		name    string
+		err     error
+		resp    *http.Response
+		want    []DepositStatuses
+		wantErr bool
+	}{
+		{
+			name:    "Kraken returns error",
+			err:     ErrSomething,
+			resp:    &http.Response{},
+			want:    []DepositStatuses{},
+			wantErr: true,
+		}, {
+			name: "Get Deposit Statuses",
+			err:  nil,
+			resp: &http.Response{
+				StatusCode: 200,
+				Body:       ioutil.NopCloser(bytes.NewReader(depositStatusesJSON)),
+			},
+			want: []DepositStatuses{DepositStatuses{Method: "Ether (Hex)", Aclass: "currency", Asset: "XETH", Refid: "sometest1",
+				Txid: "sometest2", Info: "sometest3", Amount: "6.91", Fee: "0.0000000000", Time: 1617014556, Status: "Success"},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			api := &Kraken{
+				client: &httpMock{
+					Error:    tt.err,
+					Response: tt.resp,
+				},
+			}
+			got, err := api.GetDepositStatus("Ether (Hex)", "XETH")
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Kraken.GetDepositMethods() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Kraken.GetDepositMethods() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
 
 func TestKraken_GetAccountBalances(t *testing.T) {
 	tests := []struct {
