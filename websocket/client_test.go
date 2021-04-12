@@ -742,7 +742,7 @@ func TestClient_SubscribeCandles(t *testing.T) {
 			},
 			args: args{
 				pairs:    []string{BTCCAD},
-				interval: Interal10080,
+				interval: Interval10080,
 			},
 			wantErr: false,
 		},
@@ -753,7 +753,7 @@ func TestClient_SubscribeCandles(t *testing.T) {
 			},
 			args: args{
 				pairs:    []string{BTCCAD},
-				interval: Interal10080,
+				interval: Interval10080,
 			},
 			wantErr: true,
 		},
