@@ -547,7 +547,7 @@ func TestKraken_GetOrderBook(t *testing.T) {
 }
 
 func TestKraken_GetTrades(t *testing.T) {
-	json := []byte(`{"error":[],"result":{"ADACAD":[["0.093280","2968.26413227",1553959154.2509,"s","l",""]], "last": 1554221914617956627}}`)
+	json := []byte(`{"error":[],"result":{"ADACAD":[["0.093280","2968.26413227",1553959154.2509,"s","l",""]], "last": "1554221914617956627"}}`)
 	type args struct {
 		pair  string
 		since int64
@@ -582,7 +582,7 @@ func TestKraken_GetTrades(t *testing.T) {
 				since: 2,
 			},
 			want: TradeResponse{
-				Last: 1554221914617956627,
+				Last: "1554221914617956627",
 				ADACAD: []Trade{
 					Trade{
 						Price:     0.093280,
