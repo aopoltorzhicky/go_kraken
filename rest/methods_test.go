@@ -107,7 +107,7 @@ func TestKraken_Assets(t *testing.T) {
 				assets: nil,
 			},
 			want: map[string]Asset{
-				"ADA": Asset{
+				"ADA": {
 					AlternateName:   "ADA",
 					AssetClass:      "currency",
 					Decimals:        8,
@@ -127,7 +127,7 @@ func TestKraken_Assets(t *testing.T) {
 				assets: []string{"ADA"},
 			},
 			want: map[string]Asset{
-				"ADA": Asset{
+				"ADA": {
 					AlternateName:   "ADA",
 					AssetClass:      "currency",
 					Decimals:        8,
@@ -190,7 +190,7 @@ func TestKraken_AssetPairs(t *testing.T) {
 				pairs: []string{"ADACAD"},
 			},
 			want: map[string]AssetPair{
-				"ADACAD": AssetPair{
+				"ADACAD": {
 					Altname:           "ADACAD",
 					WSName:            "ADA/CAD",
 					AssetClassBase:    "currency",
@@ -222,7 +222,7 @@ func TestKraken_AssetPairs(t *testing.T) {
 				pairs: nil,
 			},
 			want: map[string]AssetPair{
-				"ADACAD": AssetPair{
+				"ADACAD": {
 					Altname:           "ADACAD",
 					WSName:            "ADA/CAD",
 					AssetClassBase:    "currency",
@@ -307,7 +307,7 @@ func TestKraken_Ticker(t *testing.T) {
 				pairs: []string{"ADACAD"},
 			},
 			want: map[string]Ticker{
-				"ADACAD": Ticker{
+				"ADACAD": {
 					Ask: Level{
 						Price:          0.108312,
 						WholeLotVolume: 6418.,
@@ -373,7 +373,7 @@ func TestKraken_Candles(t *testing.T) {
 	response := OHLCResponse{
 		Last: 1554222360,
 		Candles: map[string][]Candle{
-			"ADACAD": []Candle{{
+			"ADACAD": {{
 				Time:      1554179640,
 				Open:      0.0005000,
 				High:      0.0005000,
@@ -496,26 +496,26 @@ func TestKraken_GetOrderBook(t *testing.T) {
 				depth: 2,
 			},
 			want: map[string]OrderBook{
-				"ADACAD": OrderBook{
+				"ADACAD": {
 					Asks: []OrderBookItem{
-						OrderBookItem{
+						{
 							Price:     0.109441,
 							Volume:    6741.072,
 							Timestamp: 1554223624,
 						},
-						OrderBookItem{
+						{
 							Price:     0.109442,
 							Volume:    4950.724,
 							Timestamp: 1554223614,
 						},
 					},
 					Bids: []OrderBookItem{
-						OrderBookItem{
+						{
 							Price:     0.090494,
 							Volume:    2789.652,
 							Timestamp: 1554223622,
 						},
-						OrderBookItem{
+						{
 							Price:     0.090493,
 							Volume:    6379.886,
 							Timestamp: 1554223620,
@@ -584,7 +584,7 @@ func TestKraken_GetTrades(t *testing.T) {
 			want: TradeResponse{
 				Last: "1554221914617956627",
 				ADACAD: []Trade{
-					Trade{
+					{
 						Price:     0.093280,
 						Volume:    2968.26413227,
 						Time:      1553959154.2509,
@@ -655,7 +655,7 @@ func TestKraken_GetSpread(t *testing.T) {
 			want: SpreadResponse{
 				Last: 1554224725,
 				ADACAD: []Spread{
-					Spread{
+					{
 						Time: 1554224145,
 						Ask:  0.109331,
 						Bid:  0.091118,

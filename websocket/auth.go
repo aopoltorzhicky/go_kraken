@@ -17,26 +17,20 @@ type AuthClient struct {
 }
 
 // NewAuth - constructor for AuthClient
-func NewAuth(key, secret string) *AuthClient {
+func NewAuth(key, secret string, opts ...AuthOption) *AuthClient {
 	api := rest.New(key, secret)
 	data, err := api.GetWebSocketsToken()
 	if err != nil {
 		panic(err)
 	}
 
-	params := NewDefaultAuthParameters()
 	c := &AuthClient{
 		Client: &Client{
-			asyncFactory: &websocketAsynchronousFactory{
-				parameters: params,
-			},
 			isConnected:   false,
-			parameters:    params,
 			listener:      make(chan interface{}),
 			terminal:      false,
 			shutdown:      make(chan struct{}),
 			asynchronous:  nil,
-			heartbeat:     time.Now().Add(params.HeartbeatTimeout),
 			hbChannel:     make(chan error),
 			subscriptions: make(map[int64]*SubscriptionStatus),
 			factories:     make(map[string]ParseFactory),
@@ -45,6 +39,20 @@ func NewAuth(key, secret string) *AuthClient {
 		token:             data.Token,
 		tokenExpiresTimer: time.NewTimer(time.Duration(data.Expires)),
 	}
+
+	for i := range opts {
+		opts[i](c)
+	}
+
+	if c.parameters == nil {
+		c.parameters = NewDefaultAuthParameters()
+	}
+
+	c.asyncFactory = &websocketAsynchronousFactory{
+		parameters: c.parameters,
+	}
+	c.heartbeat = time.Now().Add(c.parameters.HeartbeatTimeout)
+
 	c.createFactories()
 	c.createAuthFactories()
 	return c

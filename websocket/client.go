@@ -35,9 +35,6 @@ type Client struct {
 
 	timeout      int64 // read timeout
 	asynchronous asynchronous
-	isConnected  bool
-	terminal     bool
-	init         bool
 	heartbeat    time.Time
 	hbChannel    chan error
 
@@ -50,11 +47,15 @@ type Client struct {
 	// downstream listener channel to deliver API objects
 	listener chan interface{}
 
-	// race management
-	waitGroup sync.WaitGroup
-
 	subscriptions map[int64]*SubscriptionStatus
 	factories     map[string]ParseFactory
+
+	isConnected bool
+	terminal    bool
+	init        bool
+
+	// race management
+	waitGroup sync.WaitGroup
 
 	isConnectedMux sync.Mutex
 	heartbeatMux   sync.Mutex
@@ -145,26 +146,26 @@ func (c *Client) listenDisconnect() {
 		if e != nil {
 			log.Printf("socket disconnect: %s", e.Error())
 		}
-		c.setIsConnected(false)
-		err := c.reconnect(e)
-		if err != nil {
+		c.setIsConnected()
+
+		if err := c.reconnect(e); err != nil {
 			log.Printf("socket disconnect: %s", err.Error())
 		}
 	case <-c.shutdown:
 		log.Printf("Shutdown listen disconnect")
-		c.setIsConnected(false)
+		c.setIsConnected()
 		return
 
 	case e := <-c.listenHeartbeat():
 		log.Printf("Heartbeat")
 		if e != nil {
 			c.closeAsyncAndWait(c.parameters.ShutdownTimeout)
-			err := c.reconnect(nil)
-			if err != nil {
+
+			if err := c.reconnect(nil); err != nil {
 				log.Printf("socket disconnect: %s", err.Error())
 			}
 		}
-		c.setIsConnected(false)
+		c.setIsConnected()
 	}
 }
 
@@ -195,12 +196,11 @@ func (c *Client) reset() {
 
 func (c *Client) connect() error {
 	err := c.asynchronous.Connect()
-	c.setIsConnected(err == nil)
+	c.setIsConnected()
 	return err
 }
 
 func (c *Client) resubscribe() error {
-	ctx := context.Background()
 	for _, sub := range c.subscriptions {
 		s := SubscriptionRequest{
 			Event:        EventSubscribe,
@@ -208,8 +208,7 @@ func (c *Client) resubscribe() error {
 			Subscription: sub.Subscription,
 		}
 
-		err := c.asynchronous.Send(ctx, s)
-		if err != nil {
+		if err := c.asynchronous.Send(context.Background(), s); err != nil {
 			log.Println(err)
 			return err
 		}
@@ -236,8 +235,7 @@ func (c *Client) reconnect(err error) error {
 		c.reset()
 
 		if err = c.connect(); err == nil {
-			err = c.resubscribe()
-			if err == nil {
+			if err = c.resubscribe(); err == nil {
 				log.Print("reconnect OK")
 				return nil
 			}
@@ -268,8 +266,7 @@ func (c *Client) listenUpstream() {
 		case msg := <-c.asynchronous.Listen():
 			if msg != nil {
 				// log.Printf("[DEBUG]: %s\n", msg)
-				err := c.handleMessage(msg)
-				if err != nil {
+				if err := c.handleMessage(msg); err != nil {
 					log.Printf("[WARN]: %s\n", err)
 				}
 			}
@@ -312,17 +309,21 @@ func (c *Client) closeAsyncAndWait(t time.Duration) {
 	c.waitGroup.Wait()
 }
 
-func (c *Client) handleMessage(msg []byte) (err error) {
+func (c *Client) handleMessage(msg []byte) error {
 	t := bytes.TrimLeftFunc(msg, unicode.IsSpace)
 	c.updateHeartbeat()
-	if bytes.HasPrefix(t, []byte("[")) {
-		err = c.handleChannel(msg)
-	} else if bytes.HasPrefix(t, []byte("{")) {
-		err = c.handleEvent(msg)
-	} else {
-		return fmt.Errorf("unexpected message: %s", msg)
+
+	if len(t) == 0 {
+		return fmt.Errorf("Empty response: %s", string(msg))
 	}
-	return err
+	switch t[0] {
+	case '[':
+		return c.handleChannel(msg)
+	case '{':
+		return c.handleEvent(msg)
+	default:
+		return fmt.Errorf("Unexpected message: %s", string(msg))
+	}
 }
 
 func (c *Client) createFactories() {
@@ -338,25 +339,22 @@ func (c *Client) createFactory(name string, factory ParseFactory) {
 }
 
 func (c *Client) handleEvent(msg []byte) error {
-	event := &EventType{}
-	err := json.Unmarshal(msg, event)
-	if err != nil {
+	var event EventType
+	if err := json.Unmarshal(msg, &event); err != nil {
 		return err
 	}
-	switch event.Event {
 
+	switch event.Event {
 	case EventPong:
-		pong := PongResponse{}
-		err = json.Unmarshal(msg, &pong)
-		if err != nil {
+		var pong PongResponse
+		if err := json.Unmarshal(msg, &pong); err != nil {
 			return err
 		}
 		log.Print("Pong received")
 
 	case EventSystemStatus:
-		systemStatus := SystemStatus{}
-		err = json.Unmarshal(msg, &systemStatus)
-		if err != nil {
+		var systemStatus SystemStatus
+		if err := json.Unmarshal(msg, &systemStatus); err != nil {
 			return err
 		}
 		log.Printf("Status: %s", systemStatus.Status)
@@ -364,9 +362,8 @@ func (c *Client) handleEvent(msg []byte) error {
 		log.Printf("Version: %s", systemStatus.Version)
 
 	case EventSubscriptionStatus:
-		status := SubscriptionStatus{}
-		err = json.Unmarshal(msg, &status)
-		if err != nil {
+		var status SubscriptionStatus
+		if err := json.Unmarshal(msg, &status); err != nil {
 			return err
 		}
 
@@ -386,39 +383,39 @@ func (c *Client) handleEvent(msg []byte) error {
 			}
 		}
 	case EventCancelOrderStatus:
-		cancelOrderResponse := CancelOrderResponse{}
-		err = json.Unmarshal(msg, &cancelOrderResponse)
-		if err != nil {
+		var cancelOrderResponse CancelOrderResponse
+		if err := json.Unmarshal(msg, &cancelOrderResponse); err != nil {
 			return err
 		}
 
-		if cancelOrderResponse.Status == StatusError {
+		switch cancelOrderResponse.Status {
+		case StatusError:
 			log.Printf("[ERROR] %s", cancelOrderResponse.ErrorMessage)
-		} else if cancelOrderResponse.Status == StatusOK {
+		case StatusOK:
 			log.Print("[INFO] Order successfully cancelled")
 			c.listener <- DataUpdate{
 				ChannelName: EventCancelOrder,
 				Data:        cancelOrderResponse,
 			}
-		} else {
+		default:
 			log.Printf("[ERROR] Unknown status: %s", cancelOrderResponse.Status)
 		}
 	case EventAddOrderStatus:
-		addOrderResponse := AddOrderResponse{}
-		err = json.Unmarshal(msg, &addOrderResponse)
-		if err != nil {
+		var addOrderResponse AddOrderResponse
+		if err := json.Unmarshal(msg, &addOrderResponse); err != nil {
 			return err
 		}
 
-		if addOrderResponse.Status == StatusError {
+		switch addOrderResponse.Status {
+		case StatusError:
 			log.Printf("[ERROR] %s", addOrderResponse.ErrorMessage)
-		} else if addOrderResponse.Status == StatusOK {
+		case StatusOK:
 			log.Print("[INFO] Order successfully sent")
 			c.listener <- DataUpdate{
 				ChannelName: EventAddOrder,
 				Data:        addOrderResponse,
 			}
-		} else {
+		default:
 			log.Printf("[ERROR] Unknown status: %s", addOrderResponse.Status)
 		}
 	case EventHeartbeat:
@@ -430,8 +427,7 @@ func (c *Client) handleEvent(msg []byte) error {
 
 func (c *Client) handleChannel(msg []byte) error {
 	var data DataUpdate
-	err := json.Unmarshal(msg, &data)
-	if err != nil {
+	if err := json.Unmarshal(msg, &data); err != nil {
 		return err
 	}
 
@@ -458,7 +454,7 @@ func (c *Client) IsConnected() bool {
 	return c.isConnected
 }
 
-func (c *Client) setIsConnected(value bool) {
+func (c *Client) setIsConnected() {
 	c.isConnectedMux.Lock()
 	defer c.isConnectedMux.Unlock()
 

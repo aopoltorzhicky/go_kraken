@@ -80,11 +80,13 @@ func (api *Kraken) QueryOrders(needTrades bool, userRef string, txIDs ...string)
 	if userRef != "" {
 		data.Set("userref", userRef)
 	}
-	if len(txIDs) > 50 {
+
+	switch {
+	case len(txIDs) > 50:
 		return nil, fmt.Errorf("Maximum count of requested orders is 50")
-	} else if len(txIDs) == 0 {
+	case len(txIDs) == 0:
 		return nil, fmt.Errorf("txIDs is required")
-	} else {
+	default:
 		data.Set("txid", strings.Join(txIDs, ","))
 	}
 

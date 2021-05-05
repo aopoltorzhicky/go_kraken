@@ -41,7 +41,7 @@ func parseLevel(data []interface{}) Level {
 }
 
 func parseValues(data []interface{}) Values {
-	switch data[0].(type) {
+	switch val := data[0].(type) {
 	case string:
 		return Values{
 			Today:  valToFloat64(data[0]),
@@ -53,7 +53,7 @@ func parseValues(data []interface{}) Values {
 			last24h = v
 		}
 		return Values{
-			Today:  data[0].(int),
+			Today:  val,
 			Last24: last24h,
 		}
 
@@ -63,7 +63,7 @@ func parseValues(data []interface{}) Values {
 			last24h = v
 		}
 		return Values{
-			Today:  data[0].(float64),
+			Today:  val,
 			Last24: last24h,
 		}
 	default:

@@ -2,9 +2,10 @@ package websocket
 
 // URLs
 const (
-	ProdBaseURL    = "wss://ws.kraken.com"
-	AuthBaseURL    = "wss://ws-auth.kraken.com"
-	SandboxBaseURL = "wss://beta-ws.kraken.com"
+	ProdBaseURL        = "wss://ws.kraken.com"
+	AuthBaseURL        = "wss://ws-auth.kraken.com"
+	SandboxBaseURL     = "wss://beta-ws.kraken.com"
+	AuthSandboxBaseURL = "wss://beta-ws-auth.kraken.com"
 )
 
 // Available channels
@@ -36,11 +37,11 @@ const (
 
 // Intervals
 const (
-	Interval1    = 1
-	Interval5    = 5
-	Interval15   = 15
-	Interval30   = 30
-	Interval60   = 60
+	Interval1     = 1
+	Interval5     = 5
+	Interval15    = 15
+	Interval30    = 30
+	Interval60    = 60
 	Interval240   = 240
 	Interval1440  = 1440
 	Interval10080 = 10080

@@ -9,24 +9,23 @@ import (
 
 func main() {
 	c := ws.New()
-	err := c.Connect()
-	if err != nil {
+
+	if err := c.Connect(); err != nil {
 		log.Fatal("Error connecting to web socket : ", err)
 	}
 
 	pairs := []string{ws.BTCUSD}
 
 	// subscribe to BTCUSD trades
-	err = c.SubscribeTrades(pairs)
-	if err != nil {
+	if err := c.SubscribeTrades(pairs); err != nil {
 		log.Fatal(err)
 	}
 
 	go func() {
 		time.Sleep(time.Second * 30)
 		log.Print("Unsubsribing...")
-		err = c.Unsubscribe(ws.ChanTrades, pairs)
-		if err != nil {
+
+		if err := c.Unsubscribe(ws.ChanTrades, pairs); err != nil {
 			log.Fatal(err)
 		}
 		log.Print("Success!")

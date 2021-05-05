@@ -197,7 +197,7 @@ func TestClient_handleChannel(t *testing.T) {
 			name: "Test `not found factory`",
 			fields: fields{
 				subscriptions: map[int64]*SubscriptionStatus{
-					1: &SubscriptionStatus{
+					1: {
 						Subscription: Subscription{
 							Name: ChanTicker,
 						},
@@ -214,7 +214,7 @@ func TestClient_handleChannel(t *testing.T) {
 			name: "Test invalid parse message",
 			fields: fields{
 				subscriptions: map[int64]*SubscriptionStatus{
-					1: &SubscriptionStatus{
+					1: {
 						Subscription: Subscription{
 							Name: ChanTicker,
 						},
@@ -233,7 +233,7 @@ func TestClient_handleChannel(t *testing.T) {
 			name: "Test valid message",
 			fields: fields{
 				subscriptions: map[int64]*SubscriptionStatus{
-					1: &SubscriptionStatus{
+					1: {
 						Subscription: Subscription{
 							Name: ChanSpread,
 						},
@@ -305,7 +305,7 @@ func TestClient_handleMessage(t *testing.T) {
 			fields: fields{
 				heartbeat: time.Now(),
 				subscriptions: map[int64]*SubscriptionStatus{
-					1: &SubscriptionStatus{
+					1: {
 						ChannelID: 1,
 						Subscription: Subscription{
 							Name: ChanSpread,
@@ -520,51 +520,37 @@ func TestClient_Ping(t *testing.T) {
 }
 
 func TestClient_Unsubscribe(t *testing.T) {
-	type fields struct {
-		isError bool
-	}
-	type args struct {
+	tests := []struct {
+		name        string
 		channelType string
 		pairs       []string
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
+		isError     bool
+		wantErr     bool
 	}{
 		{
-			name: "Test unsubscribe method: success",
-			fields: fields{
-				isError: false,
-			},
-			args: args{
-				channelType: ChanTicker,
-				pairs:       []string{BTCCAD},
-			},
-			wantErr: false,
+			name:        "Test unsubscribe method: success",
+			isError:     false,
+			channelType: ChanTicker,
+			pairs:       []string{BTCCAD},
+			wantErr:     false,
 		},
 		{
-			name: "Test unsubscribe method: failed",
-			fields: fields{
-				isError: true,
-			},
-			args: args{
-				channelType: ChanTicker,
-				pairs:       []string{BTCCAD},
-			},
-			wantErr: true,
+			name:        "Test unsubscribe method: failed",
+			isError:     true,
+			channelType: ChanTicker,
+			pairs:       []string{BTCCAD},
+			wantErr:     true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isSendError: tt.fields.isError,
+					isSendError: tt.isError,
 				},
 				parameters: NewDefaultSandboxParameters(),
 			}
-			if err := c.Unsubscribe(tt.args.channelType, tt.args.pairs); (err != nil) != tt.wantErr {
+			if err := c.Unsubscribe(tt.channelType, tt.pairs); (err != nil) != tt.wantErr {
 				t.Errorf("Client.Unsubscribe() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -572,39 +558,26 @@ func TestClient_Unsubscribe(t *testing.T) {
 }
 
 func TestClient_SubscribeBook(t *testing.T) {
-	type fields struct {
-		isError bool
-	}
-	type args struct {
-		pairs []string
-		depth int64
-	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		pairs   []string
+		depth   int64
+		isError bool
 		wantErr bool
 	}{
 		{
-			name: "Test SubscribeBook method: success",
-			fields: fields{
-				isError: false,
-			},
-			args: args{
-				depth: Depth10,
-				pairs: []string{BTCCAD},
-			},
+			name:    "Test SubscribeBook method: success",
+			isError: false,
+			depth:   Depth10,
+			pairs:   []string{BTCCAD},
 			wantErr: false,
 		},
 		{
-			name: "Test SubscribeBook method: failed",
-			fields: fields{
-				isError: true,
-			},
-			args: args{
-				depth: Depth10,
-				pairs: []string{BTCCAD},
-			},
+			name:    "Test SubscribeBook method: failed",
+			isError: true,
+			depth:   Depth10,
+			pairs:   []string{BTCCAD},
+
 			wantErr: true,
 		},
 	}
@@ -612,11 +585,11 @@ func TestClient_SubscribeBook(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isSendError: tt.fields.isError,
+					isSendError: tt.isError,
 				},
 				parameters: NewDefaultSandboxParameters(),
 			}
-			if err := c.SubscribeBook(tt.args.pairs, tt.args.depth); (err != nil) != tt.wantErr {
+			if err := c.SubscribeBook(tt.pairs, tt.depth); (err != nil) != tt.wantErr {
 				t.Errorf("Client.SubscribeBook() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -624,36 +597,22 @@ func TestClient_SubscribeBook(t *testing.T) {
 }
 
 func TestClient_SubscribeSpread(t *testing.T) {
-	type fields struct {
-		isError bool
-	}
-	type args struct {
-		pairs []string
-	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		pairs   []string
+		isError bool
 		wantErr bool
 	}{
 		{
-			name: "Test SubscribeSpread method: success",
-			fields: fields{
-				isError: false,
-			},
-			args: args{
-				pairs: []string{BTCCAD},
-			},
+			name:    "Test SubscribeSpread method: success",
+			isError: false,
+			pairs:   []string{BTCCAD},
 			wantErr: false,
 		},
 		{
-			name: "Test SubscribeSpread method: failed",
-			fields: fields{
-				isError: true,
-			},
-			args: args{
-				pairs: []string{BTCCAD},
-			},
+			name:    "Test SubscribeSpread method: failed",
+			isError: true,
+			pairs:   []string{BTCCAD},
 			wantErr: true,
 		},
 	}
@@ -661,11 +620,11 @@ func TestClient_SubscribeSpread(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isSendError: tt.fields.isError,
+					isSendError: tt.isError,
 				},
 				parameters: NewDefaultSandboxParameters(),
 			}
-			if err := c.SubscribeSpread(tt.args.pairs); (err != nil) != tt.wantErr {
+			if err := c.SubscribeSpread(tt.pairs); (err != nil) != tt.wantErr {
 				t.Errorf("Client.SubscribeSpread() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -673,36 +632,22 @@ func TestClient_SubscribeSpread(t *testing.T) {
 }
 
 func TestClient_SubscribeTrades(t *testing.T) {
-	type fields struct {
-		isError bool
-	}
-	type args struct {
-		pairs []string
-	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		pairs   []string
+		isError bool
 		wantErr bool
 	}{
 		{
-			name: "Test SubscribeTrades method: success",
-			fields: fields{
-				isError: false,
-			},
-			args: args{
-				pairs: []string{BTCCAD},
-			},
+			name:    "Test SubscribeTrades method: success",
+			isError: false,
+			pairs:   []string{BTCCAD},
 			wantErr: false,
 		},
 		{
-			name: "Test SubscribeTrades method: failed",
-			fields: fields{
-				isError: true,
-			},
-			args: args{
-				pairs: []string{BTCCAD},
-			},
+			name:    "Test SubscribeTrades method: failed",
+			isError: true,
+			pairs:   []string{BTCCAD},
 			wantErr: true,
 		},
 	}
@@ -710,11 +655,11 @@ func TestClient_SubscribeTrades(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isSendError: tt.fields.isError,
+					isSendError: tt.isError,
 				},
 				parameters: NewDefaultSandboxParameters(),
 			}
-			if err := c.SubscribeTrades(tt.args.pairs); (err != nil) != tt.wantErr {
+			if err := c.SubscribeTrades(tt.pairs); (err != nil) != tt.wantErr {
 				t.Errorf("Client.SubscribeTrades() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -722,51 +667,37 @@ func TestClient_SubscribeTrades(t *testing.T) {
 }
 
 func TestClient_SubscribeCandles(t *testing.T) {
-	type fields struct {
-		isError bool
-	}
-	type args struct {
+	tests := []struct {
+		name     string
 		pairs    []string
 		interval int64
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr bool
+		isError  bool
+		wantErr  bool
 	}{
 		{
-			name: "Test SubscribeCandles method: success",
-			fields: fields{
-				isError: false,
-			},
-			args: args{
-				pairs:    []string{BTCCAD},
-				interval: Interval10080,
-			},
-			wantErr: false,
+			name:     "Test SubscribeCandles method: success",
+			isError:  false,
+			pairs:    []string{BTCCAD},
+			interval: Interval10080,
+			wantErr:  false,
 		},
 		{
-			name: "Test SubscribeCandles method: failed",
-			fields: fields{
-				isError: true,
-			},
-			args: args{
-				pairs:    []string{BTCCAD},
-				interval: Interval10080,
-			},
-			wantErr: true,
+			name:     "Test SubscribeCandles method: failed",
+			isError:  true,
+			pairs:    []string{BTCCAD},
+			interval: Interval10080,
+			wantErr:  true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isSendError: tt.fields.isError,
+					isSendError: tt.isError,
 				},
 				parameters: NewDefaultSandboxParameters(),
 			}
-			if err := c.SubscribeCandles(tt.args.pairs, tt.args.interval); (err != nil) != tt.wantErr {
+			if err := c.SubscribeCandles(tt.pairs, tt.interval); (err != nil) != tt.wantErr {
 				t.Errorf("Client.SubscribeCandles() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -774,36 +705,22 @@ func TestClient_SubscribeCandles(t *testing.T) {
 }
 
 func TestClient_SubscribeTicker(t *testing.T) {
-	type fields struct {
-		isError bool
-	}
-	type args struct {
-		pairs []string
-	}
 	tests := []struct {
 		name    string
-		fields  fields
-		args    args
+		pairs   []string
+		isError bool
 		wantErr bool
 	}{
 		{
-			name: "Test SubscribeTicker method: success",
-			fields: fields{
-				isError: false,
-			},
-			args: args{
-				pairs: []string{BTCCAD},
-			},
+			name:    "Test SubscribeTicker method: success",
+			isError: false,
+			pairs:   []string{BTCCAD},
 			wantErr: false,
 		},
 		{
-			name: "Test SubscribeTicker method: failed",
-			fields: fields{
-				isError: true,
-			},
-			args: args{
-				pairs: []string{BTCCAD},
-			},
+			name:    "Test SubscribeTicker method: failed",
+			isError: true,
+			pairs:   []string{BTCCAD},
 			wantErr: true,
 		},
 	}
@@ -811,11 +728,11 @@ func TestClient_SubscribeTicker(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			c := &Client{
 				asynchronous: &mockAsynchronous{
-					isSendError: tt.fields.isError,
+					isSendError: tt.isError,
 				},
 				parameters: NewDefaultSandboxParameters(),
 			}
-			if err := c.SubscribeTicker(tt.args.pairs); (err != nil) != tt.wantErr {
+			if err := c.SubscribeTicker(tt.pairs); (err != nil) != tt.wantErr {
 				t.Errorf("Client.SubscribeTicker() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -993,7 +910,7 @@ func TestClient_resubscribe(t *testing.T) {
 					isSendError: tt.fields.isError,
 				},
 				subscriptions: map[int64]*SubscriptionStatus{
-					1: &SubscriptionStatus{
+					1: {
 						Pair:         BTCCAD,
 						Subscription: Subscription{},
 					},
@@ -1264,7 +1181,7 @@ func TestClient_reconnect(t *testing.T) {
 				isConnectError: false,
 				isSendError:    true,
 				subscriptions: map[int64]*SubscriptionStatus{
-					1: &SubscriptionStatus{
+					1: {
 						Pair: BTCCAD,
 						Subscription: Subscription{
 							Name: ChanTicker,

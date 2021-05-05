@@ -87,25 +87,25 @@ func (u *DataUpdate) UnmarshalJSON(data []byte) error {
 	}
 
 	if len(raw) == 3 {
-		var ok bool
 		u.Data = raw[0]
-
-		if u.ChannelName, ok = raw[1].(string); !ok {
+		chanName, ok := raw[1].(string)
+		if !ok {
 			return fmt.Errorf("expected message to have channel name as 2nd element but got %#v instead", raw[1])
 		}
+		u.ChannelName = chanName
 
-		var sequenceMap map[string]interface{}
-		if sequenceMap, ok = raw[2].(map[string]interface{}); !ok {
+		sequenceMap, ok := raw[2].(map[string]interface{})
+		if !ok {
 			return fmt.Errorf("expected message to have JSON object as 3rd element but got %#v instead", raw[2])
 		}
 
-		var sequenceRaw interface{}
-		if sequenceRaw, ok = sequenceMap["sequence"]; !ok {
+		sequenceRaw, ok := sequenceMap["sequence"]
+		if !ok {
 			return fmt.Errorf("expected message to have sequence in JSON object as 3rd element but got %#v instead", raw[2])
 		}
 
-		var seq float64
-		if seq, ok = sequenceRaw.(float64); !ok {
+		seq, ok := sequenceRaw.(float64)
+		if !ok {
 			return fmt.Errorf("expected message to have sequence integer in JSON object as 3rd element but got %#v instead", raw[2])
 		}
 
@@ -119,15 +119,15 @@ func (u *DataUpdate) UnmarshalJSON(data []byte) error {
 	}
 
 	u.ChannelID = int64(chID)
-	u.ChannelName, ok = raw[len(raw)-2].(string)
+	u.ChannelName, ok = raw[2].(string)
 	if !ok {
 		return fmt.Errorf("expected message with (n - 2) element channel name but got %#v instead", raw[len(raw)-2])
 	}
-	u.Pair, ok = raw[len(raw)-1].(string)
+	u.Pair, ok = raw[3].(string)
 	if !ok {
 		return fmt.Errorf("expected message  with (n - 2) element pair but got %#v instead", raw[len(raw)-1])
 	}
-	u.Data = raw[1 : len(raw)-2][0]
+	u.Data = raw[1]
 
 	return nil
 }
@@ -305,7 +305,7 @@ type AddOrderResponse struct {
 	Event        string `json:"event"`
 	Status       string `json:"status"`
 	TxID         string `json:"txid"`
-	ErrorMessage string `json:"errorMessage,omiempty"`
+	ErrorMessage string `json:"errorMessage,omitempty"`
 }
 
 // CancelOrderRequest -
@@ -316,7 +316,7 @@ type CancelOrderRequest struct {
 
 // CancelOrderResponse -
 type CancelOrderResponse struct {
-	ErrorMessage string `json:"errorMessage,omiempty"`
+	ErrorMessage string `json:"errorMessage,omitempty"`
 	Event        string `json:"event"`
 	Status       string `json:"status"`
 }

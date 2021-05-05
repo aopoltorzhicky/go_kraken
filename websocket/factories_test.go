@@ -246,7 +246,7 @@ func Test_tradesFactory_Parse(t *testing.T) {
 			},
 			f: &tradesFactory{},
 			want: []TradeUpdate{
-				TradeUpdate{
+				{
 					Pair:      BTCCAD,
 					Time:      float64(t1.Unix()),
 					Price:     5541.2,
@@ -255,7 +255,7 @@ func Test_tradesFactory_Parse(t *testing.T) {
 					OrderType: Limit,
 					Misc:      "",
 				},
-				TradeUpdate{
+				{
 					Pair:      BTCCAD,
 					Time:      float64(t2.Unix()),
 					Price:     6060.,
@@ -415,13 +415,13 @@ func Test_bookFactory_Parse(t *testing.T) {
 				IsSnapshot: true,
 				Pair:       BTCCAD,
 				Asks: []OrderBookItem{
-					OrderBookItem{
+					{
 						Price:     5541.3,
 						Volume:    2.50700000,
 						Time:      float64(t1.Unix()),
 						Republish: false,
 					},
-					OrderBookItem{
+					{
 						Price:     5541.8,
 						Volume:    0.33000000,
 						Time:      float64(t2.Unix()),
@@ -429,13 +429,13 @@ func Test_bookFactory_Parse(t *testing.T) {
 					},
 				},
 				Bids: []OrderBookItem{
-					OrderBookItem{
+					{
 						Price:     5541.2,
 						Volume:    1.52900000,
 						Time:      float64(t1.Unix()),
 						Republish: false,
 					},
-					OrderBookItem{
+					{
 						Price:     5539.9,
 						Volume:    0.30000000,
 						Time:      float64(t2.Unix()),
@@ -472,7 +472,7 @@ func Test_bookFactory_Parse(t *testing.T) {
 				IsSnapshot: false,
 				Pair:       BTCCAD,
 				Asks: []OrderBookItem{
-					OrderBookItem{
+					{
 						Price:     5541.3,
 						Volume:    2.50700000,
 						Time:      float64(t1.Unix()),
@@ -480,7 +480,7 @@ func Test_bookFactory_Parse(t *testing.T) {
 					},
 				},
 				Bids: []OrderBookItem{
-					OrderBookItem{
+					{
 						Price:     5541.2,
 						Volume:    1.52900000,
 						Time:      float64(t1.Unix()),

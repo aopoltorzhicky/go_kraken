@@ -231,40 +231,58 @@ func (f *openOrdersFactory) Parse(data interface{}, pair string) (interface{}, e
 		return upd, fmt.Errorf("Can't parse data %#v", data)
 	}
 
-	if len(body) != 2 {
-		return upd, fmt.Errorf("Can't parse data %#v", data)
-	}
+	for i := range body {
+		order, ok := body[i].(map[string]interface{})
+		if !ok {
+			return upd, fmt.Errorf("Can't parse order %#v", body[i])
+		}
+		for orderID, orderBody := range order {
+			value, ok := orderBody.(map[string]interface{})
+			if !ok {
+				return upd, fmt.Errorf("Can't parse order body %#v", body[i])
+			}
+			upd.Order[orderID] = OpenOrder{
+				Cost:       valToFloat64(value["cost"]),
+				Fee:        valToFloat64(value["fee"]),
+				LimitPrice: valToFloat64(value["limitprice"]),
+				Misc:       getString(value, "misc"),
+				Oflags:     getString(value, "oflags"),
+				OpenTime:   valToFloat64(value["opentm"]),
+				StartTime:  valToFloat64(value["starttm"]),
+				ExpireTime: valToFloat64(value["expiretm"]),
+				Price:      valToFloat64(value["price"]),
+				Refid:      getString(value, "refid"),
+				Status:     getString(value, "status"),
+				StopPrice:  valToFloat64(value["stopprice"]),
+				UserRef:    int(value["userref"].(float64)),
+				Vol:        valToFloat64(value["vol"]),
+				VolExec:    valToFloat64(value["vol_exec"]),
 
-	for key, value := range body[0].(map[string]map[string]interface{}) {
-		upd.Order[key] = OpenOrder{
-			Cost:       valToFloat64(value["cost"]),
-			Fee:        valToFloat64(value["fee"]),
-			LimitPrice: valToFloat64(value["limitprice"]),
-			Misc:       value["misc"].(string),
-			Oflags:     value["oflags"].(string),
-			OpenTime:   valToFloat64(value["opentm"]),
-			StartTime:  valToFloat64(value["starttm"]),
-			ExpireTime: valToFloat64(value["expiretm"]),
-			Price:      valToFloat64(value["price"]),
-			Refid:      value["refid"].(string),
-			Status:     value["status"].(string),
-			StopPrice:  valToFloat64(value["stopprice"]),
-			UserRef:    int(value["userref"].(float64)),
-			Vol:        valToFloat64(value["vol"]),
-			VolExec:    valToFloat64(value["vol_exec"]),
-
-			Descr: OpenOrderDescr{
-				Close:     value["close"].(string),
-				Leverage:  value["leverage"].(string),
-				Order:     value["order"].(string),
-				Ordertype: value["ordertype"].(string),
-				Pair:      value["pair"].(string),
-				Price:     valToFloat64(value["price"]),
-				Price2:    valToFloat64(value["price2"]),
-				Type:      value["type"].(string),
-			},
+				Descr: OpenOrderDescr{
+					Close:     getString(value, "close"),
+					Leverage:  getString(value, "leverage"),
+					Order:     getString(value, "order"),
+					Ordertype: getString(value, "ordertype"),
+					Pair:      getString(value, "pair"),
+					Price:     valToFloat64(value["price"]),
+					Price2:    valToFloat64(value["price2"]),
+					Type:      getString(value, "type"),
+				},
+			}
 		}
 	}
 
 	return upd, nil
+}
+
+func getString(data map[string]interface{}, key string) string {
+	value, ok := data[key]
+	if !ok {
+		return ""
+	}
+	str, ok := value.(string)
+	if !ok {
+		return ""
+	}
+	return str
 }

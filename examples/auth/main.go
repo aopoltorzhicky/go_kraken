@@ -7,7 +7,10 @@ import (
 )
 
 func main() {
-	c := ws.NewAuth("", "")
+	c := ws.NewAuth(
+		"", "",
+		ws.WithParams(ws.NewDefaultSandboxAuthParameters()),
+	)
 
 	if err := c.Connect(); err != nil {
 		log.Fatal("Error connecting to web socket : ", err)

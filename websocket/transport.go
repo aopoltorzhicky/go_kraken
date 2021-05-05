@@ -36,16 +36,16 @@ func newWs(baseURL string, logTransport bool) *ws {
 }
 
 type ws struct {
-	ws            connInterface
+	BaseURL    string
+	ws         connInterface
+	downstream chan []byte
+	shutdown   chan struct{} // signal to kill looping goroutines
+	finished   chan error    // signal to parent with error, if applicable
+
 	wsLock        sync.Mutex
-	BaseURL       string
 	TLSSkipVerify bool
-	downstream    chan []byte
 	userShutdown  bool
 	logTransport  bool
-
-	shutdown chan struct{} // signal to kill looping goroutines
-	finished chan error    // signal to parent with error, if applicable
 }
 
 func (w *ws) Connect() error {
@@ -68,10 +68,12 @@ func (w *ws) Connect() error {
 	ws, resp, err := d.Dial(w.BaseURL, nil)
 	if err != nil {
 		if err == websocket.ErrBadHandshake {
-			log.Printf("bad handshake: status code %d", resp.StatusCode)
+			log.Printf("bad handshake")
 		}
 		return err
 	}
+	defer resp.Body.Close()
+
 	w.ws = ws
 	go w.listenWs()
 	return nil
@@ -86,11 +88,10 @@ func (w *ws) Send(ctx context.Context, msg interface{}) error {
 	}
 
 	bs, err := json.Marshal(msg)
-
-	// log.Printf("[DEBUG]: %s\n", bs)
 	if err != nil {
 		return err
 	}
+	// log.Printf("[DEBUG]: %s\n", bs)
 
 	select {
 	case <-ctx.Done():
@@ -102,11 +103,12 @@ func (w *ws) Send(ctx context.Context, msg interface{}) error {
 
 	w.wsLock.Lock()
 	defer w.wsLock.Unlock()
+
 	if w.logTransport {
 		log.Printf("ws->srv: %s", string(bs))
 	}
-	err = w.ws.WriteMessage(websocket.TextMessage, bs)
-	if err != nil {
+
+	if err := w.ws.WriteMessage(websocket.TextMessage, bs); err != nil {
 		w.cleanup(err)
 		return err
 	}

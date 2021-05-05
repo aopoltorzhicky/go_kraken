@@ -6,20 +6,19 @@ import (
 
 // Parameters defines adapter behavior.
 type Parameters struct {
-	AutoReconnect     bool
-	ReconnectInterval time.Duration
-	ReconnectAttempts int
-	reconnectTry      int
-	ShutdownTimeout   time.Duration
-	ContextTimeout    time.Duration
+	URL string
 
-	ResubscribeOnReconnect bool
-
+	ReconnectInterval    time.Duration
+	ShutdownTimeout      time.Duration
+	ContextTimeout       time.Duration
 	HeartbeatCheckPeriod time.Duration
 	HeartbeatTimeout     time.Duration
-	LogTransport         bool
 
-	URL string
+	ReconnectAttempts      int
+	reconnectTry           int
+	LogTransport           bool
+	AutoReconnect          bool
+	ResubscribeOnReconnect bool
 }
 
 // NewDefaultParameters - create default Parameters object for prod
@@ -64,6 +63,23 @@ func NewDefaultAuthParameters() *Parameters {
 		reconnectTry:           0,
 		ReconnectAttempts:      5,
 		URL:                    AuthBaseURL,
+		ShutdownTimeout:        time.Second * 5,
+		ResubscribeOnReconnect: true,
+		HeartbeatTimeout:       time.Second * 3, // HB = 3s
+		HeartbeatCheckPeriod:   time.Millisecond * 100,
+		LogTransport:           false, // log transport send/recv,
+		ContextTimeout:         time.Second * 5,
+	}
+}
+
+// NewDefaultSandboxAuthParameters - create default Parameters object for sanbox auth
+func NewDefaultSandboxAuthParameters() *Parameters {
+	return &Parameters{
+		AutoReconnect:          true,
+		ReconnectInterval:      time.Second,
+		reconnectTry:           0,
+		ReconnectAttempts:      5,
+		URL:                    AuthSandboxBaseURL,
 		ShutdownTimeout:        time.Second * 5,
 		ResubscribeOnReconnect: true,
 		HeartbeatTimeout:       time.Second * 3, // HB = 3s

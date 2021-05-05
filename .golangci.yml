@@ -1,0 +1,11 @@
+linters:
+  enable:
+    - bodyclose
+    - goconst
+    - gocritic
+    - gofmt
+    - interfacer
+    - maligned
+    - prealloc
+    - unconvert
+    - unparam

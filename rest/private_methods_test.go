@@ -46,7 +46,7 @@ func TestKraken_GetDepositMethods(t *testing.T) {
 				StatusCode: 200,
 				Body:       ioutil.NopCloser(bytes.NewReader(depositMethodsJSON)),
 			},
-			want:    []DepositMethods{DepositMethods{Method: "Ether (Hex)", Limit: false, Fee: "0.0000000000", GenAddress: true}},
+			want:    []DepositMethods{{Method: "Ether (Hex)", Limit: false, Fee: "0.0000000000", GenAddress: true}},
 			wantErr: false,
 		},
 	}
@@ -91,7 +91,7 @@ func TestKraken_GetDepositStatuses(t *testing.T) {
 				StatusCode: 200,
 				Body:       ioutil.NopCloser(bytes.NewReader(depositStatusesJSON)),
 			},
-			want: []DepositStatuses{DepositStatuses{Method: "Ether (Hex)", Aclass: "currency", Asset: "XETH", Refid: "sometest1",
+			want: []DepositStatuses{{Method: "Ether (Hex)", Aclass: "currency", Asset: "XETH", Refid: "sometest1",
 				Txid: "sometest2", Info: "sometest3", Amount: "6.91", Fee: "0.0000000000", Time: 1617014556, Status: "Success"},
 			},
 			wantErr: false,
@@ -244,7 +244,7 @@ func TestKraken_GetOpenOrders(t *testing.T) {
 			},
 			want: OpenOrdersResponse{
 				Orders: map[string]OrderInfo{
-					"OR3XZM-5EN2R-LS5X51": OrderInfo{
+					"OR3XZM-5EN2R-LS5X51": {
 						RefID:           nil,
 						UserRef:         nil,
 						Status:          "open",
@@ -320,7 +320,7 @@ func TestKraken_GetClosedOrders(t *testing.T) {
 			want: ClosedOrdersResponse{
 				Count: 20,
 				Orders: map[string]OrderInfo{
-					"OK46ER-A2BXK-YOLKE1": OrderInfo{
+					"OK46ER-A2BXK-YOLKE1": {
 						RefID:           nil,
 						UserRef:         nil,
 						Status:          "canceled",
@@ -396,7 +396,7 @@ func TestKraken_QueryOrders(t *testing.T) {
 				Body:       ioutil.NopCloser(bytes.NewReader(queryOrdersJSON)),
 			},
 			want: map[string]OrderInfo{
-				"OLNYE1-H3BBJ-JD2LGC": OrderInfo{
+				"OLNYE1-H3BBJ-JD2LGC": {
 					RefID:           nil,
 					UserRef:         nil,
 					Status:          "canceled",
@@ -473,7 +473,7 @@ func TestKraken_GetTradesHistory(t *testing.T) {
 			want: TradesHistoryResponse{
 				Count: 1,
 				Trades: map[string]PrivateTrade{
-					"TO3MMA-BSBGV-XUV4A1": PrivateTrade{
+					"TO3MMA-BSBGV-XUV4A1": {
 						OrderID:    "OSQQQ5-MBKL6-O4YYE1",
 						PositionID: "TYE7IH-QCG76-BVMCM1",
 						Pair:       "XXBTZUSD",
@@ -534,7 +534,7 @@ func TestKraken_QueryTrades(t *testing.T) {
 				Body:       ioutil.NopCloser(bytes.NewReader(queryTradesJSON)),
 			},
 			want: map[string]PrivateTrade{
-				"TO3MMA-BSBGV-XUV4A1": PrivateTrade{
+				"TO3MMA-BSBGV-XUV4A1": {
 					OrderID:    "OSQQQ5-MBKL6-O4YYE1",
 					PositionID: "TYE7IH-QCG76-BVMCM1",
 					Pair:       "XXBTZUSD",
@@ -594,7 +594,7 @@ func TestKraken_GetOpenPositions(t *testing.T) {
 				Body:       ioutil.NopCloser(bytes.NewReader(openPositionsJSON)),
 			},
 			want: map[string]Position{
-				"TYE7IH-QCG76-BVMCM1": Position{
+				"TYE7IH-QCG76-BVMCM1": {
 					OrderID:      "OK7SOC-SGF3O-F54S51",
 					Status:       "open",
 					Pair:         "XXBTZUSD",
@@ -658,7 +658,7 @@ func TestKraken_GetLedgersInfo(t *testing.T) {
 			},
 			want: LedgerInfoResponse{
 				Ledgers: map[string]Ledger{
-					"LGPNZQ-2SLSA-C7QCT1": Ledger{
+					"LGPNZQ-2SLSA-C7QCT1": {
 						RefID:      "TI2NBU-IICD2-BAVYO1",
 						Time:       1570623111.9096,
 						LedgerType: "rollover",
@@ -715,7 +715,7 @@ func TestKraken_QueryLedgers(t *testing.T) {
 				Body:       ioutil.NopCloser(bytes.NewReader(queryLedgerJSON)),
 			},
 			want: map[string]Ledger{
-				"LTCH4T-LG5FS-MKGVD1": Ledger{
+				"LTCH4T-LG5FS-MKGVD1": {
 					RefID:      "TYE7IH-QCG76-BVMCM1",
 					Time:       1570551111.2568,
 					LedgerType: "rollover",
@@ -774,7 +774,7 @@ func TestKraken_GetTradeVolume(t *testing.T) {
 				Currency: "ZUSD",
 				Volume:   1000,
 				Fees: map[string]Fees{
-					"XXBTZUSD": Fees{
+					"XXBTZUSD": {
 						Fee:        0.16,
 						MinFee:     0.1,
 						MaxFee:     0.26,
@@ -784,7 +784,7 @@ func TestKraken_GetTradeVolume(t *testing.T) {
 					},
 				},
 				FeesMaker: map[string]Fees{
-					"XXBTZUSD": Fees{
+					"XXBTZUSD": {
 						Fee:        0.06,
 						MinFee:     0,
 						MaxFee:     0.16,

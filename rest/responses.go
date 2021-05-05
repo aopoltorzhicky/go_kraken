@@ -651,8 +651,8 @@ type TradesHistoryResponse struct {
 // DepositMethods - respons on GetDepositMethods request
 type DepositMethods struct {
 	Method     string `json:"method"`
-	Limit      bool   `json:"limit"`
 	Fee        string `json:"fee"`
+	Limit      bool   `json:"limit"`
 	GenAddress bool   `json:"gen-address"`
 }
 
