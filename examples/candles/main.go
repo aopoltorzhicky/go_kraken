@@ -14,7 +14,7 @@ func main() {
 	}
 
 	// subscribe to BTCUSD, XLMUSD, ADACAD candles
-	err = c.SubscribeCandles([]string{ws.XLMBTC, ws.BTCEUR, ws.QTUMCAD}, ws.Interal10080)
+	err = c.SubscribeCandles([]string{ws.XLMBTC, ws.BTCEUR, ws.QTUMCAD}, ws.Interval10080)
 	if err != nil {
 		log.Fatal(err)
 	}

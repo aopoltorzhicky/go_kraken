@@ -41,10 +41,10 @@ const (
 	Interval15   = 15
 	Interval30   = 30
 	Interval60   = 60
-	Interal240   = 240
-	Interal1440  = 1440
-	Interal10080 = 10080
-	Interal21600 = 21600
+	Interval240   = 240
+	Interval1440  = 1440
+	Interval10080 = 10080
+	Interval21600 = 21600
 )
 
 // Depth
@@ -97,6 +97,8 @@ const (
 	DASHUSD = "DASH/USD"
 	DASHBTC = "DASH/XBT"
 	DOGEBTC = "XDG/XBT"
+	DOTEUR  = "DOT/EUR"
+	DOTUSD  = "DOT/USD"
 	EOSETH  = "EOS/ETH"
 	EOSEUR  = "EOS/EUR"
 	EOSUSD  = "EOS/USD"
