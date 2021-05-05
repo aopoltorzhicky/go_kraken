@@ -374,7 +374,7 @@ func (item *Trade) UnmarshalJSON(buf []byte) error {
 
 // TradeResponse - all pairs in trade response
 type TradeResponse struct {
-	Last     float64 `json:"last"`
+	Last     string `json:"last"`
 	ADACAD   []Trade
 	ADAETH   []Trade
 	ADAEUR   []Trade
