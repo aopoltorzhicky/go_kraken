@@ -1,9 +1,7 @@
-[![Build Status](https://travis-ci.org/aopoltorzhicky/go_kraken.svg?branch=master)](https://travis-ci.org/aopoltorzhicky/go_kraken)
-[![codecov](https://codecov.io/gh/aopoltorzhicky/go_kraken/branch/master/graph/badge.svg)](https://codecov.io/gh/aopoltorzhicky/go_kraken)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/13668a45df3841b2803cb167beca5032)](https://www.codacy.com/app/aopoltorzhicky/go_kraken?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=aopoltorzhicky/go_kraken&amp;utm_campaign=Badge_Grade)
-
 # Kraken Go
-Go library for Kraken Websocket and REST API
+Go library for Kraken Websocket and REST API.
+
+**ATTENTION!** Version 0.1.0 of WebSocket API package is available now! It's not compatible with previous versions. **Please check your code after package update!**
 
 ## Installation Websocket package
 
@@ -13,7 +11,7 @@ go get github.com/aopoltorzhicky/go_kraken/websocket
 
 ## Installation REST API package
 
-Now only Public API realized. Private API is under developing.
+Now only Public API realized
 
 ```bash
 go get github.com/aopoltorzhicky/go_kraken/rest
@@ -23,48 +21,137 @@ go get github.com/aopoltorzhicky/go_kraken/rest
 
 To learn how you can use the package read [examples](examples/).
 
+
+### Websocket API
+
 For quick start read the one below:
 
 ```go
 package main
 
 import (
-	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	log "github.com/sirupsen/logrus"
 
 	ws "github.com/aopoltorzhicky/go_kraken/websocket"
 )
 
 func main() {
-	c := ws.New(false)
-	err := c.Connect()
-	if err != nil {
-		log.Fatal("Error connecting to web socket : ", err)
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+
+	kraken := ws.NewKraken(ws.ProdBaseURL)
+	if err := kraken.Connect(); err != nil {
+		log.Fatalf("Error connecting to web socket: %s", err.Error())
 	}
 
-	err = c.Ping()
-	if err != nil {
-		log.Fatal(err)
+	// subscribe to BTCUSD`s ticker
+	if err := kraken.SubscribeTicker([]string{ws.BTCUSD}); err != nil {
+		log.Fatalf("SubscribeTicker error: %s", err.Error())
 	}
 
-	// subscribe to BTCUSD, XLMUSD, ADACAD spread
-	err = c.SubscribeSpread([]string{ws.BTCUSD, ws.XLMUSD, ws.ADACAD})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for obj := range c.Listen() {
-		switch obj.(type) {
-		case error:
-			log.Printf("channel closed: %s", obj)
-		case ws.DataUpdate:
-			data := obj.(ws.DataUpdate)
-			log.Printf("MSG RECV: %#v", data)
-		default:
+	for {
+		select {
+		case <-signals:
+			log.Warn("Stopping...")
+			if err := kraken.Close(); err != nil {
+				log.Fatal(err)
+			}
+			return
+		case update := <-kraken.Listen():
+			switch data := update.Data.(type) {
+			case ws.TickerUpdate:
+				log.Printf("----Ticker of %s----", update.Pair)
+				log.Printf("Ask: %s with %s", data.Ask.Price.String(), data.Ask.Volume.String())
+				log.Printf("Bid: %s with %s", data.Bid.Price.String(), data.Bid.Volume.String())
+				log.Printf("Open today: %s | Open last 24 hours: %s", data.Open.Today.String(), data.Open.Last24.String())
+			default:
+			}
 		}
 	}
 }
-
 ```
+
+Some options is available for `Kraken` object:
+```go
+kraken := ws.NewKraken(
+	ws.ProdBaseURL,
+	ws.WithHeartbeatTimeout(10*time.Second), // set interval ping message sending. Should be less than read timeout. Default: 10s.
+	ws.WithLogLevel(log.TraceLevel), // set logging level. Default: info.
+	ws.WithReadTimeout(15*time.Second), // set read timeout. Default: 15s.
+	ws.WithReconnectTimeout(5*time.Second),  // set interval of reconnecting after disconnect. Default: 5s.
+)
+```
+
+For private Webscoket API usage:
+```go
+package main
+
+import (
+	"os"
+	"os/signal"
+	"syscall"
+
+	log "github.com/sirupsen/logrus"
+
+	ws "github.com/aopoltorzhicky/go_kraken/websocket"
+)
+
+func main() {
+	signals := make(chan os.Signal, 1)
+	signal.Notify(signals, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+
+	// Create `Kraken` object
+	kraken := ws.NewKraken(ws.AuthSandboxBaseURL)
+
+	// Connect to server
+	if err := kraken.Connect(); err != nil {
+		log.Fatalf("Error connecting to web socket: %s", err.Error())
+	}
+
+	// Authenticate with your private keys
+	if err := kraken.Authenticate(os.Getenv("KRAKEN_API_KEY"), os.Getenv("KRAKEN_SECRET")); err != nil {
+		log.Fatalf("Authenticate error: %s", err.Error())
+	}
+
+	// Subscribe to channels or send commands
+	if err := kraken.SubscribeOwnTrades(); err != nil {
+		log.Fatalf("SubscribeOwnTrades error: %s", err.Error())
+	}
+
+	for {
+		select {
+		case <-signals:
+			log.Warn("Stopping...")
+			if err := kraken.Close(); err != nil {
+				log.Fatal(err)
+			}
+			return
+		case update := <-kraken.Listen():
+			switch data := update.Data.(type) {
+			case ws.OwnTradesUpdate:
+				for i := range data {
+					for tradeID, trade := range data[i] {
+						log.Printf("Trade %s: %s", tradeID, trade.Type)
+					}
+				}
+			case ws.OpenOrdersUpdate:
+				for i := range data {
+					for orderID, order := range data[i] {
+						log.Printf("Order %s: %#v", orderID, order.Descr)
+					}
+				}
+			default:
+			}
+		}
+	}
+}
+```
+
+### REST API
 
 To learn how to use REST API read example below:
 

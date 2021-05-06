@@ -22,17 +22,20 @@ const (
 
 // Events
 const (
-	EventSubscribe          = "subscribe"
-	EventUnsubscribe        = "unsubscribe"
-	EventPing               = "ping"
-	EventPong               = "pong"
-	EventSystemStatus       = "systemStatus"
-	EventSubscriptionStatus = "subscriptionStatus"
-	EventHeartbeat          = "heartbeat"
-	EventAddOrder           = "addOrder"
-	EventAddOrderStatus     = "addOrderStatus"
-	EventCancelOrder        = "cancelOrder"
-	EventCancelOrderStatus  = "cancelOrderStatus"
+	EventSubscribe             = "subscribe"
+	EventUnsubscribe           = "unsubscribe"
+	EventPing                  = "ping"
+	EventPong                  = "pong"
+	EventSystemStatus          = "systemStatus"
+	EventSubscriptionStatus    = "subscriptionStatus"
+	EventHeartbeat             = "heartbeat"
+	EventAddOrder              = "addOrder"
+	EventAddOrderStatus        = "addOrderStatus"
+	EventCancelOrder           = "cancelOrder"
+	EventCancelOrderStatus     = "cancelOrderStatus"
+	EventCancellAll            = "cancelAll"
+	EventCancellAllStatus      = "cancelAllStatus"
+	EventCancellAllOrdersAfter = "cancelAllOrdersAfter"
 )
 
 // Intervals
@@ -66,14 +69,14 @@ const (
 
 // Trade sides
 const (
-	Buy  = "buy"
-	Sell = "sell"
+	Buy  = "b"
+	Sell = "s"
 )
 
 // Order types
 const (
-	Market = "market"
-	Limit  = "limit"
+	Market = "m"
+	Limit  = "l"
 )
 
 // Pairs
