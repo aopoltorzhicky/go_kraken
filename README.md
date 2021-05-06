@@ -1,7 +1,7 @@
 # Kraken Go
 Go library for Kraken Websocket and REST API.
 
-**ATTENTION!** Version 0.1.0 of WebSocket API package is available now! It's not compatible with previous versions. **Please check your code after package update!**
+**ATTENTION!** Version 0.1.1 of WebSocket API package is available now! It's not compatible with previous versions. **Please check your code after package update!**
 
 ## Installation Websocket package
 
