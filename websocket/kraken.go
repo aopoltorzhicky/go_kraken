@@ -44,11 +44,6 @@ func NewKraken(url string, opts ...KrakenOption) *Kraken {
 		stop:             make(chan struct{}, 1),
 	}
 
-	log.SetFormatter(&log.TextFormatter{
-		FullTimestamp: true,
-	})
-	log.SetLevel(log.InfoLevel)
-
 	for i := range opts {
 		opts[i](&kraken)
 	}
