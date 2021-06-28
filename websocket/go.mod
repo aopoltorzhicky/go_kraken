@@ -1,4 +1,4 @@
-module github.com/aopoltorzhicky/go_kraken/websocket
+module github.com/kjkraw/go_kraken/websocket
 
 go 1.13
 
