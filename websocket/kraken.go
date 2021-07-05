@@ -293,6 +293,30 @@ func (k *Kraken) Unsubscribe(channelType string, pairs []string) error {
 	})
 }
 
+// UnsubscribeCandles - Unsubscribe from candles subscription, can specify multiple currency pairs.
+func (k *Kraken) UnsubscribeCandles(pairs []string, interval int64) error {
+	return k.send(UnsubscribeRequest{
+		Event: EventUnsubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name: ChanCandles,
+			Interval: interval,
+		},
+	})
+}
+
+// UnsubscribeBook - Unsubscribe from order book subscription, can specify multiple currency pairs.
+func (k *Kraken) UnsubscribeBook(pairs []string, depth int64) error {
+	return k.send(UnsubscribeRequest{
+		Event: EventUnsubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name:  ChanBook,
+			Depth: depth,
+		},
+	})
+}
+
 // Authenticate - authenticate in private Websocket API
 func (k *Kraken) Authenticate(key, secret string) error {
 	data, err := rest.New(key, secret).GetWebSocketsToken()
