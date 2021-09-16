@@ -44,11 +44,6 @@ func NewKraken(url string, opts ...KrakenOption) *Kraken {
 		stop:             make(chan struct{}, 1),
 	}
 
-	log.SetFormatter(&log.TextFormatter{
-		FullTimestamp: true,
-	})
-	log.SetLevel(log.InfoLevel)
-
 	for i := range opts {
 		opts[i](&kraken)
 	}
@@ -294,6 +289,30 @@ func (k *Kraken) Unsubscribe(channelType string, pairs []string) error {
 		Pairs: pairs,
 		Subscription: Subscription{
 			Name: channelType,
+		},
+	})
+}
+
+// UnsubscribeCandles - Unsubscribe from candles subscription, can specify multiple currency pairs.
+func (k *Kraken) UnsubscribeCandles(pairs []string, interval int64) error {
+	return k.send(UnsubscribeRequest{
+		Event: EventUnsubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name: ChanCandles,
+			Interval: interval,
+		},
+	})
+}
+
+// UnsubscribeBook - Unsubscribe from order book subscription, can specify multiple currency pairs.
+func (k *Kraken) UnsubscribeBook(pairs []string, depth int64) error {
+	return k.send(UnsubscribeRequest{
+		Event: EventUnsubscribe,
+		Pairs: pairs,
+		Subscription: Subscription{
+			Name:  ChanBook,
+			Depth: depth,
 		},
 	})
 }
