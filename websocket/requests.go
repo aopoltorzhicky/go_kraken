@@ -84,12 +84,22 @@ type AuthRequest struct {
 // AddOrderRequest -
 type AddOrderRequest struct {
 	AuthRequest
-	ClosePrice string `json:"close[price]"`
-	Ordertype  string `json:"ordertype"`
-	Pair       string `json:"pair"`
-	Price      string `json:"price"`
-	Type       string `json:"type"`
-	Volume     string `json:"volume"`
+	Ordertype      string `json:"ordertype"`
+	Pair           string `json:"pair"`
+	Price          string `json:"price"`
+	Type           string `json:"type"`
+	Volume         string `json:"volume"`
+	Starttm        string `json:"starttm,omitempty"`
+	Expiretm       string `json:"expiretm,omitempty"`
+	Deadline       string `json:"deadline,omitempty"`
+	Validate       string `json:"validate,omitempty"`
+	TimeInForce    string `json:"timeinforce,omitempty"`
+	UserRef        string `json:"userref,omitempty"`
+	OFlags         string `json:"oflags,omitempty"`
+	Leverage       string `json:"leverage,omitempty"`
+	ClosePrice     string `json:"close[price],omitempty"`
+	ClosePrice2    string `json:"close[price2],omitempty"`
+	CloseOrderType string `json:"close[ordertype],omitempty"`
 }
 
 // AddOrderResponse -
