@@ -299,7 +299,7 @@ func (k *Kraken) UnsubscribeCandles(pairs []string, interval int64) error {
 		Event: EventUnsubscribe,
 		Pairs: pairs,
 		Subscription: Subscription{
-			Name: ChanCandles,
+			Name:     ChanCandles,
 			Interval: interval,
 		},
 	})
@@ -369,6 +369,17 @@ func (k *Kraken) CancelOrder(orderIDs []string) error {
 func (k *Kraken) CancelAll() error {
 	return k.send(AuthRequest{
 		Token: k.token,
-		Event: EventCancelOrder,
+		Event: EventCancelAll,
+	})
+}
+
+// CancelAllOrdersAfter -  provides a `Dead Man's Switch` mechanism to protect the client from network malfunction, extreme latency or unexpected matching engine downtime. The client can send a request with a timeout (in seconds), that will start a countdown timer which will cancel *all* client orders when the timer expires.
+func (k *Kraken) CancelAllOrdersAfter(timeout int64) error {
+	return k.send(CancelAllOrdersAfterRequest{
+		AuthRequest: AuthRequest{
+			Token: k.token,
+			Event: EventCancelAllOrdersAfter,
+		},
+		Timeout: timeout,
 	})
 }

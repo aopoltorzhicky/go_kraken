@@ -22,20 +22,21 @@ const (
 
 // Events
 const (
-	EventSubscribe             = "subscribe"
-	EventUnsubscribe           = "unsubscribe"
-	EventPing                  = "ping"
-	EventPong                  = "pong"
-	EventSystemStatus          = "systemStatus"
-	EventSubscriptionStatus    = "subscriptionStatus"
-	EventHeartbeat             = "heartbeat"
-	EventAddOrder              = "addOrder"
-	EventAddOrderStatus        = "addOrderStatus"
-	EventCancelOrder           = "cancelOrder"
-	EventCancelOrderStatus     = "cancelOrderStatus"
-	EventCancellAll            = "cancelAll"
-	EventCancellAllStatus      = "cancelAllStatus"
-	EventCancellAllOrdersAfter = "cancelAllOrdersAfter"
+	EventSubscribe                  = "subscribe"
+	EventUnsubscribe                = "unsubscribe"
+	EventPing                       = "ping"
+	EventPong                       = "pong"
+	EventSystemStatus               = "systemStatus"
+	EventSubscriptionStatus         = "subscriptionStatus"
+	EventHeartbeat                  = "heartbeat"
+	EventAddOrder                   = "addOrder"
+	EventAddOrderStatus             = "addOrderStatus"
+	EventCancelOrder                = "cancelOrder"
+	EventCancelOrderStatus          = "cancelOrderStatus"
+	EventCancelAll                  = "cancelAll"
+	EventCancelAllStatus            = "cancelAllStatus"
+	EventCancelAllOrdersAfter       = "cancelAllOrdersAfter"
+	EventCancelAllOrdersAfterStatus = "cancelAllOrdersAfterStatus"
 )
 
 // Intervals

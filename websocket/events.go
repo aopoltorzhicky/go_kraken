@@ -23,8 +23,10 @@ func (k *Kraken) handleEvent(msg []byte) error {
 		return k.handleEventCancelOrderStatus(msg)
 	case EventAddOrderStatus:
 		return k.handleEventAddOrderStatus(msg)
-	case EventCancellAllStatus:
+	case EventCancelAllStatus:
 		return k.handleEventCancellAllStatus(msg)
+	case EventCancelAllOrdersAfter:
+		return k.handleEventCancellAllOrdersAfter(msg)
 	case EventHeartbeat:
 	default:
 		log.Warnf("unknown event: %s", msg)
@@ -126,7 +128,27 @@ func (k *Kraken) handleEventCancellAllStatus(data []byte) error {
 	case StatusOK:
 		log.Debugf("%d orders cancelled", cancelAllResponse.Count)
 		k.msg <- Update{
-			ChannelName: EventAddOrder,
+			ChannelName: EventCancelAllStatus,
+			Data:        cancelAllResponse,
+		}
+	default:
+		log.Errorf("Unknown status: %s", cancelAllResponse.Status)
+	}
+	return nil
+}
+
+func (k *Kraken) handleEventCancellAllOrdersAfter(data []byte) error {
+	var cancelAllResponse CancelAllOrdersAfterResponse
+	if err := json.Unmarshal(data, &cancelAllResponse); err != nil {
+		return err
+	}
+
+	switch cancelAllResponse.Status {
+	case StatusError:
+		log.Errorf(cancelAllResponse.ErrorMessage)
+	case StatusOK:
+		k.msg <- Update{
+			ChannelName: EventCancelAllOrdersAfter,
 			Data:        cancelAllResponse,
 		}
 	default:
