@@ -7,9 +7,12 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+
+	"github.com/shopspring/decimal"
+	"github.com/stretchr/testify/assert"
 )
 
-var ErrSomething = fmt.Errorf("Something went wrong")
+var ErrSomething = fmt.Errorf("something went wrong")
 
 type httpMock struct {
 	Response *http.Response
@@ -309,40 +312,40 @@ func TestKraken_Ticker(t *testing.T) {
 			want: map[string]Ticker{
 				"ADACAD": {
 					Ask: Level{
-						Price:          0.108312,
-						WholeLotVolume: 6418.,
-						Volume:         6418.000,
+						Price:          decimal.NewFromFloat(0.108312),
+						WholeLotVolume: decimal.NewFromFloat(6418.),
+						Volume:         decimal.NewFromFloat(6418.000),
 					},
 					Bid: Level{
-						Price:          0.090125,
-						WholeLotVolume: 2688.,
-						Volume:         2688.000,
+						Price:          decimal.NewFromFloat(0.090125),
+						WholeLotVolume: decimal.NewFromFloat(2688.),
+						Volume:         decimal.NewFromFloat(2688.000),
 					},
 					Close: CloseLevel{
-						Price:     0.090043,
-						LotVolume: 0.00000091,
+						Price:     decimal.NewFromFloat(0.090043),
+						LotVolume: decimal.NewFromFloat(0.00000091),
 					},
 					Volume: CloseLevel{
-						Price:     115805.23341809,
-						LotVolume: 136512.79974015,
+						Price:     decimal.NewFromFloat(115805.23341809),
+						LotVolume: decimal.NewFromFloat(136512.79974015),
 					},
 					VolumeAveragePrice: CloseLevel{
-						Price:     0.102010,
-						LotVolume: 0.100786,
+						Price:     decimal.NewFromFloat(0.102010),
+						LotVolume: decimal.NewFromFloat(0.100786),
 					},
 					Trades: TimeLevel{
-						Today:       54.,
-						Last24Hours: 67.,
+						Today:       54,
+						Last24Hours: 67,
 					},
 					Low: CloseLevel{
-						Price:     0.090000,
-						LotVolume: 0.090000,
+						Price:     decimal.NewFromFloat(0.090000),
+						LotVolume: decimal.NewFromFloat(0.090000),
 					},
 					High: CloseLevel{
-						Price:     0.109000,
-						LotVolume: 0.109000,
+						Price:     decimal.NewFromFloat(0.109000),
+						LotVolume: decimal.NewFromFloat(0.109000),
 					},
-					OpeningPrice: 0.093911,
+					OpeningPrice: decimal.NewFromFloat(0.093911),
 				},
 			},
 			wantErr: false,
@@ -361,8 +364,40 @@ func TestKraken_Ticker(t *testing.T) {
 				t.Errorf("Kraken.Ticker() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Kraken.Ticker() = %v, want %v", got, tt.want)
+			if !assert.Equal(t, len(got), len(tt.want)) {
+				return
+			}
+			for name, data := range got {
+				wantData, ok := tt.want[name]
+				if !ok {
+					t.Errorf("Kraken.Ticker() unknown ticker name = %v", name)
+					return
+				}
+				assert.Equal(t, data.Ask.Price.String(), wantData.Ask.Price.String())
+				assert.Equal(t, data.Ask.WholeLotVolume.String(), wantData.Ask.WholeLotVolume.String())
+				assert.Equal(t, data.Ask.Volume.String(), wantData.Ask.Volume.String())
+
+				assert.Equal(t, data.Bid.Price.String(), wantData.Bid.Price.String())
+				assert.Equal(t, data.Bid.WholeLotVolume.String(), wantData.Bid.WholeLotVolume.String())
+				assert.Equal(t, data.Bid.Volume.String(), wantData.Bid.Volume.String())
+
+				assert.Equal(t, data.Close.Price.String(), wantData.Close.Price.String())
+				assert.Equal(t, data.Close.LotVolume.String(), wantData.Close.LotVolume.String())
+
+				assert.Equal(t, data.Volume.Price.String(), wantData.Volume.Price.String())
+				assert.Equal(t, data.Volume.LotVolume.String(), wantData.Volume.LotVolume.String())
+
+				assert.Equal(t, data.VolumeAveragePrice.Price.String(), wantData.VolumeAveragePrice.Price.String())
+				assert.Equal(t, data.VolumeAveragePrice.LotVolume.String(), wantData.VolumeAveragePrice.LotVolume.String())
+
+				assert.Equal(t, data.Trades.Today, wantData.Trades.Today)
+				assert.Equal(t, data.Trades.Last24Hours, wantData.Trades.Last24Hours)
+
+				assert.Equal(t, data.Low.Price.String(), wantData.Low.Price.String())
+				assert.Equal(t, data.Low.LotVolume.String(), wantData.Low.LotVolume.String())
+
+				assert.Equal(t, data.High.Price.String(), wantData.High.Price.String())
+				assert.Equal(t, data.High.LotVolume.String(), wantData.High.LotVolume.String())
 			}
 		})
 	}
@@ -375,12 +410,12 @@ func TestKraken_Candles(t *testing.T) {
 		Candles: map[string][]Candle{
 			"ADACAD": {{
 				Time:      1554179640,
-				Open:      0.0005000,
-				High:      0.0005000,
-				Low:       0.0005000,
-				Close:     0.0005000,
-				VolumeWAP: 0.0000000,
-				Volume:    0.0000000,
+				Open:      decimal.NewFromFloat(0.0005000),
+				High:      decimal.NewFromFloat(0.0005000),
+				Low:       decimal.NewFromFloat(0.0005000),
+				Close:     decimal.NewFromFloat(0.0005000),
+				VolumeWAP: decimal.NewFromFloat(0.0000000),
+				Volume:    decimal.NewFromFloat(0.0000000),
 				Count:     0,
 			}},
 		},
@@ -453,8 +488,27 @@ func TestKraken_Candles(t *testing.T) {
 				t.Errorf("Kraken.Candles() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Kraken.Candles() = %v, want %v", got, tt.want)
+			assert.Equal(t, got.Last, tt.want.Last)
+			if !assert.Equal(t, len(got.Candles), len(tt.want.Candles)) {
+				return
+			}
+			for name, data := range got.Candles {
+				wantData, ok := tt.want.Candles[name]
+				if !ok {
+					t.Errorf("Kraken.Candles() unknown ticker name = %v", name)
+					return
+				}
+				if !assert.Equal(t, len(data), len(wantData)) {
+					return
+				}
+				for i := range data {
+					assert.Equal(t, data[i].Close.String(), wantData[i].Close.String())
+					assert.Equal(t, data[i].Open.String(), wantData[i].Open.String())
+					assert.Equal(t, data[i].Low.String(), wantData[i].Low.String())
+					assert.Equal(t, data[i].High.String(), wantData[i].High.String())
+					assert.Equal(t, data[i].Volume.String(), wantData[i].Volume.String())
+					assert.Equal(t, data[i].VolumeWAP.String(), wantData[i].VolumeWAP.String())
+				}
 			}
 		})
 	}

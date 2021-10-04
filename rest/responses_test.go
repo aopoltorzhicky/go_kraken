@@ -3,6 +3,9 @@ package rest
 import (
 	"reflect"
 	"testing"
+
+	"github.com/shopspring/decimal"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_getTimestamp(t *testing.T) {
@@ -127,33 +130,36 @@ func TestLevel_UnmarshalJSON(t *testing.T) {
 			wantErr: true,
 			result:  &Level{},
 		}, {
-			name:    "invalid price",
 			buf:     []byte(`[123, 123, 123]`),
-			wantErr: true,
-			result:  &Level{},
+			wantErr: false,
+			result: &Level{
+				Price:          decimal.NewFromInt(123),
+				WholeLotVolume: decimal.NewFromInt(123),
+				Volume:         decimal.NewFromInt(123),
+			},
 		}, {
-			name:    "invalid whole",
 			buf:     []byte(`["123.0", 123, 123]`),
-			wantErr: true,
+			wantErr: false,
 			result: &Level{
-				Price: 123,
+				Price:          decimal.NewFromInt(123),
+				WholeLotVolume: decimal.NewFromInt(123),
+				Volume:         decimal.NewFromInt(123),
 			},
 		}, {
-			name:    "invalid vol",
 			buf:     []byte(`["123.0", "124.0", 123]`),
-			wantErr: true,
+			wantErr: false,
 			result: &Level{
-				Price:          123,
-				WholeLotVolume: 124,
+				Price:          decimal.NewFromInt(123),
+				WholeLotVolume: decimal.NewFromInt(124),
+				Volume:         decimal.NewFromInt(123),
 			},
 		}, {
-			name:    "good",
 			buf:     []byte(`["123.0", "124.0", "125.0"]`),
 			wantErr: false,
 			result: &Level{
-				Price:          123,
-				WholeLotVolume: 124,
-				Volume:         125,
+				Price:          decimal.NewFromInt(123),
+				WholeLotVolume: decimal.NewFromInt(124),
+				Volume:         decimal.NewFromInt(125),
 			},
 		},
 	}
@@ -162,10 +168,11 @@ func TestLevel_UnmarshalJSON(t *testing.T) {
 			item := &Level{}
 			if err := item.UnmarshalJSON(tt.buf); (err != nil) != tt.wantErr {
 				t.Errorf("Level.UnmarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
-			if !reflect.DeepEqual(item, tt.result) {
-				t.Errorf("Kraken.GetAccountBalances() = %v, want %v", item, tt.result)
-			}
+			assert.Equal(t, item.Price.String(), tt.result.Price.String())
+			assert.Equal(t, item.WholeLotVolume.String(), tt.result.WholeLotVolume.String())
+			assert.Equal(t, item.Volume.String(), tt.result.Volume.String())
 		})
 	}
 }
@@ -188,20 +195,18 @@ func TestTimeLevel_UnmarshalJSON(t *testing.T) {
 			wantErr: true,
 			result:  &TimeLevel{},
 		}, {
-			name:    "invalid today",
+			name:    "invalid both types",
 			buf:     []byte(`["123", "123"]`),
 			wantErr: true,
 			result:  &TimeLevel{},
 		}, {
-			name:    "invalid last",
-			buf:     []byte(`[123.0, "123"]`),
+			name:    "invalid last 24 hour type",
+			buf:     []byte(`[123, "123"]`),
 			wantErr: true,
-			result: &TimeLevel{
-				Today: 123,
-			},
+			result:  &TimeLevel{},
 		}, {
 			name:    "good",
-			buf:     []byte(`[123.0, 124.0]`),
+			buf:     []byte(`[123, 124]`),
 			wantErr: false,
 			result: &TimeLevel{
 				Today:       123,
@@ -211,13 +216,13 @@ func TestTimeLevel_UnmarshalJSON(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			item := &TimeLevel{}
+			item := new(TimeLevel)
 			if err := item.UnmarshalJSON(tt.buf); (err != nil) != tt.wantErr {
 				t.Errorf("TimeLevel.UnmarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
-			if !reflect.DeepEqual(item, tt.result) {
-				t.Errorf("Kraken.GetAccountBalances() = %v, want %v", item, tt.result)
-			}
+			assert.Equal(t, item.Today, tt.result.Today)
+			assert.Equal(t, item.Last24Hours, tt.result.Last24Hours)
 		})
 	}
 }
@@ -240,36 +245,37 @@ func TestCloseLevel_UnmarshalJSON(t *testing.T) {
 			wantErr: true,
 			result:  &CloseLevel{},
 		}, {
-			name:    "invalid today",
 			buf:     []byte(`[123, 123]`),
-			wantErr: true,
-			result:  &CloseLevel{},
-		}, {
-			name:    "invalid last",
-			buf:     []byte(`["123.0", 123]`),
-			wantErr: true,
+			wantErr: false,
 			result: &CloseLevel{
-				Price: 123,
+				Price:     decimal.NewFromInt(123),
+				LotVolume: decimal.NewFromInt(123),
 			},
 		}, {
-			name:    "good",
+			buf:     []byte(`["123.0", 123]`),
+			wantErr: false,
+			result: &CloseLevel{
+				Price:     decimal.NewFromInt(123),
+				LotVolume: decimal.NewFromInt(123),
+			},
+		}, {
 			buf:     []byte(`["123.0", "124.0"]`),
 			wantErr: false,
 			result: &CloseLevel{
-				Price:     123,
-				LotVolume: 124,
+				Price:     decimal.NewFromInt(123),
+				LotVolume: decimal.NewFromInt(124),
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			item := &CloseLevel{}
+			item := new(CloseLevel)
 			if err := item.UnmarshalJSON(tt.buf); (err != nil) != tt.wantErr {
 				t.Errorf("TimeLevel.UnmarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
-			if !reflect.DeepEqual(item, tt.result) {
-				t.Errorf("Kraken.GetAccountBalances() = %v, want %v", item, tt.result)
-			}
+			assert.Equal(t, item.Price.String(), tt.result.Price.String())
+			assert.Equal(t, item.LotVolume.String(), tt.result.LotVolume.String())
 		})
 	}
 }

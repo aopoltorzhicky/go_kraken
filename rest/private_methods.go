@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"fmt"
+	"errors"
 	"log"
 	"net/url"
 	"strconv"
@@ -83,9 +83,9 @@ func (api *Kraken) QueryOrders(needTrades bool, userRef string, txIDs ...string)
 
 	switch {
 	case len(txIDs) > 50:
-		return nil, fmt.Errorf("Maximum count of requested orders is 50")
+		return nil, errors.New("maximum count of requested orders is 50")
 	case len(txIDs) == 0:
-		return nil, fmt.Errorf("txIDs is required")
+		return nil, errors.New("txIDs is required")
 	default:
 		data.Set("txid", strings.Join(txIDs, ","))
 	}
@@ -163,7 +163,7 @@ func (api *Kraken) QueryTrades(trades bool, txIDs ...string) (map[string]Private
 		data.Set("trades", "true")
 	}
 	if len(txIDs) == 0 {
-		return nil, fmt.Errorf("txIDs is required")
+		return nil, errors.New("txIDs is required")
 	}
 	data.Set("txid", strings.Join(txIDs, ","))
 
@@ -181,7 +181,7 @@ func (api *Kraken) GetOpenPositions(docalcs bool, txIDs ...string) (map[string]P
 		data.Set("docalcs", "true")
 	}
 	if len(txIDs) == 0 {
-		return nil, fmt.Errorf("txIDs is required")
+		return nil, errors.New("txIDs is required")
 	}
 	data.Set("txid", strings.Join(txIDs, ","))
 
@@ -219,10 +219,10 @@ func (api *Kraken) GetLedgersInfo(ledgerType string, start int64, end int64, ass
 func (api *Kraken) QueryLedgers(ledgerIds ...string) (map[string]Ledger, error) {
 	data := url.Values{}
 	if len(ledgerIds) == 0 {
-		return nil, fmt.Errorf("`ledgerIds` is required")
+		return nil, errors.New("`ledgerIds` is required")
 	}
 	if len(ledgerIds) > 20 {
-		return nil, fmt.Errorf("Maximum count of requested ledgers is 20")
+		return nil, errors.New("maximum count of requested ledgers is 20")
 	}
 	data.Set("id", strings.Join(ledgerIds, ","))
 
@@ -238,7 +238,7 @@ func (api *Kraken) GetTradeVolume(needFeeInfo bool, pairs ...string) (TradeVolum
 	response := TradeVolumeResponse{}
 	data := url.Values{}
 	if len(pairs) == 0 {
-		return response, fmt.Errorf("`pairs` is required")
+		return response, errors.New("`pairs` is required")
 	}
 	if needFeeInfo {
 		data.Set("fee-info", "true")

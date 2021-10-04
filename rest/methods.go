@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"fmt"
+	"errors"
 	"net/url"
 	"strconv"
 	"strings"
@@ -57,7 +57,7 @@ func (api *Kraken) Ticker(pairs ...string) (map[string]Ticker, error) {
 			"pair": {strings.Join(pairs, ",")},
 		}
 	} else {
-		return nil, fmt.Errorf("You need to set pairs on Ticker request")
+		return nil, errors.New("you need to set pairs on Ticker request")
 	}
 	response := make(map[string]Ticker)
 	if err := api.request("Ticker", false, data, &response); err != nil {
