@@ -1,6 +1,6 @@
 module github.com/aopoltorzhicky/go_kraken/websocket
 
-go 1.13
+go 1.16
 
 require (
 	github.com/aopoltorzhicky/go_kraken/rest v0.0.3

@@ -12,6 +12,13 @@ jobs:
         with:
           version: v1.34
           args: --timeout=2m
+          working-directory: rest
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2.3.0
+        with:
+          version: v1.34
+          args: --timeout=2m
+          working-directory: websocket
   test:
     runs-on: ubuntu-latest
     steps:
@@ -31,5 +38,9 @@ jobs:
         env:
           GO111MODULE: on
         run: |
+          cd rest
+          go mod download
+          go test ./...
+          cd ../websocket
           go mod download
           go test ./...
