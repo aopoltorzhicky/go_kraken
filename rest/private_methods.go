@@ -6,11 +6,13 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/shopspring/decimal"
 )
 
 // GetAccountBalances - methods returns account balances
-func (api *Kraken) GetAccountBalances() (BalanceResponse, error) {
-	response := BalanceResponse{}
+func (api *Kraken) GetAccountBalances() (map[string]decimal.Decimal, error) {
+	response := make(map[string]decimal.Decimal)
 	if err := api.request("Balance", true, nil, &response); err != nil {
 		return response, err
 	}
@@ -252,7 +254,7 @@ func (api *Kraken) GetTradeVolume(needFeeInfo bool, pairs ...string) (TradeVolum
 }
 
 // AddOrder - method sends order to exchange
-func (api *Kraken) AddOrder(pair string, side string, orderType string, volume float64, args map[string]interface{}) (AddOrderResponse, error) {
+func (api *Kraken) AddOrder(pair string, side string, orderType string, volume float64, args map[string]interface{}) (response AddOrderResponse, err error) {
 	data := url.Values{
 		"pair":      {pair},
 		"volume":    {strconv.FormatFloat(volume, 'f', 8, 64)},
@@ -274,30 +276,21 @@ func (api *Kraken) AddOrder(pair string, side string, orderType string, volume f
 		}
 	}
 
-	response := AddOrderResponse{}
-	if err := api.request("AddOrder", true, data, &response); err != nil {
-		return response, err
-	}
-	return response, nil
+	err = api.request("AddOrder", true, data, &response)
+	return
 }
 
 // Cancel - method cancels order
-func (api *Kraken) Cancel(orderID string) (CancelResponse, error) {
+func (api *Kraken) Cancel(orderID string) (response CancelResponse, err error) {
 	data := url.Values{
 		"txid": {orderID},
 	}
-	response := CancelResponse{}
-	if err := api.request("CancelOrder", true, data, &response); err != nil {
-		return response, err
-	}
-	return response, nil
+	err = api.request("CancelOrder", true, data, &response)
+	return
 }
 
 // GetWebSocketsToken - WebSockets authentication
-func (api *Kraken) GetWebSocketsToken() (GetWebSocketTokenResponse, error) {
-	response := GetWebSocketTokenResponse{}
-	if err := api.request("GetWebSocketsToken", true, nil, &response); err != nil {
-		return response, err
-	}
-	return response, nil
+func (api *Kraken) GetWebSocketsToken() (response GetWebSocketTokenResponse, err error) {
+	err = api.request("GetWebSocketsToken", true, nil, &response)
+	return
 }

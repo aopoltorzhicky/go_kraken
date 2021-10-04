@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
+
+	"github.com/shopspring/decimal"
+	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -122,14 +125,14 @@ func TestKraken_GetAccountBalances(t *testing.T) {
 		name    string
 		err     error
 		resp    *http.Response
-		want    BalanceResponse
+		want    map[string]decimal.Decimal
 		wantErr bool
 	}{
 		{
 			name:    "Kraken returns error",
 			err:     ErrSomething,
 			resp:    &http.Response{},
-			want:    BalanceResponse{},
+			want:    make(map[string]decimal.Decimal),
 			wantErr: true,
 		}, {
 			name: "Get Account Balances",
@@ -138,10 +141,10 @@ func TestKraken_GetAccountBalances(t *testing.T) {
 				StatusCode: 200,
 				Body:       ioutil.NopCloser(bytes.NewReader(balancesJSON)),
 			},
-			want: BalanceResponse{
-				BSV:  0.0000053898,
-				ZUSD: 435.9135,
-				USDT: 2,
+			want: map[string]decimal.Decimal{
+				"BSV":  decimal.NewFromFloat(0.0000053898),
+				"ZUSD": decimal.NewFromFloat(435.9135),
+				"USDT": decimal.NewFromInt(2),
 			},
 			wantErr: false,
 		},
@@ -159,8 +162,14 @@ func TestKraken_GetAccountBalances(t *testing.T) {
 				t.Errorf("Kraken.GetAccountBalances() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Kraken.GetAccountBalances() = %v, want %v", got, tt.want)
+			assert.Len(t, got, len(tt.want))
+			for name, balance := range got {
+				wantBalance, ok := tt.want[name]
+				if !ok {
+					t.Errorf("Kraken.GetAccountBalances() unknown asset: %s", name)
+					return
+				}
+				assert.Equal(t, wantBalance.String(), balance.String())
 			}
 		})
 	}

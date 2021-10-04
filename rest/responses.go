@@ -59,23 +59,24 @@ type Asset struct {
 
 // AssetPair - asset pair information
 type AssetPair struct {
-	Altname           string      `json:"altname"`
-	AssetClassBase    string      `json:"aclass_base"`
-	Base              string      `json:"base"`
-	AssetClassQuote   string      `json:"aclass_quote"`
-	Quote             string      `json:"quote"`
-	Lot               string      `json:"lot"`
-	PairDecimals      int         `json:"pair_decimals"`
-	LotDecimals       int         `json:"lot_decimals"`
-	LotMultiplier     int         `json:"lot_multiplier"`
-	LeverageBuy       []float64   `json:"leverage_buy"`
-	LeverageSell      []float64   `json:"leverage_sell"`
-	Fees              [][]float64 `json:"fees"`
-	FeesMaker         [][]float64 `json:"fees_maker"`
-	FeeVolumeCurrency string      `json:"fee_volume_currency"`
-	MarginCall        int         `json:"margin_call"`
-	MarginStop        int         `json:"margin_stop"`
-	WSName            string      `json:"wsname"`
+	Altname           string          `json:"altname"`
+	AssetClassBase    string          `json:"aclass_base"`
+	Base              string          `json:"base"`
+	AssetClassQuote   string          `json:"aclass_quote"`
+	Quote             string          `json:"quote"`
+	Lot               string          `json:"lot"`
+	PairDecimals      int             `json:"pair_decimals"`
+	LotDecimals       int             `json:"lot_decimals"`
+	LotMultiplier     int             `json:"lot_multiplier"`
+	LeverageBuy       []int           `json:"leverage_buy"`
+	LeverageSell      []int           `json:"leverage_sell"`
+	Fees              [][]float64     `json:"fees"`
+	FeesMaker         [][]float64     `json:"fees_maker"`
+	FeeVolumeCurrency string          `json:"fee_volume_currency"`
+	MarginCall        int             `json:"margin_call"`
+	MarginStop        int             `json:"margin_stop"`
+	WSName            string          `json:"wsname"`
+	OrderMin          decimal.Decimal `json:"ordermin"`
 }
 
 // Level - ticker structure for Ask and Bid
@@ -527,41 +528,6 @@ type SpreadResponse struct {
 	XZECXXBT []Spread
 	XZECZEUR []Spread
 	XZECZUSD []Spread
-}
-
-// BalanceResponse - response on account balance request
-type BalanceResponse struct {
-	ADA  float64 `json:",string"`
-	BCH  float64 `json:",string"`
-	BSV  float64 `json:",string"`
-	DASH float64 `json:",string"`
-	EOS  float64 `json:",string"`
-	GNO  float64 `json:",string"`
-	KFEE float64 `json:",string"`
-	QTUM float64 `json:",string"`
-	USDT float64 `json:",string"`
-	XDAO float64 `json:",string"`
-	XETC float64 `json:",string"`
-	XETH float64 `json:",string"`
-	XICN float64 `json:",string"`
-	XLTC float64 `json:",string"`
-	XMLN float64 `json:",string"`
-	XNMC float64 `json:",string"`
-	XREP float64 `json:",string"`
-	XXBT float64 `json:",string"`
-	XXDG float64 `json:",string"`
-	XXLM float64 `json:",string"`
-	XXMR float64 `json:",string"`
-	XXRP float64 `json:",string"`
-	XXTZ float64 `json:",string"`
-	XXVN float64 `json:",string"`
-	XZEC float64 `json:",string"`
-	ZCAD float64 `json:",string"`
-	ZEUR float64 `json:",string"`
-	ZGBP float64 `json:",string"`
-	ZJPY float64 `json:",string"`
-	ZKRW float64 `json:",string"`
-	ZUSD float64 `json:",string"`
 }
 
 // TradeBalanceResponse - response of get trade balance request

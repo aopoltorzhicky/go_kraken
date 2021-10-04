@@ -1,0 +1,35 @@
+name: Tests
+on: push
+
+jobs:
+  golangci:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2.3.0
+        with:
+          version: v1.34
+          args: --timeout=2m
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15.x
+      - name: checkout code
+        uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: golang tests
+        env:
+          GO111MODULE: on
+        run: |
+          go mod download
+          go test ./...

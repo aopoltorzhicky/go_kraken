@@ -115,3 +115,10 @@ const (
 	StatusCancelled = "canceled"
 	StatusExpired   = "expired"
 )
+
+// modes
+const (
+	OrderModeGTC = "GTC"
+	OrderModeIOC = "IOC"
+	OrderModeGTD = "GTD"
+)
