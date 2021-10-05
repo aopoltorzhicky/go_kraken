@@ -68,16 +68,33 @@ const (
 	SubscriptionStatusUnsubscribed = "unsubscribed"
 )
 
-// Trade sides
+// Trade sides for parsing
 const (
 	Buy  = "b"
 	Sell = "s"
 )
 
-// Order types
+// Order types for parsing
 const (
 	Market = "m"
 	Limit  = "l"
+)
+
+// Trade sides -
+const (
+	SideBuy  = "buy"
+	SideSell = "sell"
+)
+
+// Order types -
+const (
+	OrderTypeMarket          = "market"
+	OrderTypeLimit           = "limit"
+	OrderTypeStopLoss        = "stop-loss"
+	OrderTypeTakeProfit      = "take-profit"
+	OrderTypeStopLossLimit   = "stop-loss-limit"
+	OrderTypeTakeProfitLimit = "take-profit-limit"
+	OrderTypeSettlePosition  = "settle-position"
 )
 
 // Pairs
