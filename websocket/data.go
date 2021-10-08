@@ -157,7 +157,7 @@ type Spread struct {
 
 // UnmarshalJSON - unmarshal candle update
 func (s *Spread) UnmarshalJSON(data []byte) error {
-	raw := []interface{}{&s.Ask, &s.Bid, &s.Time, &s.AskVolume, &s.BidVolume, &s.Time}
+	raw := []interface{}{&s.Bid, &s.Ask, &s.Time, &s.BidVolume, &s.AskVolume}
 	return json.Unmarshal(data, &raw)
 }
 
