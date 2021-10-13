@@ -221,7 +221,7 @@ func (k *Kraken) handleMessage(data []byte) error {
 	case '{':
 		return k.handleEvent(data)
 	default:
-		return errors.Errorf("Unexpected message: %s", string(data))
+		return errors.Errorf("(Kraken) Unexpected message: %s", string(data))
 	}
 }
 

@@ -120,15 +120,41 @@ func (api *Kraken) parseResponse(response *http.Response, retType interface{}) e
 	return nil
 }
 
-func (api *Kraken) request(method string, isPrivate bool, data url.Values, retType interface{}) error {
+/*
+request 1 => err
+request 2 => err
+request 3 =>
+
+
+*/
+func (api *Kraken) request(method string, isPrivate bool, data url.Values, retType interface{}, retryCount int) error {
 	req, err := api.prepareRequest(method, isPrivate, data)
 	if err != nil {
 		return err
 	}
+
 	resp, err := api.client.Do(req)
 	if err != nil {
+
+		if retryCount <= MaxRequestRetryCount {
+			fmt.Printf("Retrying request %d of %d\n", retryCount, MaxRequestRetryCount)
+			retryCount += 1
+			time.Sleep(RetryDelayMs * time.Millisecond)
+			return api.request(method, isPrivate, data, retType, retryCount)
+		}
 		return errors.Wrap(err, "error during request execution")
 	}
 	defer resp.Body.Close()
-	return api.parseResponse(resp, retType)
+	err = api.parseResponse(resp, retType)
+	if err != nil {
+		if retryCount <= MaxRequestRetryCount {
+			fmt.Printf("Retrying request %d of %d\n", retryCount, MaxRequestRetryCount)
+			retryCount += 1
+			time.Sleep(RetryDelayMs * time.Millisecond)
+			return api.request(method, isPrivate, data, retType, retryCount)
+		}
+		return err
+	}
+
+	return nil
 }

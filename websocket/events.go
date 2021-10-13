@@ -2,6 +2,8 @@ package websocket
 
 import (
 	"encoding/json"
+	"fmt"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -28,6 +30,15 @@ func (k *Kraken) handleEvent(msg []byte) error {
 	case EventCancelAllOrdersAfter:
 		return k.handleEventCancellAllOrdersAfter(msg)
 	case EventHeartbeat:
+		currentTime := time.Now().Unix()
+		if currentTime%30 == 0 {
+			wsType := "public"
+			if k.token != "" {
+				wsType = "private"
+			}
+			log.Info(fmt.Sprintf("Kraken %s heartbeat received.", wsType))
+		}
+
 	default:
 		log.Warnf("unknown event: %s", msg)
 	}

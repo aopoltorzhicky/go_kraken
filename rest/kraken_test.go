@@ -365,11 +365,15 @@ func TestKraken_request(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			api := New(tt.fields.key, tt.fields.secret)
-			err := api.request(tt.args.method, tt.args.isPrivate, tt.args.data, tt.args.retType)
+			err := api.request(tt.args.method, tt.args.isPrivate, tt.args.data, tt.args.retType, MaxRequestRetryCount)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Kraken.request() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 		})
 	}
+}
+
+func TestKraken_requestRetry(t *testing.T) {
+
 }

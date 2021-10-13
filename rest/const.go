@@ -122,3 +122,10 @@ const (
 	OrderModeIOC = "IOC"
 	OrderModeGTD = "GTD"
 )
+
+// Default Retry Count
+const (
+	MaxRequestRetryCount = 3
+	RetryDelayMs         = 50
+	InitialRetryCount    = 1
+)
