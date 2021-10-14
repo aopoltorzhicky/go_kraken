@@ -124,12 +124,18 @@ func (k *Kraken) managerThread() {
 
 func (k *Kraken) resubscribe() error {
 	for _, sub := range k.subscriptions {
-		if err := k.send(SubscriptionRequest{
-			Event:        EventSubscribe,
-			Pairs:        []string{sub.Pair},
-			Subscription: sub.Subscription,
-		}); err != nil {
-			return err
+		switch sub.Subscription.Name {
+		// Private Channels
+		case ChanOwnTrades, ChanOpenOrders:
+			return k.subscribeToPrivate(sub.Subscription.Name)
+		default:
+			if err := k.send(SubscriptionRequest{
+				Event:        EventSubscribe,
+				Pairs:        []string{sub.Pair},
+				Subscription: sub.Subscription,
+			}); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
