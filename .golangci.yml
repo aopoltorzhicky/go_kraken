@@ -1,11 +1,14 @@
 linters:
   enable:
-    - bodyclose
     - goconst
     - gocritic
     - gofmt
-    - interfacer
-    - maligned
+    - govet
     - prealloc
     - unconvert
-    - unparam
+    - deadcode
+    - varcheck
+    - errcheck
+    - ineffassign
+    - containedctx
+    - tenv
