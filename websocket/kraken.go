@@ -389,3 +389,10 @@ func (k *Kraken) CancelAllOrdersAfter(timeout int64) error {
 		Timeout: timeout,
 	})
 }
+
+// EditOrder - method adds new order.
+func (k *Kraken) EditOrder(req EditOrderRequest) error {
+	req.Event = EventEditOrder
+	req.Token = k.token
+	return k.send(req)
+}

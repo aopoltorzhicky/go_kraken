@@ -27,6 +27,8 @@ func (k *Kraken) handleEvent(msg []byte) error {
 		return k.handleEventCancellAllStatus(msg)
 	case EventCancelAllOrdersAfter:
 		return k.handleEventCancellAllOrdersAfter(msg)
+	case EventEditOrderStatus:
+		return k.handleEventEditOrderStatus(msg)
 	case EventHeartbeat:
 	default:
 		log.Warnf("unknown event: %s", msg)
@@ -153,6 +155,27 @@ func (k *Kraken) handleEventCancellAllOrdersAfter(data []byte) error {
 		}
 	default:
 		log.Errorf("Unknown status: %s", cancelAllResponse.Status)
+	}
+	return nil
+}
+
+func (k *Kraken) handleEventEditOrderStatus(data []byte) error {
+	var editOrderResponse EditOrderResponse
+	if err := json.Unmarshal(data, &editOrderResponse); err != nil {
+		return err
+	}
+
+	switch editOrderResponse.Status {
+	case StatusError:
+		log.Errorf(editOrderResponse.ErrorMessage)
+	case StatusOK:
+		log.Debug("Order successfully edited")
+		k.msg <- Update{
+			ChannelName: EventEditOrder,
+			Data:        editOrderResponse,
+		}
+	default:
+		log.Errorf("Unknown status: %s", editOrderResponse.Status)
 	}
 	return nil
 }

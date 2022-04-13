@@ -37,6 +37,8 @@ const (
 	EventCancelAllStatus            = "cancelAllStatus"
 	EventCancelAllOrdersAfter       = "cancelAllOrdersAfter"
 	EventCancelAllOrdersAfterStatus = "cancelAllOrdersAfterStatus"
+	EventEditOrder                  = "editOrder"
+	EventEditOrderStatus            = "editOrderStatus"
 )
 
 // Intervals

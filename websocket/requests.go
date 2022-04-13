@@ -151,3 +151,28 @@ type CancelAllOrdersAfterResponse struct {
 	CurrentTime  string `json:"currentTime"`
 	TriggerTime  string `json:"triggerTime"`
 }
+
+// EditOrderRequest -
+type EditOrderRequest struct {
+	AuthRequest
+	OrderID    string `json:"orderid,omitempty"`
+	ReqID      int64  `json:"reqid,omitempty"`
+	Pair       string `json:"pair"`
+	Price      string `json:"price,omitempty"`
+	Price2     string `json:"price2,omitempty"`
+	Volume     string `json:"volume,omitempty"`
+	OFlags     string `json:"oflags,omitempty"`
+	NewUserRef string `json:"newuserref,omitempty"`
+	Validate   string `json:"validate,omitempty"`
+}
+
+// EditOrderResponse -
+type EditOrderResponse struct {
+	Event        string `json:"event"`
+	TxID         string `json:"txid,omitempty"`
+	OriginalTxID string `json:"originaltxid,omitempty"`
+	ReqID        int64  `json:"reqid,omitempty"`
+	Status       string `json:"status"`
+	Description  string `json:"descr,omitempty"`
+	ErrorMessage string `json:"errorMessage,omitempty"`
+}
