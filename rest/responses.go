@@ -712,7 +712,7 @@ type AddOrderResponse struct {
 // EditOrderResponse - response on EditOrder request
 type EditOrderResponse struct {
 	Description     OrderDescription `json:"descr"`
-	TransactionIds  []string         `json:"txid"`
+	TransactionId   string           `json:"txid"`
 	OrdersCancelled int64            `json:"orders_cancelled"`
 	Volume          string           `json:"volume"`
 	Status          string           `json:"status"`

@@ -278,12 +278,11 @@ func (api *Kraken) AddOrder(pair string, side string, orderType string, volume f
 	return
 }
 
-// EditOrder - method sends order to exchange
-func (api *Kraken) EditOrder(orderId string, pair string, volume float64, args map[string]interface{}) (response EditOrderResponse, err error) {
+// EditOrder - method edits an existing order in the exchange
+func (api *Kraken) EditOrder(orderId string, pair string, args map[string]interface{}) (response EditOrderResponse, err error) {
 	data := url.Values{
-		"orderId": {orderId},
-		"pair":    {pair},
-		"volume":  {strconv.FormatFloat(volume, 'f', 8, 64)},
+		"txid": {orderId},
+		"pair": {pair},
 	}
 	for key, value := range args {
 		switch v := value.(type) {
