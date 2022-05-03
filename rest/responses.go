@@ -709,6 +709,18 @@ type AddOrderResponse struct {
 	TransactionIds []string         `json:"txid"`
 }
 
+// EditOrderResponse - response on EditOrder request
+type EditOrderResponse struct {
+	Description     OrderDescription `json:"descr"`
+	TransactionId   string           `json:"txid"`
+	OrdersCancelled int64            `json:"orders_cancelled"`
+	Volume          string           `json:"volume"`
+	Status          string           `json:"status"`
+	Price           float64          `json:"price,string"`
+	Price2          float64          `json:"price2,string"`
+	ErrorMessage    float64          `json:"error_message,string"`
+}
+
 // GetWebSocketTokenResponse - response on GetWebSocketsToken request
 type GetWebSocketTokenResponse struct {
 	Token   string `json:"token"`

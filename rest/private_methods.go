@@ -125,7 +125,6 @@ func (api *Kraken) GetTradesHistory(tradeType string, needTrades bool, start int
 
 // GetDepositMethods - returns deposit methods
 func (api *Kraken) GetDepositMethods(assets ...string) ([]DepositMethods, error) {
-
 	data := url.Values{}
 	if len(assets) > 0 {
 		data.Add("asset", strings.Join(assets, ","))
@@ -142,7 +141,6 @@ func (api *Kraken) GetDepositMethods(assets ...string) ([]DepositMethods, error)
 
 // GetDepositStatus - returns deposit status
 func (api *Kraken) GetDepositStatus(method string, assets ...string) ([]DepositStatuses, error) {
-
 	data := url.Values{}
 	if len(assets) > 0 {
 		data.Add("asset", strings.Join(assets, ","))
@@ -277,6 +275,31 @@ func (api *Kraken) AddOrder(pair string, side string, orderType string, volume f
 	}
 
 	err = api.request("AddOrder", true, data, &response)
+	return
+}
+
+// EditOrder - method edits an existing order in the exchange
+func (api *Kraken) EditOrder(orderId string, pair string, args map[string]interface{}) (response EditOrderResponse, err error) {
+	data := url.Values{
+		"txid": {orderId},
+		"pair": {pair},
+	}
+	for key, value := range args {
+		switch v := value.(type) {
+		case string:
+			data.Set(key, v)
+		case int64:
+			data.Set(key, strconv.FormatInt(v, 10))
+		case float64:
+			data.Set(key, strconv.FormatFloat(v, 'f', 8, 64))
+		case bool:
+			data.Set(key, strconv.FormatBool(v))
+		default:
+			log.Printf("[WARNING] Unknown value type %v for key %s", value, key)
+		}
+	}
+
+	err = api.request("EditOrder", true, data, &response)
 	return
 }
 
