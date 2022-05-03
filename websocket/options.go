@@ -33,6 +33,6 @@ func WithReadTimeout(timeout time.Duration) KrakenOption {
 // WithHeartbeatTimeout - add custom heartbeat timeout (time interval for sending ping message). Default: 10s.
 func WithHeartbeatTimeout(timeout time.Duration) KrakenOption {
 	return func(k *Kraken) {
-		k.readTimeout = timeout
+		k.heartbeatTimeout = timeout
 	}
 }
