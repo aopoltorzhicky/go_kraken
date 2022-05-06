@@ -272,6 +272,7 @@ type OwnTrade struct {
 	Time      json.Number `json:"time"`
 	Type      string      `json:"type"`
 	Vol       json.Number `json:"vol"`
+    UserRef   json.Number `json:userref`
 }
 
 // OpenOrderDescr -
