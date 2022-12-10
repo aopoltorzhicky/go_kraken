@@ -170,6 +170,25 @@ func (api *Kraken) WithdrawFunds(asset string, key string, amount float64) (resp
 	return response, nil
 }
 
+// GetWithdrawStatus - returns withdrawal statuses
+func (api *Kraken) GetWithdrawStatus(asset string, method string) ([]WithdrawStatus, error) {
+	data := url.Values{}
+
+	if len(asset) > 0 {
+		data.Add("asset", asset)
+	}
+
+	if len(method) > 0 {
+		data.Add("method", method)
+	}
+
+	response := make([]WithdrawStatus, 0)
+	if err := api.request("WithdrawStatus", true, data, &response); err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
 // QueryTrades - returns trades by IDs
 func (api *Kraken) QueryTrades(trades bool, txIDs ...string) (map[string]PrivateTrade, error) {
 	data := url.Values{}

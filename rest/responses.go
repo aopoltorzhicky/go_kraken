@@ -609,6 +609,20 @@ type WithdrawFunds struct {
 	RefID string `json:"refid"`
 }
 
+// GetWithdrawStatus - response on WithdrawStatus request
+type WithdrawStatus struct {
+	Method string `json:"method,omitempty"`
+	AClass string `json:"a_class,omitempty"`
+	Asset  string `json:"asset,omitempty"`
+	Refid  string `json:"refid,omitempty"`
+	Txid   string `json:"txid,omitempty"`
+	Info   string `json:"info,omitempty"`
+	Amount string `json:"amount,omitempty"`
+	Fee    string `json:"fee,omitempty"`
+	Time   int    `json:"time,omitempty"`
+	Status string `json:"status,omitempty"`
+}
+
 // PrivateTrade - structure of account's trades
 type PrivateTrade struct {
 	OrderID              string   `json:"ordertxid"`
