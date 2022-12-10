@@ -1,20 +1,12 @@
 # Kraken Go
 Go library for Kraken Websocket and REST API.
 
-**ATTENTION!** Version 0.1.1 of WebSocket API package is available now! It's not compatible with previous versions. **Please check your code after package update!**
+**ATTENTION!** Version 0.2.0 is a union of websocket and rest package. Now `go_kraken` is the one package contains websocket and rest API.
 
-## Installation Websocket package
-
-```bash
-go get github.com/aopoltorzhicky/go_kraken/websocket
-```
-
-## Installation REST API package
-
-Now only Public API realized
+## Installation package
 
 ```bash
-go get github.com/aopoltorzhicky/go_kraken/rest
+go get github.com/aopoltorzhicky/go_kraken
 ```
 
 ## Usage
