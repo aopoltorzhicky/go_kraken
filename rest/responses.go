@@ -604,6 +604,11 @@ type DepositStatuses struct {
 	Status string `json:"status"`
 }
 
+// WithdrawFunds - response on WithdrawFunds request
+type WithdrawFunds struct {
+	RefID string `json:"refid"`
+}
+
 // PrivateTrade - structure of account's trades
 type PrivateTrade struct {
 	OrderID              string   `json:"ordertxid"`
