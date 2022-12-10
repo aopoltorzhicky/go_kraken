@@ -2,7 +2,7 @@ package rest
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"reflect"
 	"testing"
@@ -47,7 +47,7 @@ func TestKraken_GetDepositMethods(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(depositMethodsJSON)),
+				Body:       io.NopCloser(bytes.NewReader(depositMethodsJSON)),
 			},
 			want:    []DepositMethods{{Method: "Ether (Hex)", Limit: false, Fee: "0.0000000000", GenAddress: true}},
 			wantErr: false,
@@ -92,7 +92,7 @@ func TestKraken_GetDepositStatuses(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(depositStatusesJSON)),
+				Body:       io.NopCloser(bytes.NewReader(depositStatusesJSON)),
 			},
 			want: []DepositStatuses{{Method: "Ether (Hex)", Aclass: "currency", Asset: "XETH", Refid: "sometest1",
 				Txid: "sometest2", Info: "sometest3", Amount: "6.91", Fee: "0.0000000000", Time: 1617014556, Status: "Success"},
@@ -139,7 +139,7 @@ func TestKraken_GetAccountBalances(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(balancesJSON)),
+				Body:       io.NopCloser(bytes.NewReader(balancesJSON)),
 			},
 			want: map[string]decimal.Decimal{
 				"BSV":  decimal.NewFromFloat(0.0000053898),
@@ -194,7 +194,7 @@ func TestKraken_GetTradeBalance(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(tradeBalancesJSON)),
+				Body:       io.NopCloser(bytes.NewReader(tradeBalancesJSON)),
 			},
 			want: TradeBalanceResponse{
 				EquivalentBalance: 33.5,
@@ -249,7 +249,7 @@ func TestKraken_GetOpenOrders(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(openOrdersJSON)),
+				Body:       io.NopCloser(bytes.NewReader(openOrdersJSON)),
 			},
 			want: OpenOrdersResponse{
 				Orders: map[string]OrderInfo{
@@ -324,7 +324,7 @@ func TestKraken_GetClosedOrders(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(closedOrdersJSON)),
+				Body:       io.NopCloser(bytes.NewReader(closedOrdersJSON)),
 			},
 			want: ClosedOrdersResponse{
 				Count: 20,
@@ -402,7 +402,7 @@ func TestKraken_QueryOrders(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(queryOrdersJSON)),
+				Body:       io.NopCloser(bytes.NewReader(queryOrdersJSON)),
 			},
 			want: map[string]OrderInfo{
 				"OLNYE1-H3BBJ-JD2LGC": {
@@ -477,7 +477,7 @@ func TestKraken_GetTradesHistory(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(tradeHistoryJSON)),
+				Body:       io.NopCloser(bytes.NewReader(tradeHistoryJSON)),
 			},
 			want: TradesHistoryResponse{
 				Count: 1,
@@ -540,7 +540,7 @@ func TestKraken_QueryTrades(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(queryTradesJSON)),
+				Body:       io.NopCloser(bytes.NewReader(queryTradesJSON)),
 			},
 			want: map[string]PrivateTrade{
 				"TO3MMA-BSBGV-XUV4A1": {
@@ -600,7 +600,7 @@ func TestKraken_GetOpenPositions(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(openPositionsJSON)),
+				Body:       io.NopCloser(bytes.NewReader(openPositionsJSON)),
 			},
 			want: map[string]Position{
 				"TYE7IH-QCG76-BVMCM1": {
@@ -663,7 +663,7 @@ func TestKraken_GetLedgersInfo(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(getLedgersJSON)),
+				Body:       io.NopCloser(bytes.NewReader(getLedgersJSON)),
 			},
 			want: LedgerInfoResponse{
 				Ledgers: map[string]Ledger{
@@ -721,7 +721,7 @@ func TestKraken_QueryLedgers(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(queryLedgerJSON)),
+				Body:       io.NopCloser(bytes.NewReader(queryLedgerJSON)),
 			},
 			want: map[string]Ledger{
 				"LTCH4T-LG5FS-MKGVD1": {
@@ -777,7 +777,7 @@ func TestKraken_GetTradeVolume(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(getTradeVolumeJSON)),
+				Body:       io.NopCloser(bytes.NewReader(getTradeVolumeJSON)),
 			},
 			want: TradeVolumeResponse{
 				Currency: "ZUSD",
@@ -845,7 +845,7 @@ func TestKraken_GetWebSocketsToken(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(getWSTokenJSON)),
+				Body:       io.NopCloser(bytes.NewReader(getWSTokenJSON)),
 			},
 			want: GetWebSocketTokenResponse{
 				Token:   "test",

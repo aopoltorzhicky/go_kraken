@@ -21,12 +21,12 @@ func main() {
 
 	// subscribe to BTCUSD`s book
 	if err := kraken.SubscribeBook([]string{ws.BTCUSD}, ws.Depth10); err != nil {
-		log.Fatalf("SubscribeTicker error: %s", err.Error())
+		log.Fatalf("SubscribeBook error: %s", err.Error())
 	}
 
 	// subscribe to BTCUSD`s candles
 	if err := kraken.SubscribeCandles([]string{ws.BTCUSD}, ws.Interval1440); err != nil {
-		log.Fatalf("SubscribeTicker error: %s", err.Error())
+		log.Fatalf("SubscribeCandles error: %s", err.Error())
 	}
 
 	// subscribe to BTCUSD`s ticker
@@ -36,13 +36,15 @@ func main() {
 
 	// subscribe to BTCUSD`s trades
 	if err := kraken.SubscribeTrades([]string{ws.BTCUSD}); err != nil {
-		log.Fatalf("SubscribeTicker error: %s", err.Error())
+		log.Fatalf("SubscribeTrades error: %s", err.Error())
 	}
 
 	// subscribe to BTCUSD`s spread
 	if err := kraken.SubscribeSpread([]string{ws.BTCUSD}); err != nil {
-		log.Fatalf("SubscribeTicker error: %s", err.Error())
+		log.Fatalf("SubscribeSpread error: %s", err.Error())
 	}
+
+	orderBook := ws.NewOrderBook(10, 5, 8)
 
 	for {
 		select {
@@ -80,14 +82,11 @@ func main() {
 				log.Printf("Ask: %s with %s", data.Ask.String(), data.AskVolume.String())
 				log.Printf("Bid: %s with %s", data.Bid.String(), data.BidVolume.String())
 			case ws.OrderBookUpdate:
-				log.Printf("----Asks of %s----", update.Pair)
-				for _, ask := range data.Asks {
-					log.Printf("%s | %s", ask.Price.String(), ask.Volume.String())
+				if err := orderBook.ApplyUpdate(data, true); err != nil {
+					log.Fatal(err)
 				}
-				log.Printf("----Bids of %s----", update.Pair)
-				for _, bid := range data.Bids {
-					log.Printf("%s | %s", bid.Price.String(), bid.Volume.String())
-				}
+
+				log.Print(orderBook.String())
 			default:
 			}
 		}

@@ -10,7 +10,7 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v2.3.0
         with:
-          version: v1.45.2
+          version: v1.49.0
           args: --timeout=2m
           working-directory: rest
       - name: golangci-lint
@@ -38,9 +38,5 @@ jobs:
         env:
           GO111MODULE: on
         run: |
-          cd rest
-          go mod download
-          go test ./...
-          cd ../websocket
           go mod download
           go test ./...

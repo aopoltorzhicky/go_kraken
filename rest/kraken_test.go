@@ -2,7 +2,7 @@ package rest
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -293,7 +293,7 @@ func TestKraken_parseResponse(t *testing.T) {
 			args: args{
 				response: &http.Response{
 					StatusCode: 200,
-					Body:       ioutil.NopCloser(bytes.NewBufferString("")),
+					Body:       io.NopCloser(bytes.NewBufferString("")),
 				},
 				retType: nil,
 			},
@@ -308,7 +308,7 @@ func TestKraken_parseResponse(t *testing.T) {
 			args: args{
 				response: &http.Response{
 					StatusCode: 200,
-					Body:       ioutil.NopCloser(bytes.NewBufferString("{\"error\": [\"test\"]}")),
+					Body:       io.NopCloser(bytes.NewBufferString("{\"error\": [\"test\"]}")),
 				},
 				retType: nil,
 			},

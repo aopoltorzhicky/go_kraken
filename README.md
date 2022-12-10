@@ -86,6 +86,35 @@ kraken := ws.NewKraken(
 )
 ```
 
+To build order book by updates you can use `OrderBook` structure. Example of usage you can find [here](/examples/public_ws/main.go). Short code example:
+
+```go
+// subscribe to BTCUSD`s book
+if err := kraken.SubscribeBook([]string{ws.BTCUSD}, ws.Depth10); err != nil {
+	log.Fatalf("SubscribeBook error: %s", err.Error())
+}
+
+// 10 - a depth of order book
+// 5 - the price precision from asset info
+// 8 - the volume precision from asset info
+orderBook := ws.NewOrderBook(10, 5, 8)
+
+for {
+	select {
+		case update := <-kraken.Listen():
+			switch data := update.Data.(type) {
+			case ws.OrderBookUpdate:
+				// To apply updates call this method. true - is the checksum verification flag
+				if err := orderBook.ApplyUpdate(data, true); err != nil {
+					log.Fatal(err)
+				}
+
+				log.Print(orderBook.String())
+			}			
+	}
+}
+```
+
 For private Webscoket API usage:
 ```go
 package main

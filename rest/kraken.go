@@ -7,7 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -98,7 +98,7 @@ func (api *Kraken) parseResponse(response *http.Response, retType interface{}) e
 		return errors.New("error during response parsing: can not read response body")
 	}
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return errors.Wrap(err, "error during response parsing: can not read response body")
 	}
