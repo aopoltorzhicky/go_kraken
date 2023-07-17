@@ -55,9 +55,9 @@ func TestNew(t *testing.T) {
 
 func TestKraken_getSign(t *testing.T) {
 	type fields struct {
-		key    string
-		secret string
-		client clientInterface
+		key        string
+		isNotValid bool
+		client     clientInterface
 	}
 	type args struct {
 		requestURL string
@@ -74,7 +74,6 @@ func TestKraken_getSign(t *testing.T) {
 			name: "Good test",
 			fields: fields{
 				key:    "api-key",
-				secret: "deadbeaf",
 				client: nil,
 			},
 			args: args{
@@ -88,9 +87,9 @@ func TestKraken_getSign(t *testing.T) {
 		}, {
 			name: "Invalid base64 decode",
 			fields: fields{
-				key:    "api-key",
-				secret: "Invalid secret-key",
-				client: nil,
+				key:        "api-key",
+				isNotValid: true,
+				client:     nil,
 			},
 			args: args{
 				requestURL: "test-url",
@@ -106,9 +105,14 @@ func TestKraken_getSign(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			api := &Kraken{
 				key:    tt.fields.key,
-				secret: tt.fields.secret,
+				secret: deadbeaf,
 				client: tt.fields.client,
 			}
+
+			if tt.fields.isNotValid {
+				api.secret = invalid
+			}
+
 			got, err := api.getSign(tt.args.requestURL, tt.args.data)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Kraken.getSign() error = %v, wantErr %v", err, tt.wantErr)
@@ -330,8 +334,7 @@ func TestKraken_parseResponse(t *testing.T) {
 
 func TestKraken_request(t *testing.T) {
 	type fields struct {
-		key    string
-		secret string
+		key string
 	}
 	type args struct {
 		method    string
@@ -355,8 +358,7 @@ func TestKraken_request(t *testing.T) {
 				retType:   nil,
 			},
 			fields: fields{
-				key:    "key",
-				secret: "!@#$%^&*()",
+				key: "key",
 			},
 			want:    nil,
 			wantErr: true,
@@ -364,7 +366,7 @@ func TestKraken_request(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			api := New(tt.fields.key, tt.fields.secret)
+			api := New(tt.fields.key, invalid)
 			err := api.request(tt.args.method, tt.args.isPrivate, tt.args.data, tt.args.retType)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Kraken.request() error = %v, wantErr %v", err, tt.wantErr)

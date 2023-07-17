@@ -3,7 +3,7 @@ on: push
 
 jobs:
   golangci:
-    name: Run linter
+    name: Linter
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v3
@@ -16,6 +16,7 @@ jobs:
           version: v1.51.2
           args: --timeout=3m
   test:
+    name: Tests
     runs-on: ubuntu-latest
     steps:
       - name: install Go
