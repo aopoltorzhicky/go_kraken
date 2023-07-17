@@ -14,5 +14,7 @@ func main() {
 		log.Panicln(err)
 		return
 	}
-	log.Println(data)
+	for name, ticker := range data {
+		log.Printf("%s ask %s", name, ticker.Ask.Price)
+	}
 }

@@ -121,10 +121,15 @@ func TestKraken_getSign(t *testing.T) {
 	}
 }
 
+const (
+	deadbeaf = "deadbeaf"
+	invalid  = "invalid"
+)
+
 func TestKraken_prepareRequest(t *testing.T) {
 	type fields struct {
-		key    string
-		secret string
+		key        string
+		isNotValid bool
 	}
 	type args struct {
 		method    string
@@ -141,8 +146,7 @@ func TestKraken_prepareRequest(t *testing.T) {
 		{
 			name: "Good test",
 			fields: fields{
-				key:    "api-key",
-				secret: "deadbeaf",
+				key: "api-key",
 			},
 			args: args{
 				method:    "time",
@@ -156,8 +160,7 @@ func TestKraken_prepareRequest(t *testing.T) {
 		}, {
 			name: "Data is nil",
 			fields: fields{
-				key:    "api-key",
-				secret: "deadbeaf",
+				key: "api-key",
 			},
 			args: args{
 				method:    "time",
@@ -169,8 +172,7 @@ func TestKraken_prepareRequest(t *testing.T) {
 		}, {
 			name: "Invalid request creation",
 			fields: fields{
-				key:    "api-key",
-				secret: "deadbeaf",
+				key: "api-key",
 			},
 			args: args{
 				method:    "^%&RDRER^WER*XRW&",
@@ -182,8 +184,7 @@ func TestKraken_prepareRequest(t *testing.T) {
 		}, {
 			name: "Private request",
 			fields: fields{
-				key:    "api-key",
-				secret: "deadbeaf",
+				key: "api-key",
 			},
 			args: args{
 				method:    "time",
@@ -194,8 +195,8 @@ func TestKraken_prepareRequest(t *testing.T) {
 		}, {
 			name: "Private request: invalid signature",
 			fields: fields{
-				key:    "api-key",
-				secret: "asfqwerfvwevwe",
+				key:        "api-key",
+				isNotValid: true,
 			},
 			args: args{
 				method:    "time",
@@ -207,7 +208,11 @@ func TestKraken_prepareRequest(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			api := New(tt.fields.key, tt.fields.secret)
+			s := deadbeaf
+			if tt.fields.isNotValid {
+				s = invalid
+			}
+			api := New(tt.fields.key, s)
 			got, err := api.prepareRequest(tt.args.method, tt.args.isPrivate, tt.args.data)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Kraken.prepareRequest() error = %v, wantErr %v", err, tt.wantErr)
@@ -242,8 +247,7 @@ func TestKraken_prepareRequest(t *testing.T) {
 
 func TestKraken_parseResponse(t *testing.T) {
 	type fields struct {
-		key    string
-		secret string
+		key string
 	}
 	type args struct {
 		response *http.Response
@@ -259,8 +263,7 @@ func TestKraken_parseResponse(t *testing.T) {
 		{
 			name: "Status code != 200",
 			fields: fields{
-				key:    "api-key",
-				secret: "deadbeaf",
+				key: "api-key",
 			},
 			args: args{
 				response: &http.Response{
@@ -273,8 +276,7 @@ func TestKraken_parseResponse(t *testing.T) {
 		}, {
 			name: "Response body is nil",
 			fields: fields{
-				key:    "api-key",
-				secret: "deadbeaf",
+				key: "api-key",
 			},
 			args: args{
 				response: &http.Response{
@@ -287,8 +289,7 @@ func TestKraken_parseResponse(t *testing.T) {
 		}, {
 			name: "Response marshalling error",
 			fields: fields{
-				key:    "api-key",
-				secret: "deadbeaf",
+				key: "api-key",
 			},
 			args: args{
 				response: &http.Response{
@@ -302,8 +303,7 @@ func TestKraken_parseResponse(t *testing.T) {
 		}, {
 			name: "Response with Kraken error",
 			fields: fields{
-				key:    "api-key",
-				secret: "deadbeaf",
+				key: "api-key",
 			},
 			args: args{
 				response: &http.Response{
@@ -318,7 +318,7 @@ func TestKraken_parseResponse(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			api := New(tt.fields.key, tt.fields.secret)
+			api := New(tt.fields.key, deadbeaf)
 			err := api.parseResponse(tt.args.response, tt.args.retType)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Kraken.parseResponse() error = %v, wantErr %v", err, tt.wantErr)
