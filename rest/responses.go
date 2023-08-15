@@ -604,6 +604,14 @@ type DepositStatuses struct {
 	Status string `json:"status"`
 }
 
+// WithdrawInfo - response on WithdrawInfo request
+type WithdrawInfo struct {
+	Method string `json:"method,omitempty"`
+	Limit  string `json:"limit,omitempty"`
+	Amount string `json:"amount,omitempty"`
+	Fee    string `json:"fee,omitempty"`
+}
+
 // WithdrawFunds - response on WithdrawFunds request
 type WithdrawFunds struct {
 	RefID string `json:"refid"`
