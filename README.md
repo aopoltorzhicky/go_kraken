@@ -1,20 +1,12 @@
 # Kraken Go
 Go library for Kraken Websocket and REST API.
 
-**ATTENTION!** Version 0.1.1 of WebSocket API package is available now! It's not compatible with previous versions. **Please check your code after package update!**
+**ATTENTION!** Version 0.2.0 is a union of websocket and rest package. Now `go_kraken` is the one package contains websocket and rest API.
 
-## Installation Websocket package
-
-```bash
-go get github.com/aopoltorzhicky/go_kraken/websocket
-```
-
-## Installation REST API package
-
-Now only Public API realized
+## Installation package
 
 ```bash
-go get github.com/aopoltorzhicky/go_kraken/rest
+go get github.com/aopoltorzhicky/go_kraken
 ```
 
 ## Usage
@@ -84,6 +76,35 @@ kraken := ws.NewKraken(
 	ws.WithReadTimeout(15*time.Second), // set read timeout. Default: 15s.
 	ws.WithReconnectTimeout(5*time.Second),  // set interval of reconnecting after disconnect. Default: 5s.
 )
+```
+
+To build order book by updates you can use `OrderBook` structure. Example of usage you can find [here](/examples/public_ws/main.go). Short code example:
+
+```go
+// subscribe to BTCUSD`s book
+if err := kraken.SubscribeBook([]string{ws.BTCUSD}, ws.Depth10); err != nil {
+	log.Fatalf("SubscribeBook error: %s", err.Error())
+}
+
+// 10 - a depth of order book
+// 5 - the price precision from asset info
+// 8 - the volume precision from asset info
+orderBook := ws.NewOrderBook(10, 5, 8)
+
+for {
+	select {
+		case update := <-kraken.Listen():
+			switch data := update.Data.(type) {
+			case ws.OrderBookUpdate:
+				// To apply updates call this method. true - is the checksum verification flag
+				if err := orderBook.ApplyUpdate(data, true); err != nil {
+					log.Fatal(err)
+				}
+
+				log.Print(orderBook.String())
+			}			
+	}
+}
 ```
 
 For private Webscoket API usage:

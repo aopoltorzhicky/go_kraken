@@ -3,7 +3,7 @@ package rest
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"reflect"
 	"testing"
@@ -47,7 +47,7 @@ func TestKraken_Time(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(json)),
+				Body:       io.NopCloser(bytes.NewReader(json)),
 			},
 			want: TimeResponse{
 				Unixtime: 1554218108,
@@ -104,7 +104,7 @@ func TestKraken_Assets(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(json)),
+				Body:       io.NopCloser(bytes.NewReader(json)),
 			},
 			args: args{
 				assets: nil,
@@ -124,7 +124,7 @@ func TestKraken_Assets(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(json)),
+				Body:       io.NopCloser(bytes.NewReader(json)),
 			},
 			args: args{
 				assets: []string{"ADA"},
@@ -188,7 +188,7 @@ func TestKraken_AssetPairs(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(json))},
+				Body:       io.NopCloser(bytes.NewReader(json))},
 			args: args{
 				pairs: []string{"ADACAD"},
 			},
@@ -220,7 +220,7 @@ func TestKraken_AssetPairs(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(json))},
+				Body:       io.NopCloser(bytes.NewReader(json))},
 			args: args{
 				pairs: nil,
 			},
@@ -304,7 +304,7 @@ func TestKraken_Ticker(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(json)),
+				Body:       io.NopCloser(bytes.NewReader(json)),
 			},
 			args: args{
 				pairs: []string{"ADACAD"},
@@ -450,7 +450,7 @@ func TestKraken_Candles(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(json)),
+				Body:       io.NopCloser(bytes.NewReader(json)),
 			},
 			args: args{
 				pair:     "ADACAD",
@@ -464,7 +464,7 @@ func TestKraken_Candles(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(json)),
+				Body:       io.NopCloser(bytes.NewReader(json)),
 			},
 			args: args{
 				pair:     "ADACAD",
@@ -543,7 +543,7 @@ func TestKraken_GetOrderBook(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(json)),
+				Body:       io.NopCloser(bytes.NewReader(json)),
 			},
 			args: args{
 				pair:  "ADACAD",
@@ -629,7 +629,7 @@ func TestKraken_GetTrades(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(json)),
+				Body:       io.NopCloser(bytes.NewReader(json)),
 			},
 			args: args{
 				pair:  "ADACAD",
@@ -700,7 +700,7 @@ func TestKraken_GetSpread(t *testing.T) {
 			err:  nil,
 			resp: &http.Response{
 				StatusCode: 200,
-				Body:       ioutil.NopCloser(bytes.NewReader(json)),
+				Body:       io.NopCloser(bytes.NewReader(json)),
 			},
 			args: args{
 				pair:  "ADACAD",
