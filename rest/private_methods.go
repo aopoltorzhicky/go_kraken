@@ -156,6 +156,20 @@ func (api *Kraken) GetDepositStatus(method string, assets ...string) ([]DepositS
 	return response, nil
 }
 
+// WithdrawInfo - Retrieve fee information about potential withdrawals for a particular asset, key and amount.
+func (api *Kraken) WithdrawInfo(asset string, key string, amount float64) (response WithdrawInfo, err error) {
+	data := url.Values{
+		"asset":  {asset},
+		"key":    {key},
+		"amount": {strconv.FormatFloat(amount, 'f', 8, 64)},
+	}
+
+	if err = api.request("WithdrawInfo", true, data, &response); err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
 // WithdrawFunds - returns withdrawal response
 func (api *Kraken) WithdrawFunds(asset string, key string, amount float64) (response WithdrawFunds, err error) {
 	data := url.Values{
