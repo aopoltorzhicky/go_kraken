@@ -2,6 +2,7 @@ package rest
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/url"
 	"strconv"
@@ -151,6 +152,29 @@ func (api *Kraken) GetDepositStatus(method string, assets ...string) ([]DepositS
 	}
 	response := make([]DepositStatuses, 0)
 	if err := api.request("DepositStatus", true, data, &response); err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
+// GetDepositAddresses - retrieve (or generate a new) deposit addresses for a particular asset and method
+func (api *Kraken) GetDepositAddresses(asset string, method string, new bool, amount float64) ([]DepositAddress, error) {
+	if asset == "" || method == "" {
+		return []DepositAddress{}, errors.New("asset and method are required")
+	}
+
+	data := url.Values{
+		"asset":  {asset},
+		"method": {method},
+		"new":    {fmt.Sprintf("%t", new)},
+	}
+
+	if method == "Bitcoin Lightning" && amount != 0 {
+		data.Add("amount", fmt.Sprintf("%f", amount))
+	}
+
+	response := make([]DepositAddress, 0)
+	if err := api.request("DepositAddresses", true, data, &response); err != nil {
 		return response, err
 	}
 	return response, nil

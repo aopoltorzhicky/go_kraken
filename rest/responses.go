@@ -590,6 +590,15 @@ type DepositMethods struct {
 	GenAddress bool   `json:"gen-address"`
 }
 
+// DepositAddresses - response on GetDepositAddresses request
+type DepositAddress struct {
+	Address  string `json:"address,omitempty"`
+	Expiretm string `json:"expiretm,omitempty"`
+	New      bool   `json:"new,omitempty"`
+	Memo     string `json:"memo,omitempty"`
+	Tag      string `json:"tag,omitempty"`
+}
+
 // GetDepositStatus - respons on GetDepositMethods request
 type DepositStatuses struct {
 	Method string `json:"method"`
