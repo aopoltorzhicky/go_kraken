@@ -40,24 +40,34 @@ func New(key string, secret string) *KrakenFutures {
 	}
 }
 
-func (api *KrakenFutures) getSign(requestURL string, data url.Values) (string, error) {
-	sha := sha256.New()
+// func (api *KrakenFutures) getSign(requestURL string, data url.Values) (string, error) {
+// 	sha := sha256.New()
 
-	if _, err := sha.Write([]byte(data.Get("nonce") + data.Encode())); err != nil {
-		return "", err
-	}
-	hashData := sha.Sum(nil)
-	s, err := base64.StdEncoding.DecodeString(api.secret)
-	if err != nil {
-		return "", err
-	}
-	hmacObj := hmac.New(sha512.New, s)
+// 	if _, err := sha.Write([]byte(data.Get("nonce") + data.Encode())); err != nil {
+// 		return "", err
+// 	}
+// 	hashData := sha.Sum(nil)
+// 	s, err := base64.StdEncoding.DecodeString(api.secret)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	hmacObj := hmac.New(sha512.New, s)
 
-	if _, err := hmacObj.Write(append([]byte(requestURL), hashData...)); err != nil {
-		return "", err
-	}
-	hmacData := hmacObj.Sum(nil)
-	return base64.StdEncoding.EncodeToString(hmacData), nil
+// 	if _, err := hmacObj.Write(append([]byte(requestURL), hashData...)); err != nil {
+// 		return "", err
+// 	}
+// 	hmacData := hmacObj.Sum(nil)
+// 	return base64.StdEncoding.EncodeToString(hmacData), nil
+// }
+
+func (api *KrakenFutures) getSign(requestURL string, data url.Values, nonce string) (string, error) {
+	input := data.Encode() + nonce + "/api/v3" + requestURL
+	hash := sha256.Sum256([]byte(input))
+	macKey, _ := base64.StdEncoding.DecodeString(api.secret)
+	mac := hmac.New(sha512.New, macKey)
+	mac.Write(hash[:])
+	authent := base64.StdEncoding.EncodeToString(mac.Sum(nil))
+	return authent, nil
 }
 
 func (api *KrakenFutures) prepareRequest(reqType string, method string, isPrivate bool, data url.Values) (*http.Request, error) {
@@ -67,7 +77,7 @@ func (api *KrakenFutures) prepareRequest(reqType string, method string, isPrivat
 	requestURL := ""
 	if isPrivate {
 		requestURL = fmt.Sprintf("%s/%s", FuturesAPIUrl, method)
-		data.Set("nonce", fmt.Sprintf("%d", time.Now().UnixNano()))
+		// data.Set("nonce", fmt.Sprintf("%d", time.Now().UnixNano()))
 	} else {
 		requestURL = fmt.Sprintf("%s/%s", FuturesAPIUrl, method)
 	}
@@ -87,13 +97,15 @@ func (api *KrakenFutures) prepareRequest(reqType string, method string, isPrivat
 	}
 
 	if isPrivate {
+		nonce := fmt.Sprintf("%d", time.Now().UnixNano())
 		urlPath := fmt.Sprintf("/%s", method)
-		req.Header.Add("API-Key", api.key)
-		signature, err := api.getSign(urlPath, data)
+		signature, err := api.getSign(urlPath, data, nonce)
 		if err != nil {
 			return nil, errors.Wrap(err, "invalid secret key")
 		}
-		req.Header.Add("API-Sign", signature)
+		req.Header.Add("APIKey", api.key)
+		req.Header.Add("Authent", signature)
+		req.Header.Add("Nonce", nonce)
 	}
 	return req, nil
 }
@@ -111,6 +123,8 @@ func (api *KrakenFutures) parseResponse(response *http.Response, retType interfa
 	if err != nil {
 		return errors.Wrap(err, "error during response parsing: can not read response body")
 	}
+
+	fmt.Println(string(body))
 
 	if err = json.Unmarshal(body, &retType); err != nil {
 		return errors.Wrap(err, "error during response parsing: json marshalling")

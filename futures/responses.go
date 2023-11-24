@@ -20,6 +20,40 @@ type OrderBookResponse struct {
 	OrderBook OrderBook `json:"orderBook"`
 }
 
+type SendOrderResponse struct {
+	Result     string     `json:"result"`
+	SendStatus SendStatus `json:"sendStatus"`
+	ServerTime string     `json:"serverTime"`
+}
+
+type SendStatus struct {
+	CliOrdId     string       `json:"cliOrdId"`
+	OrderEvents  []OrderEvent `json:"orderEvents"`
+	OrderId      string       `json:"order_id"`
+	ReceivedTime string       `json:"receivedTime"`
+	Status       string       `json:"status"`
+}
+
+type OrderEvent struct {
+	Order           Order   `json:"order"`
+	ReducedQuantity float64 `json:"reducedQuantity"`
+	Type            string  `json:"type"`
+}
+
+type Order struct {
+	CliOrdId            string  `json:"cliOrdId"`
+	Filled              float64 `json:"filled"`
+	LastUpdateTimestamp string  `json:"lastUpdateTimestamp"`
+	LimitPrice          float64 `json:"limitPrice"`
+	OrderId             string  `json:"orderId"`
+	Quantity            float64 `json:"quantity"`
+	ReduceOnly          bool    `json:"reduceOnly"`
+	Side                string  `json:"side"`
+	Symbol              string  `json:"symbol"`
+	Timestamp           string  `json:"timestamp"`
+	Type                string  `json:"type"`
+}
+
 // Ticker - struct of ticker response
 type Ticker struct {
 	Ask                   float64 `json:"ask"`
