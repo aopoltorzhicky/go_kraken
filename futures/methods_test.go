@@ -13,8 +13,10 @@ type httpMock struct {
 	Error    error
 }
 
-var key = "aHSxzbttolik8W+s4vI2FDEsOtJt/QudOymdHkm+ygdG37oYfKbuQzDj"
-var sec = "B/izE8e9qePTQB6/AvOpBVafZ7mYBJe6apO4ZeXyJl9jmigTNnUdFKrANu87r9tb+nqmwaSgjWni1Zldgh+nKDfIB/izE8e9qePTQB6/AvOpBVafZ7mYBJe6apO4ZeXyJl9jmigTNnUdFKrANu87r9tb+nqmwaSgjWni1Zldgh+nKDfI"
+var (
+	key = "aHSxzbttolik8W+s4vI2FDEsOtJt/QudOymdHkm+ygdG37oYfKbuQzDj"
+	sec = "B/izE8e9qePTQB6/AvOpBVafZ7mYBJe6apO4ZeXyJl9jmigTNnUdFKrANu87r9tb+nqmwaSgjWni1Zldgh+nKDfI"
+)
 
 var krakenLive = New(key, sec)
 

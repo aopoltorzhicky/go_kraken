@@ -60,14 +60,31 @@ func New(key string, secret string) *KrakenFutures {
 // 	return base64.StdEncoding.EncodeToString(hmacData), nil
 // }
 
-func (api *KrakenFutures) getSign(requestURL string, data url.Values, nonce string) (string, error) {
-	input := data.Encode() + nonce + "/api/v3" + requestURL
-	hash := sha256.Sum256([]byte(input))
-	macKey, _ := base64.StdEncoding.DecodeString(api.secret)
-	mac := hmac.New(sha512.New, macKey)
-	mac.Write(hash[:])
-	authent := base64.StdEncoding.EncodeToString(mac.Sum(nil))
-	return authent, nil
+// GenerateAuthentSignature generates a signature based on the provided parameters.
+func (api *KrakenFutures) getSign(endpointPath string, data url.Values, nonce string) (string, error) {
+	// Step 1: Concatenate postData + Nonce + endpointPath
+	dataToHash := data.Encode() + nonce + endpointPath
+
+	// Step 2: Hash the result of step 1 with SHA-256
+	sha256Hasher := sha256.New()
+	sha256Hasher.Write([]byte(dataToHash))
+	hashedData := sha256Hasher.Sum(nil)
+
+	// Step 3: Base64-decode the api_secret
+	decodedSecret, err := base64.StdEncoding.DecodeString(api.secret)
+	if err != nil {
+		return "", err
+	}
+
+	// Step 4: Use the result of step 3 to hash the result of step 2 with HMAC-SHA-512
+	hmac512 := hmac.New(sha512.New, decodedSecret)
+	hmac512.Write(hashedData)
+	hmacHash := hmac512.Sum(nil)
+
+	// Step 5: Base64-encode the result of step 4
+	signature := base64.StdEncoding.EncodeToString(hmacHash)
+
+	return signature, nil
 }
 
 func (api *KrakenFutures) prepareRequest(reqType string, method string, isPrivate bool, data url.Values) (*http.Request, error) {
@@ -97,8 +114,8 @@ func (api *KrakenFutures) prepareRequest(reqType string, method string, isPrivat
 	}
 
 	if isPrivate {
-		nonce := fmt.Sprintf("%d", time.Now().UnixNano())
-		urlPath := fmt.Sprintf("/%s", method)
+		nonce := fmt.Sprintf("%d", time.Now().UnixMilli())
+		urlPath := fmt.Sprintf("/api/v3/%s", method)
 		signature, err := api.getSign(urlPath, data, nonce)
 		if err != nil {
 			return nil, errors.Wrap(err, "invalid secret key")
