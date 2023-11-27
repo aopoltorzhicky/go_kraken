@@ -112,6 +112,26 @@ func (api *Kraken) GetTrades(pair string, since int64) (TradeResponse, error) {
 	return response, nil
 }
 
+// GetTrades2 - returns trades on pair from since date
+func (api *Kraken) GetTrades2(pair string, since int64, count int64) (TradeResponse2, error) {
+	data := url.Values{
+		"pair": {pair},
+	}
+	if since > 0 {
+		data.Add("since", strconv.FormatInt(since, 10))
+	}
+	if count == 0 || count > 1000 {
+		count = 1000
+	}
+	data.Add("since", strconv.FormatInt(count, 10))
+
+	response := TradeResponse2{}
+	if err := api.request("Trades", false, data, &response); err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
 // GetSpread - return array of pair name and recent spread data
 func (api *Kraken) GetSpread(pair string, since int64) (SpreadResponse, error) {
 	data := url.Values{

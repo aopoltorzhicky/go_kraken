@@ -417,6 +417,9 @@ type TradeResponse struct {
 	XZECZUSD []Trade
 }
 
+// TradeResponse2 allows for the return of pairs that have not yet been defined
+type TradeResponse2 map[string]interface{}
+
 // Spread - structure of spread data
 type Spread struct {
 	Time float64
