@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/aopoltorzhicky/go_kraken/rest"
+	"github.com/bknigge/go_kraken/rest"
 )
 
 func main() {

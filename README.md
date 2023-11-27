@@ -6,7 +6,7 @@ Go library for Kraken Websocket and REST API.
 ## Installation package
 
 ```bash
-go get github.com/aopoltorzhicky/go_kraken
+go get github.com/bknigge/go_kraken
 ```
 
 ## Usage
@@ -28,7 +28,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	ws "github.com/aopoltorzhicky/go_kraken/websocket"
+	ws "github.com/bknigge/go_kraken/websocket"
 )
 
 func main() {
@@ -118,7 +118,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	ws "github.com/aopoltorzhicky/go_kraken/websocket"
+	ws "github.com/bknigge/go_kraken/websocket"
 )
 
 func main() {
@@ -182,7 +182,7 @@ package main
 import (
 	"log"
 
-	"github.com/aopoltorzhicky/go_kraken/rest"
+	"github.com/bknigge/go_kraken/rest"
 )
 
 func main() {
