@@ -11,9 +11,12 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
 )
 
@@ -28,6 +31,19 @@ type KrakenFutures struct {
 	client clientInterface
 }
 
+func NewFromEnv() *KrakenFutures {
+	rootDir, _ := filepath.Abs("../")
+	err := godotenv.Load(filepath.Join(rootDir, ".env"))
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	key := os.Getenv("KRAKEN_KEY")
+	pk := os.Getenv("KRAKEN_PRIVATE_KEY")
+
+	return New(key, pk)
+}
+
 // New - constructor of KrakenFutures object
 func New(key string, secret string) *KrakenFutures {
 	if key == "" || secret == "" {
@@ -39,26 +55,6 @@ func New(key string, secret string) *KrakenFutures {
 		client: http.DefaultClient,
 	}
 }
-
-// func (api *KrakenFutures) getSign(requestURL string, data url.Values) (string, error) {
-// 	sha := sha256.New()
-
-// 	if _, err := sha.Write([]byte(data.Get("nonce") + data.Encode())); err != nil {
-// 		return "", err
-// 	}
-// 	hashData := sha.Sum(nil)
-// 	s, err := base64.StdEncoding.DecodeString(api.secret)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	hmacObj := hmac.New(sha512.New, s)
-
-// 	if _, err := hmacObj.Write(append([]byte(requestURL), hashData...)); err != nil {
-// 		return "", err
-// 	}
-// 	hmacData := hmacObj.Sum(nil)
-// 	return base64.StdEncoding.EncodeToString(hmacData), nil
-// }
 
 // GenerateAuthentSignature generates a signature based on the provided parameters.
 func (api *KrakenFutures) getSign(endpointPath string, data url.Values, nonce string) (string, error) {
@@ -94,7 +90,6 @@ func (api *KrakenFutures) prepareRequest(reqType string, method string, isPrivat
 	requestURL := ""
 	if isPrivate {
 		requestURL = fmt.Sprintf("%s/%s", FuturesAPIUrl, method)
-		// data.Set("nonce", fmt.Sprintf("%d", time.Now().UnixNano()))
 	} else {
 		requestURL = fmt.Sprintf("%s/%s", FuturesAPIUrl, method)
 	}
@@ -108,6 +103,7 @@ func (api *KrakenFutures) prepareRequest(reqType string, method string, isPrivat
 	} else {
 		// For POST and other types, add data in the body
 		req, err = http.NewRequest(reqType, requestURL, strings.NewReader(data.Encode()))
+		req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	}
 	if err != nil {
 		return nil, errors.Wrap(err, "error during request creation")
@@ -141,7 +137,7 @@ func (api *KrakenFutures) parseResponse(response *http.Response, retType interfa
 		return errors.Wrap(err, "error during response parsing: can not read response body")
 	}
 
-	fmt.Println(string(body))
+	// fmt.Println(string(body))
 
 	if err = json.Unmarshal(body, &retType); err != nil {
 		return errors.Wrap(err, "error during response parsing: json marshalling")

@@ -8,19 +8,29 @@ import (
 
 func TestKraken_SendOrder(t *testing.T) {
 	tests := []struct {
-		name    string
-		err     error
-		resp    *http.Response
-		want    OrderBook
-		wantErr bool
-		live    bool
+		name      string
+		err       error
+		resp      *http.Response
+		want      OrderBook
+		wantErr   bool
+		live      bool
+		orderSide string
 	}{
 		{
-			name:    "SendOrder to Kraken",
-			err:     nil,
-			want:    OrderBook{},
-			wantErr: false,
-			live:    true,
+			name:      "SendOrder BUY to Kraken",
+			err:       nil,
+			want:      OrderBook{},
+			wantErr:   false,
+			live:      true,
+			orderSide: OrderSideBuy,
+		},
+		{
+			name:      "SendOrder SELL to Kraken",
+			err:       nil,
+			want:      OrderBook{},
+			wantErr:   false,
+			live:      true,
+			orderSide: OrderSideSell,
 		},
 	}
 	for _, tt := range tests {
@@ -36,9 +46,17 @@ func TestKraken_SendOrder(t *testing.T) {
 					},
 				}
 			}
-			got, err := api.SendOrder("PI_XBTUSD", OrderSideBuy, OrderTypeMarket, 0.001, 27000)
+			got, err := api.SendOrder(
+				"pf_xbtusd",
+				tt.orderSide,
+				OrderTypeLimit,
+				0.001,
+				35000)
 			if tt.live && err != nil {
 				t.Errorf("Kraken.OrderBook() error = %v", err)
+			}
+			if got.OrderId == "" {
+				t.Errorf("Kraken.OrderBook() got = %v", got)
 			}
 			fmt.Println(got)
 		})

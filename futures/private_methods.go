@@ -6,13 +6,13 @@ import (
 	"strconv"
 )
 
-func (api *KrakenFutures) SendOrder(pair string, side string, orderType string, volume float64, price float64) (response Order, err error) {
+func (api *KrakenFutures) SendOrder(symbol string, side string, orderType string, volume float64, price float64) (response Order, err error) {
 	data := url.Values{
-		"symbol":    {pair},
-		"side":      {side},
-		"orderType": {orderType},
-		"size":      {strconv.FormatFloat(volume, 'f', 8, 64)},
-		// "limitPrice": {strconv.FormatFloat(price, 'f', 8, 64)},
+		"orderType":  {orderType},
+		"side":       {side},
+		"size":       {strconv.FormatFloat(volume, 'f', -1, 64)},
+		"symbol":     {symbol},
+		"limitPrice": {strconv.FormatFloat(price, 'f', -1, 64)},
 		// "triggerSignal": {"mark"},
 		// "cliOrdId":      {"rage"},
 		// "reduceOnly":    {"false"},
