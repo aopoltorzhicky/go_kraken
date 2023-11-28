@@ -137,7 +137,7 @@ func (api *KrakenFutures) parseResponse(response *http.Response, retType interfa
 		return errors.Wrap(err, "error during response parsing: can not read response body")
 	}
 
-	// fmt.Println(string(body))
+	fmt.Println(string(body))
 
 	if err = json.Unmarshal(body, &retType); err != nil {
 		return errors.Wrap(err, "error during response parsing: json marshalling")

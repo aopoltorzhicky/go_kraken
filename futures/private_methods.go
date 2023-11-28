@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func (api *KrakenFutures) SendOrder(symbol string, side string, orderType string, volume float64, price float64) (response Order, err error) {
+func (api *KrakenFutures) SendOrder(symbol string, side string, orderType string, volume float64, price float64) (response SendStatus, err error) {
 	data := url.Values{
 		"orderType":  {orderType},
 		"side":       {side},
@@ -22,20 +22,34 @@ func (api *KrakenFutures) SendOrder(symbol string, side string, orderType string
 	var resp SendOrderResponse
 	err = api.request("POST", "sendorder", true, data, &resp)
 	if err != nil {
-		return Order{}, err
+		return SendStatus{}, err
 	}
 
 	// Check if the SendStatus and OrderEvents slice are present
 	if resp.SendStatus.OrderEvents == nil || len(resp.SendStatus.OrderEvents) == 0 {
-		return Order{}, fmt.Errorf("no order events found in response")
+		return SendStatus{}, fmt.Errorf("no order events found in response")
 	}
 
-	// Check if Order is present
-	if resp.SendStatus.OrderEvents[0].Order == (Order{}) {
-		return Order{}, fmt.Errorf("order is empty in the first order event")
+	response = resp.SendStatus
+	return response, nil
+}
+
+func (api *KrakenFutures) GetOrderStatus(cliOrdIds []string, orderIds []string) (response OrderStatusResponse, err error) {
+	data := url.Values{}
+
+	for _, id := range cliOrdIds {
+		data.Add("cliOrdIds", id)
+	}
+	for _, id := range orderIds {
+		data.Add("orderIds", id)
 	}
 
-	response = resp.SendStatus.OrderEvents[0].Order
+	// Send the request
+	err = api.request("POST", "orders/status", true, data, &response)
+	if err != nil {
+		return OrderStatusResponse{}, err
+	}
+
 	return response, nil
 }
 

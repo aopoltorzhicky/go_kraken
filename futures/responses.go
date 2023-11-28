@@ -14,6 +14,15 @@ type OrderBook struct {
 	Bids []OrderBookItem `json:"bids"`
 }
 
+type OrderStatusResponse struct {
+	Orders []struct {
+		Error        string `json:"error"`
+		Order        Order  `json:"order"`
+		Status       string `json:"status"`
+		UpdateReason string `json:"updateReason"`
+	} // `json:"orders"`
+}
+
 // OrderBookResponse - wrapper struct for the full response
 type OrderBookResponse struct {
 	Result    string    `json:"result"`
@@ -27,31 +36,36 @@ type SendOrderResponse struct {
 }
 
 type SendStatus struct {
-	CliOrdId     string       `json:"cliOrdId"`
-	OrderEvents  []OrderEvent `json:"orderEvents"`
-	OrderId      string       `json:"order_id"`
-	ReceivedTime string       `json:"receivedTime"`
+	OrderID      string       `json:"order_id"`
 	Status       string       `json:"status"`
+	ReceivedTime string       `json:"receivedTime"`
+	OrderEvents  []OrderEvent `json:"orderEvents"`
 }
 
 type OrderEvent struct {
-	Order           Order   `json:"order"`
-	ReducedQuantity float64 `json:"reducedQuantity"`
-	Type            string  `json:"type"`
+	Order                *Order   `json:"order,omitempty"`
+	ReducedQuantity      *float64 `json:"reducedQuantity,omitempty"`
+	Type                 string   `json:"type"`
+	ExecutionID          *string  `json:"executionId,omitempty"`
+	Price                *float64 `json:"price,omitempty"`
+	Amount               *float64 `json:"amount,omitempty"`
+	OrderPriorEdit       *Order   `json:"orderPriorEdit,omitempty"`
+	OrderPriorExecution  *Order   `json:"orderPriorExecution,omitempty"`
+	TakerReducedQuantity *float64 `json:"takerReducedQuantity,omitempty"`
 }
 
 type Order struct {
-	CliOrdId            string  `json:"cliOrdId"`
-	Filled              float64 `json:"filled"`
-	LastUpdateTimestamp string  `json:"lastUpdateTimestamp"`
-	LimitPrice          float64 `json:"limitPrice"`
-	OrderId             string  `json:"orderId"`
-	Quantity            float64 `json:"quantity"`
-	ReduceOnly          bool    `json:"reduceOnly"`
-	Side                string  `json:"side"`
-	Symbol              string  `json:"symbol"`
-	Timestamp           string  `json:"timestamp"`
-	Type                string  `json:"type"`
+	CliOrdId            *string  `json:"cliOrdId,omitempty"`
+	Filled              *float64 `json:"filled,omitempty"`
+	LastUpdateTimestamp string   `json:"lastUpdateTimestamp"`
+	LimitPrice          *float64 `json:"limitPrice,omitempty"`
+	OrderId             string   `json:"orderId"`
+	Quantity            *float64 `json:"quantity,omitempty"`
+	ReduceOnly          bool     `json:"reduceOnly"`
+	Side                string   `json:"side"`
+	Symbol              string   `json:"symbol"`
+	Timestamp           string   `json:"timestamp"`
+	Type                string   `json:"type"`
 }
 
 // Ticker - struct of ticker response
