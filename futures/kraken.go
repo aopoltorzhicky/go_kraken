@@ -124,20 +124,19 @@ func (api *KrakenFutures) prepareRequest(reqType string, method string, isPrivat
 }
 
 func (api *KrakenFutures) parseResponse(response *http.Response, retType interface{}) error {
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return errors.Wrap(err, "error during response parsing: can not read response body")
+	}
+
 	if response.StatusCode != 200 {
+		fmt.Println(string(body))
 		return errors.Errorf("error during response parsing: invalid status code %d", response.StatusCode)
 	}
 
 	if response.Body == nil {
 		return errors.New("error during response parsing: can not read response body")
 	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return errors.Wrap(err, "error during response parsing: can not read response body")
-	}
-
-	fmt.Println(string(body))
 
 	if err = json.Unmarshal(body, &retType); err != nil {
 		return errors.Wrap(err, "error during response parsing: json marshalling")

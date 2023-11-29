@@ -103,7 +103,7 @@ func TestKraken_SendOrder(t *testing.T) {
 			got, err := api.SendOrder(
 				"pf_xbtusd",
 				tt.orderSide,
-				OrderTypeLimit,
+				OrderTypeMarket,
 				0.001,
 				35000)
 			if err != nil {
