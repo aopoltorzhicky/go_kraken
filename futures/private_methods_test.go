@@ -2,9 +2,9 @@ package futures
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"testing"
 )
 
@@ -116,22 +116,60 @@ func TestKraken_SendOrder(t *testing.T) {
 }
 
 func TestKraken_Accounts(t *testing.T) {
+	json := []byte(`{
+		"result": "success",
+		"accounts": {
+		  "flex": {
+			"currencies": {
+			  "USDT": {
+				"quantity": 1000.0,
+				"value": 1000.189
+			  }
+			},
+			"initialMargin": 0.7393,
+			"balanceValue": 2997.86,
+			"type": "multiCollateralMarginAccount"
+		  }
+		},
+		"serverTime": "2023-11-29T08:20:38.194Z"
+	  }`)
 	tests := []struct {
 		name    string
 		err     error
 		resp    *http.Response
-		want    OrderBook
+		want    AccountsResponse
 		wantErr bool
 		live    bool
 	}{
 		{
-			name:    "Accounts to Kraken",
-			err:     nil,
-			want:    OrderBook{},
+			name: "Accounts to Kraken",
+			err:  nil,
+			resp: &http.Response{
+				StatusCode: 200,
+				Body:       io.NopCloser(bytes.NewReader(json)),
+			},
+			want: AccountsResponse{
+				Result: "success",
+				Accounts: Accounts{
+					Flex: FlexAccount{
+						Currencies: map[string]CurrencyDetail{
+							"USDT": {
+								Quantity: 1000.0,
+								Value:    1000.189,
+							},
+						},
+						InitialMargin: 0.7393,
+						BalanceValue:  2997.86,
+						Type:          "multiCollateralMarginAccount",
+					},
+				},
+				ServerTime: "2023-11-29T08:20:38.194Z",
+			},
 			wantErr: false,
-			live:    true,
+			live:    false,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var api *KrakenFutures
@@ -145,11 +183,13 @@ func TestKraken_Accounts(t *testing.T) {
 					},
 				}
 			}
-			got, err := api.GetBalances()
+			got, err := api.GetAccounts()
 			if tt.live && err != nil {
-				t.Errorf("Kraken.GetBalances() error = %v", err)
+				t.Errorf("Kraken.GetAccounts() error = %v", err)
 			}
-			fmt.Println(got)
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Kraken.GetAccounts() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }

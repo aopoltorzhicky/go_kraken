@@ -91,3 +91,39 @@ type Ticker struct {
 	Tag                   string  `json:"tag"`
 	Vol24h                float64 `json:"vol24h"`
 }
+
+// Accounts
+
+type AccountsResponse struct {
+	Result     string   `json:"result"`
+	Accounts   Accounts `json:"accounts"`
+	ServerTime string   `json:"serverTime"`
+}
+
+type Accounts struct {
+	Flex FlexAccount `json:"flex"`
+}
+
+type FlexAccount struct {
+	Currencies              map[string]CurrencyDetail `json:"currencies"`
+	InitialMargin           float64                   `json:"initialMargin"`
+	InitialMarginWithOrders float64                   `json:"initialMarginWithOrders"`
+	MaintenanceMargin       float64                   `json:"maintenanceMargin"`
+	BalanceValue            float64                   `json:"balanceValue"`
+	PortfolioValue          float64                   `json:"portfolioValue"`
+	CollateralValue         float64                   `json:"collateralValue"`
+	Pnl                     float64                   `json:"pnl"`
+	UnrealizedFunding       float64                   `json:"unrealizedFunding"`
+	TotalUnrealized         float64                   `json:"totalUnrealized"`
+	TotalUnrealizedAsMargin float64                   `json:"totalUnrealizedAsMargin"`
+	AvailableMargin         float64                   `json:"availableMargin"`
+	MarginEquity            float64                   `json:"marginEquity"`
+	Type                    string                    `json:"type"`
+}
+
+type CurrencyDetail struct {
+	Quantity   float64 `json:"quantity"`
+	Value      float64 `json:"value"`
+	Collateral float64 `json:"collateral"`
+	Available  float64 `json:"available"`
+}

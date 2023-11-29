@@ -53,12 +53,12 @@ func (api *KrakenFutures) GetOrderStatus(cliOrdIds []string, orderIds []string) 
 	return response, nil
 }
 
-func (api *KrakenFutures) GetBalances() (response SendOrderResponse, err error) {
+func (api *KrakenFutures) GetAccounts() (response AccountsResponse, err error) {
 	// Send the request
-	var resp SendOrderResponse
+	var resp AccountsResponse
 	err = api.request("GET", "accounts", true, nil, &resp)
 	if err != nil {
-		return SendOrderResponse{}, err
+		return AccountsResponse{}, err
 	}
 
 	return resp, nil
