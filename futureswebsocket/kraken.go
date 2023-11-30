@@ -100,15 +100,13 @@ func (k *Kraken) Connect() error {
 		case <-interrupt:
 			log.Println("interrupted")
 
+			close(k.Msg)
+
 			// Graceful shutdown by sending a close frame and then waiting for the server to close the connection.
 			err := k.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
 				log.Println("write close:", err)
 				return err
-			}
-			select {
-			case <-done:
-			case <-time.After(time.Second):
 			}
 			return nil
 		}
