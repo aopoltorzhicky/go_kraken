@@ -42,20 +42,27 @@ type BookDepth struct {
 
 type BookSnapshotEvent struct {
 	Feed      FEED_TYPE   `json:"feed,omitempty"`
-	ProductId string      `json:"productId,omitempty"`
+	ProductId string      `json:"product_id,omitempty"`
 	Timestamp int64       `json:"timestamp,omitempty"`
 	Seq       int64       `json:"seq,omitempty"`
-	TickSize  float64     `json:"tickSize,omitempty"`
+	TickSize  float64     `json:"tick_size,omitempty"`
 	Bids      []BookDepth `json:"bids,omitempty"`
 	Asks      []BookDepth `json:"asks,omitempty"`
 }
 
 type BookUpdateEvent struct {
 	Feed      FEED_TYPE `json:"feed,omitempty"`
-	ProductId string    `json:"productId,omitempty"`
+	ProductId string    `json:"product_id,omitempty"`
 	Side      BOOK_SIDE `json:"side,omitempty"`
 	Seq       int64     `json:"seq,omitempty"`
 	Price     float64   `json:"price,omitempty"`
 	Qty       float64   `json:"qty,omitempty"`
 	Timestamp int64     `json:"timestamp,omitempty"`
+}
+
+type Update struct {
+	Feed      FEED_TYPE   `json:"feed,omitempty"`
+	ProductId string      `json:"product_id,omitempty"`
+	Seq       int64       `json:"seq,omitempty"`
+	Data      interface{} `json:"data,omitempty"`
 }

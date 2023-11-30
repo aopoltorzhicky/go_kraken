@@ -19,6 +19,7 @@ type Kraken struct {
 	Key    string
 	Secret string
 	Conn   *websocket.Conn
+	Msg    chan Update
 }
 
 // New - constructor of Kraken object
@@ -29,6 +30,7 @@ func New(key string, secret string) *Kraken {
 	return &Kraken{
 		Key:    key,
 		Secret: secret,
+		Msg:    make(chan Update, 1024),
 	}
 }
 
@@ -36,7 +38,7 @@ func (k *Kraken) SubscribeToBooks(productIds []string) error {
 	subscribeMsg, err := json.Marshal(SubscribeBook{
 		Event:      SUBSCRIBE,
 		Feed:       BOOK,
-		ProductIds: []string{"PI_XBTUSD"},
+		ProductIds: productIds,
 	})
 	if err != nil {
 		return err
@@ -51,7 +53,7 @@ func (k *Kraken) SubscribeToBooks(productIds []string) error {
 	return nil
 }
 
-func (k *Kraken) ConnectAndProcessUpdates() error {
+func (k *Kraken) Connect() error {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt)
 
@@ -62,19 +64,20 @@ func (k *Kraken) ConnectAndProcessUpdates() error {
 	if err != nil {
 		log.Fatal("dial:", err)
 	}
+	k.Conn = conn
 	done := make(chan struct{})
 
 	// Read messages from server
 	go func() {
 		defer close(done)
 		for {
-			_, message, err := conn.ReadMessage()
+			_, message, err := k.Conn.ReadMessage()
 			if err != nil {
 				log.Print("read:", err)
 				return
 			}
 
-			if err := k.handleBookMessage(message); err != nil {
+			if err := k.handleMessage(message); err != nil {
 				log.Print("read:", err)
 				return
 			}
@@ -89,7 +92,7 @@ func (k *Kraken) ConnectAndProcessUpdates() error {
 		case <-done:
 			return nil
 		case <-ticker.C:
-			err = conn.WriteMessage(websocket.PingMessage, []byte{})
+			err = k.Conn.WriteMessage(websocket.PingMessage, []byte{})
 			if err != nil {
 				log.Println("write:", err)
 				return err
@@ -98,7 +101,7 @@ func (k *Kraken) ConnectAndProcessUpdates() error {
 			log.Println("interrupted")
 
 			// Graceful shutdown by sending a close frame and then waiting for the server to close the connection.
-			err := conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			err := k.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
 				log.Println("write close:", err)
 				return err
@@ -110,6 +113,10 @@ func (k *Kraken) ConnectAndProcessUpdates() error {
 			return nil
 		}
 	}
+}
+
+func (k *Kraken) Listen() <-chan Update {
+	return k.Msg
 }
 
 // SignChallenge signs the given challenge using the provided API secret.
