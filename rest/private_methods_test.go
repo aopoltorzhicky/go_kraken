@@ -15,6 +15,7 @@ var (
 	depositMethodsJSON  = []byte(`{"error":[],"result":[{"method": "Ether (Hex)","limit": false,"fee": "0.0000000000","gen-address": true}]}`)
 	depositStatusesJSON = []byte(`{"error":[],"result":[{"method": "Ether (Hex)","aclass": "currency","asset": "XETH","refid": "sometest1","txid": "sometest2","info": "sometest3","amount": "6.91","fee": "0.0000000000","time": 1617014556,"status": "Success"}]}`)
 	balancesJSON        = []byte(`{"error":[],"result":{"ZUSD":"435.9135","USDT":"2.00000000","BSV":"0.0000053898"}}`)
+	balancesExJSON      = []byte(`{"error":[],"result":{"ZUSD":{"balance":25435.21,"hold_trade":8249.76},"XXBT":{"balance":1.2435,"hold_trade":0.8423}}}`)
 	tradeBalancesJSON   = []byte(`{"error":[],"result":{"eb":"33.50","tb":"33.50","m":"23.77","n":"4.3750","c":"11.8999","v":"12.2","e":"32.1","mf":"33.1","ml":"12.97"}}`)
 	openOrdersJSON      = []byte(`{"error":[],"result":{"open":{"OR3XZM-5EN2R-LS5X51":{"refid":null,"userref":null,"status":"open","opentm":1570622342.3552,"starttm":0,"expiretm":0,"descr":{"pair":"XBTEUR","type":"sell","ordertype":"limit","price":"7712.2","price2":"0","leverage":"4:1","order":"sell 1.10000000 XBTEUR @ limit 7712.2 with 4:1 leverage","close":""},"vol":"1.10000000","vol_exec":"0.00000000","cost":"0.00000","fee":"0.00000","price":"0.00000","stopprice":"0.00000","limitprice":"0.00000","misc":"","oflags":"fciq"}}}}`)
 	closedOrdersJSON    = []byte(`{"error":[],"result":{"closed":{"OK46ER-A2BXK-YOLKE1":{"refid":null,"userref":null,"status":"canceled","reason":"User requested","opentm":1570623817.6537,"closetm":1570623823.9012,"starttm":0,"expiretm":0,"descr":{"pair":"ETHEUR","type":"buy","ordertype":"limit","price":"160.87","price2":"0","leverage":"4:1","order":"buy 21.00000000 ETHEUR @ limit 160.87 with 4:1 leverage","close":""},"vol":"21.00000000","vol_exec":"0.00000000","cost":"0.00000","fee":"0.00000","price":"0.00000","stopprice":"0.00000","limitprice":"0.00000","misc":"","oflags":"fciq"}},"count":20}}`)
@@ -170,6 +171,66 @@ func TestKraken_GetAccountBalances(t *testing.T) {
 					return
 				}
 				assert.Equal(t, wantBalance.String(), balance.String())
+			}
+		})
+	}
+}
+
+func TestKraken_GetAccountBalancesEx(t *testing.T) {
+	tests := []struct {
+		name    string
+		err     error
+		resp    *http.Response
+		want    map[string]BalanceEx
+		wantErr bool
+	}{
+		{
+			name:    "Kraken returns error",
+			err:     ErrSomething,
+			resp:    &http.Response{},
+			want:    make(map[string]BalanceEx),
+			wantErr: true,
+		}, {
+			name: "Get Account Balances Ex",
+			err:  nil,
+			resp: &http.Response{
+				StatusCode: 200,
+				Body:       io.NopCloser(bytes.NewReader(balancesExJSON)),
+			},
+			want: map[string]BalanceEx{
+				"ZUSD": {
+					Balance:   decimal.NewFromFloat(25435.21),
+					HoldTrade: decimal.NewFromFloat(8249.76),
+				},
+				"XXBT": {
+					Balance:   decimal.NewFromFloat(1.2435),
+					HoldTrade: decimal.NewFromFloat(0.8423),
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			api := &Kraken{
+				client: &httpMock{
+					Error:    tt.err,
+					Response: tt.resp,
+				},
+			}
+			got, err := api.GetAccountBalancesEx()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Kraken.GetAccountBalances() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			assert.Len(t, got, len(tt.want))
+			for name, balanceEx := range got {
+				wantBalanceEx, ok := tt.want[name]
+				if !ok {
+					t.Errorf("Kraken.GetAccountBalances() unknown asset: %s", name)
+					return
+				}
+				assert.Equal(t, wantBalanceEx.Balance, balanceEx.Balance)
 			}
 		})
 	}
