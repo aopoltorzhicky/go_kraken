@@ -19,6 +19,15 @@ func (api *Kraken) GetAccountBalances() (map[string]decimal.Decimal, error) {
 	return response, nil
 }
 
+// GetAccountBalancesEx - methods returns account balances
+func (api *Kraken) GetAccountBalancesEx() (map[string]BalanceEx, error) {
+	response := make(map[string]BalanceEx)
+	if err := api.request("BalanceEx", true, nil, &response); err != nil {
+		return response, err
+	}
+	return response, nil
+}
+
 // GetTradeBalance - returns tradable balances info
 func (api *Kraken) GetTradeBalance(baseAsset string) (TradeBalanceResponse, error) {
 	data := url.Values{}

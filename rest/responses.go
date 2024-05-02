@@ -212,7 +212,7 @@ func (item *OHLCResponse) UnmarshalJSON(buf []byte) error {
 			if err != nil {
 				continue
 			}
-			close, err := decimal.NewFromString(candle[4].(string))
+			clse, err := decimal.NewFromString(candle[4].(string))
 			if err != nil {
 				continue
 			}
@@ -229,7 +229,7 @@ func (item *OHLCResponse) UnmarshalJSON(buf []byte) error {
 				Open:      open,
 				High:      high,
 				Low:       low,
-				Close:     close,
+				Close:     clse,
 				VolumeWAP: vwap,
 				Volume:    vol,
 				Count:     int64(candle[7].(float64)),
@@ -528,6 +528,14 @@ type SpreadResponse struct {
 	XZECXXBT []Spread
 	XZECZEUR []Spread
 	XZECZUSD []Spread
+}
+
+// BalanceEx - balance extended
+type BalanceEx struct {
+	Balance    decimal.Decimal `json:"balance"`
+	Credit     decimal.Decimal `json:"credit"`
+	CreditUsed decimal.Decimal `json:"credit_used"`
+	HoldTrade  decimal.Decimal `json:"hold_trade"`
 }
 
 // TradeBalanceResponse - response of get trade balance request

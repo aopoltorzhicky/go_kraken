@@ -6,7 +6,6 @@ linters:
     - govet
     - prealloc
     - unconvert
-    - deadcode
     - varcheck
     - errcheck
     - ineffassign
