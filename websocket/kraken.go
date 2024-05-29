@@ -107,7 +107,6 @@ func (k *Kraken) managerThread() {
 		case <-reconnectCh:
 			connect <- struct{}{}
 		case <-k.stop:
-			close(stopListener)
 			return
 		case <-heartbeat.C:
 			if err := k.send(PingRequest{
