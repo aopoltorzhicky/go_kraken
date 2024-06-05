@@ -125,7 +125,9 @@ func (k *Kraken) resubscribe() error {
 		switch sub.Subscription.Name {
 		// Private Channels
 		case ChanOwnTrades, ChanOpenOrders:
-			return k.subscribeToPrivate(sub.Subscription.Name)
+			if err := k.subscribeToPrivate(sub.Subscription.Name); err != nil {
+				return err
+			}
 		default:
 			if err := k.send(SubscriptionRequest{
 				Event:        EventSubscribe,
