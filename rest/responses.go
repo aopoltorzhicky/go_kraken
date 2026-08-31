@@ -191,37 +191,71 @@ func (item *OHLCResponse) UnmarshalJSON(buf []byte) error {
 
 	item.Candles = make(map[string][]Candle)
 	for k, v := range res {
-		items := v.([]interface{})
+		items, ok := v.([]interface{})
+		if !ok {
+			continue
+		}
 		item.Candles[k] = make([]Candle, len(items))
 		for idx, c := range items {
-			candle := c.([]interface{})
+			candle, ok := c.([]interface{})
+			if !ok || len(candle) < 8 {
+				continue
+			}
 
 			ts, err := getTimestamp(candle[0])
 			if err != nil {
 				continue
 			}
-			open, err := decimal.NewFromString(candle[1].(string))
+			openStr, ok := candle[1].(string)
+			if !ok {
+				continue
+			}
+			open, err := decimal.NewFromString(openStr)
 			if err != nil {
 				continue
 			}
-			high, err := decimal.NewFromString(candle[2].(string))
+			highStr, ok := candle[2].(string)
+			if !ok {
+				continue
+			}
+			high, err := decimal.NewFromString(highStr)
 			if err != nil {
 				continue
 			}
-			low, err := decimal.NewFromString(candle[3].(string))
+			lowStr, ok := candle[3].(string)
+			if !ok {
+				continue
+			}
+			low, err := decimal.NewFromString(lowStr)
 			if err != nil {
 				continue
 			}
-			clse, err := decimal.NewFromString(candle[4].(string))
+			clseStr, ok := candle[4].(string)
+			if !ok {
+				continue
+			}
+			clse, err := decimal.NewFromString(clseStr)
 			if err != nil {
 				continue
 			}
-			vwap, err := decimal.NewFromString(candle[5].(string))
+			vwapStr, ok := candle[5].(string)
+			if !ok {
+				continue
+			}
+			vwap, err := decimal.NewFromString(vwapStr)
 			if err != nil {
 				continue
 			}
-			vol, err := decimal.NewFromString(candle[6].(string))
+			volStr, ok := candle[6].(string)
+			if !ok {
+				continue
+			}
+			vol, err := decimal.NewFromString(volStr)
 			if err != nil {
+				continue
+			}
+			count, ok := candle[7].(float64)
+			if !ok {
 				continue
 			}
 			item.Candles[k][idx] = Candle{
@@ -232,7 +266,7 @@ func (item *OHLCResponse) UnmarshalJSON(buf []byte) error {
 				Close:     clse,
 				VolumeWAP: vwap,
 				Volume:    vol,
-				Count:     int64(candle[7].(float64)),
+				Count:     int64(count),
 			}
 		}
 	}
