@@ -182,9 +182,11 @@ type Spread struct {
 	Time      json.Number
 }
 
-// UnmarshalJSON - unmarshal candle update
+// UnmarshalJSON - unmarshal spread update
 func (s *Spread) UnmarshalJSON(data []byte) error {
-	raw := []interface{}{&s.Bid, &s.Ask, &s.Time, &s.AskVolume, &s.BidVolume, &s.Time}
+	// Kraken v1 spread payload order: [bid, ask, timestamp, bidVolume, askVolume]
+	// https://docs.kraken.com/exchange/api-reference/spot-websocket-v1/spread
+	raw := []interface{}{&s.Bid, &s.Ask, &s.Time, &s.BidVolume, &s.AskVolume}
 	return json.Unmarshal(data, &raw)
 }
 
