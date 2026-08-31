@@ -91,10 +91,17 @@ func (o *OrderBookSide) applyUpdates(updates []OrderBookItem) error {
 
 	o.mx.Lock()
 	levels := newOrderBookLevels(o.m, o.isAsk)
-	for _, level := range levels[o.depth:] {
-		delete(o.m, level.Price.StringFixed(o.pricePrecision))
+	// Only trim to depth when there are more levels than the configured depth.
+	// A thin side (or an early book that hasn't filled to `depth` levels yet)
+	// has len(levels) < o.depth, and levels[o.depth:] / levels[:o.depth] would
+	// panic with slice out of range.
+	if len(levels) > o.depth {
+		for _, level := range levels[o.depth:] {
+			delete(o.m, level.Price.StringFixed(o.pricePrecision))
+		}
+		levels = levels[:o.depth]
 	}
-	o.sorted = levels[:o.depth]
+	o.sorted = levels
 	o.mx.Unlock()
 
 	return nil
